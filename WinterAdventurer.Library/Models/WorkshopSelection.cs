@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace WinterAdventurer.Library.Models
+{
+    public class WorkshopSelection
+    {
+        public int RegistrationId { get; set; }
+        public string SelectionId { get; set; }
+        public string ClassName { get; set; }
+        public string FullName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+    }
+}
