@@ -1,7 +1,63 @@
 ﻿@page "/"
+@using WinterAdventurer.Library
+@using System
+@using System.IO
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Import Excel File</h1>
 
-Welcome to your new app.
+<InputFile title="Upload an Excel file" OnChange="UploadExcel" accept=".xlsx" multiple />
+
+@if (isLoading)
+{
+    <p>Uploading...</p>
+}
+
+@if (workshops != null && workshops.Count > 0)
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Leader</th>
+                <th>Type</th>
+                <th>Max Participants</th>
+                <th>Min Age</th>
+                <th>Selections</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var workshop in workshops)
+            {
+                <tr>
+                    <td>@workshop.Name</td>
+                    <td>@workshop.Leader</td>
+                    <td>@workshop.Type</td>
+                    <td>@workshop.MaxParticipants</td>
+                    <td>@workshop.MinAge</td>
+                    <td>@string.Join(", ", workshop.Selections)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<WinterAdventurer.Library.Models.Workshop> workshops = new List<Library.Models.Workshop>();
+    private bool isLoading;
+
+    private void UploadExcel(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        workshops.Clear();
+
+        using (var stream = new MemoryStream())
+        {
+            e.GetMultipleFiles().First().OpenReadStream().CopyToAsync(stream);
+            // workshops = WinterAdventurer.Library.ExcelUtilities.ImportExcel(stream);
+        }
+
+        //isLoading = false;
+    }
+}

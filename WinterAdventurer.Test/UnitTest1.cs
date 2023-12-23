@@ -20,9 +20,10 @@ namespace WinterAdventurer.Test
             sheet.Cells[2, 1].Value = 1;
             sheet.Cells[2, 2].Value = "Selection 1";
             sheet.Cells[2, 4].Value = "Full Name 1";
+            var excelUtilities = new ExcelUtilities();
 
             // Act
-            var result = ExcelUtilities.CollectWorkshops(sheet);
+            var result = excelUtilities.CollectWorkshops(sheet);
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(List<Library.Models.Workshop>));

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WinterAdventurer.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\i.lebwohl-steiner\\Downloads\\Winter Adventure 2022 Schedule Card Data.xlsx\""
+    }
+  }
+}
