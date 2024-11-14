@@ -48,15 +48,15 @@
     private List<WinterAdventurer.Library.Models.Workshop> workshops = new List<Library.Models.Workshop>();
     private bool isLoading;
 
-    private void UploadExcel(InputFileChangeEventArgs e)
+    private async Task UploadExcel(InputFileChangeEventArgs e)
     {
         isLoading = true;
         workshops.Clear();
 
-        using (var stream = new FileStream(e.File.Name, FileMode.Create, FileAccess.Write))
+        using (var stream = new FileStream(e.File.Name, FileMode.OpenOrCreate, FileAccess.ReadWrite))
         {
             var excelUtilities = new ExcelUtilities();
-            e.File.OpenReadStream().CopyToAsync(stream);
+            await e.File.OpenReadStream().CopyToAsync(stream);
             excelUtilities.ImportExcel(stream);
             workshops = excelUtilities.Workshops;
         }

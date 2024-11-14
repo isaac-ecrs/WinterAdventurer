@@ -22,6 +22,8 @@ namespace WinterAdventurer.Library
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
+            stream.Position = 0;
+            
             using (var package = new ExcelPackage(stream))
             {
                 Workshops.AddRange(ParseWorkshops(package));                                
