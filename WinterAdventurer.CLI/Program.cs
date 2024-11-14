@@ -30,9 +30,7 @@ using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
     foreach (var workshop in excelUtilities.Workshops)
     {
         Console.WriteLine(workshop.ToString());
-    }
-
-    
+    }    
 
     var document = excelUtilities.CreatePdf();
 
@@ -40,8 +38,9 @@ using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
 
     var renderer = new PdfDocumentRenderer();
     renderer.Document = document;
+    document.Styles["Normal"].Font.Name = "NotoSans-Medium";   
+
     renderer.RenderDocument();
-    const string filename = "C:\\Users\\i.lebwohl-steiner\\Downloads\\test.pdf";
-    renderer.Save(filename);
+    renderer.Save(filePath);
     //Process.Start(filename);
 }

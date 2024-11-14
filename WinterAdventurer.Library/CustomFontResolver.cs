@@ -15,8 +15,8 @@ namespace WinterAdventurer.Library
 
             switch (name)
             {
-                case "arial":
-                    return new FontResolverInfo("Arial#");
+                case "noto":
+                    return new FontResolverInfo("NotoSans-Medium");
                 // Add more cases for other fonts if needed.
                 // ...
 
@@ -29,9 +29,9 @@ namespace WinterAdventurer.Library
         {
             switch (faceName.ToLower())
             {
-                case "arial#":
+                case "NotoSans-Medium":
                     // Load Arial font data (replace with your actual font data).
-                    return LoadFontData("C:\\Windows\\Fonts\\arial.ttf");
+                    return LoadFontData("/usr/share/fonts/noto/NotoSans-Medium.ttf");
                 // Add more cases for other fonts if needed.
                 // ...
 
@@ -62,7 +62,7 @@ namespace WinterAdventurer.Library
             // Load your fallback font data here.
             // Replace this with the actual font data for your chosen fallback font.
             // Example: Load Arial font data.
-            return LoadFontData("C:\\Windows\\Fonts\\arial.ttf");
+            return LoadFontData("/usr/share/fonts/noto/NotoSans-Medium.ttf");
         }
 
     }

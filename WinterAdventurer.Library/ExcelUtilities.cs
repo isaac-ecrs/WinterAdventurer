@@ -8,6 +8,7 @@ using MigraDoc;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 using System.Data.Common;
+using System.Xml;
 
 namespace WinterAdventurer.Library
 {
@@ -17,7 +18,7 @@ namespace WinterAdventurer.Library
         
         readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
 
-        public void ImportExcel(MemoryStream stream)
+        public void ImportExcel(Stream stream)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 

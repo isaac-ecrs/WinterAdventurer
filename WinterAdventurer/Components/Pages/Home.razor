@@ -2,12 +2,13 @@
 @using WinterAdventurer.Library
 @using System
 @using System.IO
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Import Excel File</h1>
 
-<InputFile title="Upload an Excel file" OnChange="UploadExcel" accept=".xlsx" multiple />
+<InputFile title="Upload an Excel file" OnChange="UploadExcel" accept=".xlsx" />
 
 @if (isLoading)
 {
@@ -52,12 +53,14 @@
         isLoading = true;
         workshops.Clear();
 
-        using (var stream = new MemoryStream())
+        using (var stream = new FileStream(e.File.Name, FileMode.Create, FileAccess.Write))
         {
-            e.GetMultipleFiles().First().OpenReadStream().CopyToAsync(stream);
-            // workshops = WinterAdventurer.Library.ExcelUtilities.ImportExcel(stream);
+            var excelUtilities = new ExcelUtilities();
+            e.File.OpenReadStream().CopyToAsync(stream);
+            excelUtilities.ImportExcel(stream);
+            workshops = excelUtilities.Workshops;
         }
 
-        //isLoading = false;
+        isLoading = false;
     }
 }
