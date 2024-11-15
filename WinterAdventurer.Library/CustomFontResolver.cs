@@ -1,14 +1,14 @@
 ﻿using PdfSharp.Fonts;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace WinterAdventurer.Library
 {
     public class CustomFontResolver : IFontResolver
     {
+        // Resolve font family names to embedded resource names
         public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
             var name = familyName.ToLower();
@@ -16,54 +16,62 @@ namespace WinterAdventurer.Library
             switch (name)
             {
                 case "noto":
-                    return new FontResolverInfo("NotoSans-Medium");
-                // Add more cases for other fonts if needed.
-                // ...
+                case "notosans":
+                    return new FontResolverInfo("NotoSans-Regular"); // Noto family base font
+                case "oswald":
+                    return new FontResolverInfo("Oswald-Regular");
+                case "roboto":
+                    return new FontResolverInfo("Roboto-Regular");
 
                 default:
                     return PlatformFontResolver.ResolveTypeface(familyName, isBold, isItalic);
             }
         }
 
+        // Get the font from embedded resources
         public byte[] GetFont(string faceName)
         {
-            switch (faceName.ToLower())
-            {
-                case "NotoSans-Medium":
-                    // Load Arial font data (replace with your actual font data).
-                    return LoadFontData("/usr/share/fonts/noto/NotoSans-Medium.ttf");
-                // Add more cases for other fonts if needed.
-                // ...
+            string resourceName = GetFontResourceName(faceName);
+            if (resourceName == null)
+                throw new InvalidOperationException($"Font resource for {faceName} not found.");
 
+            return LoadFontFromResource(resourceName);
+        }
+
+        // Map font family name to the corresponding embedded resource name
+        private string GetFontResourceName(string faceName)
+        {
+            switch (faceName.Split('-').FirstOrDefault().ToLower())
+            {
+                case "noto":
+                case "notosans":
+                    return "WinterAdventurer.Library.Resources.Fonts.Noto_Sans.static.NotoSans-Regular.ttf";
+                case "oswald":
+                    return "WinterAdventurer.Library.Resources.Fonts.Oswald.Oswald-Regular.ttf";
+                case "roboto":
+                    return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Regular.ttf";
                 default:
-                    return LoadFontData(faceName);
+                    return null;
             }
         }
 
-        private byte[] LoadFontData(string fontFilePath)
+        // Load the font from the embedded resource stream
+        private byte[] LoadFontFromResource(string resourceName)
         {
-            try
+            var assembly = Assembly.GetExecutingAssembly();
+            var resources = assembly.GetManifestResourceNames();
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
-                // Read the font file as a byte array.
-                return File.ReadAllBytes(fontFilePath);
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions (e.g., file not found, permissions, etc.).
-                // You can log the error or provide a fallback font data.
-                Console.WriteLine($"Error loading font data: {ex.Message}");
-                // Return a fallback font (e.g., Helvetica) as a byte array.
-                return LoadFallbackFontData();
+                if (stream == null)
+                    throw new InvalidOperationException($"Resource {resourceName} not found.");
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    stream.CopyTo(ms);
+                    return ms.ToArray();
+                }
             }
         }
-
-        private byte[] LoadFallbackFontData()
-        {
-            // Load your fallback font data here.
-            // Replace this with the actual font data for your chosen fallback font.
-            // Example: Load Arial font data.
-            return LoadFontData("/usr/share/fonts/noto/NotoSans-Medium.ttf");
-        }
-
     }
 }

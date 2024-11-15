@@ -1,4 +1,7 @@
 ﻿@page "/"
+@using MigraDoc.Rendering
+@using PdfSharp.Fonts
+@using PdfSharp.Pdf
 @using WinterAdventurer.Library
 @using System
 @using System.IO
@@ -17,6 +20,8 @@
 
 @if (workshops != null && workshops.Count > 0)
 {
+    <a href=@downloadFileName download="schedules.pdf">Download File</a>
+
     <table>
         <thead>
             <tr>
@@ -47,6 +52,7 @@
 @code {
     private List<WinterAdventurer.Library.Models.Workshop> workshops = new List<Library.Models.Workshop>();
     private bool isLoading;
+    public string? downloadFileName;
 
     private async Task UploadExcel(InputFileChangeEventArgs e)
     {
@@ -59,8 +65,30 @@
             await e.File.OpenReadStream().CopyToAsync(stream);
             excelUtilities.ImportExcel(stream);
             workshops = excelUtilities.Workshops;
+            SetDownloadLink(excelUtilities);
         }
 
         isLoading = false;
+    }
+
+    private void SetDownloadLink(ExcelUtilities excelUtilities)
+    {
+        try
+        {
+            var renderer = new PdfDocumentRenderer();
+            renderer.Document = excelUtilities.CreatePdf();
+            renderer.RenderDocument();
+
+            using(var stream = new MemoryStream())
+            {
+                renderer.PdfDocument.Save(stream);
+                var base64File = Convert.ToBase64String(stream.ToArray());
+                downloadFileName = $"data:application/pdf;base64,{base64File}";
+            }            
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 }

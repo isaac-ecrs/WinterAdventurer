@@ -9,6 +9,7 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 using System.Data.Common;
 using System.Xml;
+using PdfSharp.Fonts;
 
 namespace WinterAdventurer.Library
 {
@@ -119,7 +120,12 @@ namespace WinterAdventurer.Library
         {
             if (Workshops != null)
             {
+                GlobalFontSettings.FontResolver = new CustomFontResolver();
+
                 var document = new Document();
+                var fontResolver = new CustomFontResolver();
+                MigraDoc.DocumentObjectModel.Style style = document.Styles["Normal"];
+                style.Font = new Font("noto");
 
                 foreach(var section in PrintWorkshopParticipants())
                 {                    
@@ -140,6 +146,7 @@ namespace WinterAdventurer.Library
         private List<Section> PrintWorkshopParticipants()
         {
             var sections = new List<Section>();
+            var fontResolver = new CustomFontResolver();
 
             foreach(var workshopListing in Workshops)
             {
