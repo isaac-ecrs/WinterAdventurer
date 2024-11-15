@@ -72,12 +72,18 @@ namespace WinterAdventurer.Library
                 .Union(CollectWorkshops(periodThreeSheet)).ToList();
         }
 
+        // @TODO rewrite this to parse the correct workshop format
         public List<Workshop> CollectWorkshops(ExcelWorksheet sheet)
         {
             var rows = sheet.Dimension.Rows;
             var columns = sheet.Dimension.Columns;
             var workshops = new Dictionary<string, Workshop>();
             string workshopListing;
+
+            // First get all the workshops, find the correct column by name and then get distinct values
+            // Put the column header in the type value for each workshop
+
+            // Iterate over 
 
             for (int i = 2; i <= rows; i++)
             {
@@ -123,7 +129,6 @@ namespace WinterAdventurer.Library
                 GlobalFontSettings.FontResolver = new CustomFontResolver();
 
                 var document = new Document();
-                var fontResolver = new CustomFontResolver();
                 MigraDoc.DocumentObjectModel.Style style = document.Styles["Normal"];
                 style.Font = new Font("noto");
 
@@ -170,6 +175,7 @@ namespace WinterAdventurer.Library
             return sections;
         }
 
+        // @TODO switch from hardcoded workshops to those from the uploaded file
         private Table BuildScheduleTemplate(Section section)
         {
             section.PageSetup.Orientation = Orientation.Landscape;
