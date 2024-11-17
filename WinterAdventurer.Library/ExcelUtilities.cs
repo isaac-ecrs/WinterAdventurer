@@ -72,52 +72,66 @@ namespace WinterAdventurer.Library
                 .Union(CollectWorkshops(periodThreeSheet)).ToList();
         }
 
-        // @TODO rewrite this to parse the correct workshop format
         public List<Workshop> CollectWorkshops(ExcelWorksheet sheet)
         {
             var rows = sheet.Dimension.Rows;
             var columns = sheet.Dimension.Columns;
             var workshops = new Dictionary<string, Workshop>();
-            string workshopListing;
+            Workshop workshop;
 
             // First get all the workshops, find the correct column by name and then get distinct values
             // Put the column header in the type value for each workshop
-
-            // Iterate over 
-
-            for (int i = 2; i <= rows; i++)
+            for(int i = 1; i <= columns; i++)
             {
-                for (int j = 5; j <= columns; j++)
+                // There's a value in the column header and it's a class
+                if(sheet.Cells[1,i].Value != null && sheet.Cells[1,i].Value.ToString().ToLower().Contains("classes"))
                 {
-                    if (sheet.Cells[i, j].Value != null)
+                    for(int j = 2; j <= rows; j++)
                     {
-                        workshopListing = sheet.Cells[i, j].Value.ToString();
+                        var rowValue = sheet.Cells[j,i].Value;
 
-                        if(!workshops.ContainsKey(workshopListing))
+                        if(rowValue != null)
                         {
-                            workshops[workshopListing] = new Workshop()
+                            var workshopName = rowValue.ToString().GetWorkshopName();
+                            var leaderName = rowValue.ToString().GetLeaderName();
+                            var participantName = new PersonName(
+                                sheet.Cells[j,
+                                Constants.COLUMN_ATTENDEE_NAME].Value.ToString());
+
+                            if(!string.IsNullOrWhiteSpace(workshopName))
                             {
-                                Name = workshopListing.GetWorkshopName(),
-                                Leader = workshopListing.GetLeaderName(),
-                                Type = sheet.Cells[1, j].Value.ToString()
-                            };
-                        }                        
+                                var workshopSelected = new WorkshopSelection()
+                                {
+                                    ClassName = workshopName,
+                                    RegistrationId = int.Parse(sheet.Cells[j, Constants.COLUMN_REGISTRATION_ID].Value.ToString()),
+                                    SelectionId = int.Parse(sheet.Cells[j, Constants.COLUMN_SELECTION_ID].Value.ToString()),
+                                    FullName = participantName.FullName,
+                                    FirstName = participantName.FirstName,
+                                    LastName = participantName.LastName                                
+                                };
 
-                        if (workshops[workshopListing].Selections is null)
-                        {
-                            workshops[workshopListing].Selections = new List<WorkshopSelection>();
+                                if(workshops.TryGetValue(rowValue.ToString(), out workshop))
+                                {
+                                    workshops[rowValue.ToString()].Selections.Add(workshopSelected);
+                                }
+                                else
+                                {
+                                    workshops.Add(rowValue.ToString(), new Workshop() 
+                                        {
+                                            Name = rowValue.ToString().GetWorkshopName(),
+                                            Leader = rowValue.ToString().GetLeaderName(),
+                                            Selections = new List<WorkshopSelection>()
+                                            {
+                                                workshopSelected
+                                            }
+                                        }
+                                    );
+                                }
+                            }                       
                         }
-
-                        workshops[workshopListing].Selections.Add(new WorkshopSelection()
-                        {
-                            ClassName = workshopListing.GetWorkshopName(),
-                            FullName = sheet.Cells[i, 4].Value.ToString(),
-                            SelectionId = sheet.Cells[i, 2].Value.ToString(),
-                            RegistrationId = int.Parse(sheet.Cells[i, 1].Value.ToString())
-                        });
                     }
                 }
-            }
+            }            
 
             return workshops.Values.ToList();
         }
@@ -129,18 +143,22 @@ namespace WinterAdventurer.Library
                 GlobalFontSettings.FontResolver = new CustomFontResolver();
 
                 var document = new Document();
-                MigraDoc.DocumentObjectModel.Style style = document.Styles["Normal"];
+                var style = document.Styles["Normal"];
                 style.Font = new Font("noto");
 
                 foreach(var section in PrintWorkshopParticipants())
                 {                    
+                    section.PageSetup.TopMargin = Unit.FromInch(.25);
+                    section.PageSetup.LeftMargin = Unit.FromInch(.25);
+                    
                     document.Sections.Add(section);                    
                 }
-
+                /*
                 foreach(var section in PrintSchedules())
                 {
                     document.Sections.Add(section);
                 }
+                */
                 
                 return document;
             }
@@ -380,7 +398,7 @@ namespace WinterAdventurer.Library
                             classSelectionsSheet.Cells[i,
                             classSelectionsSheet.Cells["1:1"].First(cell =>
                                 cell.Value.ToString().StartsWith("WinterAdventure")).Start.Column].Value.ToString()),
-                        SelectionId = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "ClassSelection_Id").Start.Column].Value.ToString(),
+                        SelectionId = (int)classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "ClassSelection_Id").Start.Column].Value,
                         FirstName = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "Name_First").Start.Column].Value.ToString(),
                         LastName = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "Name_Last").Start.Column].Value.ToString()
                     }

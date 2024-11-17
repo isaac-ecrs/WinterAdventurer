@@ -10,7 +10,7 @@ namespace WinterAdventurer.Library.Models
     public class WorkshopSelection
     {
         public int RegistrationId { get; set; }
-        public string SelectionId { get; set; }
+        public int SelectionId { get; set; }
         public string ClassName { get; set; }
         public string FullName { get; set; }
         public string FirstName { get; set; }

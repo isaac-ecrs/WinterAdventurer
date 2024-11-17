@@ -10,6 +10,19 @@ namespace WinterAdventurer.Library.Extensions
 
     public static class StringExtensions
     {
+        public static string ToProper(this string input)
+        {
+            var splitInput = input.Split(' ');
+            var combinedInput = "";
+
+            foreach (var word in splitInput)
+            {
+                combinedInput = combinedInput + " " + word[0].ToString().ToUpper() + word.Substring(1);
+            }
+
+            return combinedInput.Trim();
+        }
+
         public static string GetLeaderName(this string input)
         {
             return input.ExtractFromParentheses(true);
