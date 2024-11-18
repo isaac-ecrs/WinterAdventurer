@@ -10,6 +10,9 @@ using MigraDoc.DocumentObjectModel.Tables;
 using System.Data.Common;
 using System.Xml;
 using PdfSharp.Fonts;
+using System.Diagnostics;
+using MigraDoc.DocumentObjectModel.Visitors;
+using PdfSharp.Pdf;
 
 namespace WinterAdventurer.Library
 {
@@ -143,6 +146,7 @@ namespace WinterAdventurer.Library
                 GlobalFontSettings.FontResolver = new CustomFontResolver();
 
                 var document = new Document();
+                GlobalFontSettings.FontResolver = new CustomFontResolver();
                 var style = document.Styles["Normal"];
                 style.Font = new Font("noto");
 
@@ -159,6 +163,15 @@ namespace WinterAdventurer.Library
                     document.Sections.Add(section);
                 }
                 */
+
+                foreach(var section in document.Sections)
+                {                    
+                    foreach(var element in section.GetElements())
+                    {                        
+                        Console.WriteLine(element.ToString());
+                        Debug.WriteLine(element.ToString());
+                    }
+                }
                 
                 return document;
             }

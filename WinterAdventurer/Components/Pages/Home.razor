@@ -75,7 +75,11 @@
     {
         try
         {
-            var renderer = new PdfDocumentRenderer();
+            var renderer = new PdfDocumentRenderer()
+            {
+                Document = excelUtilities.CreatePdf()
+            };
+
             renderer.Document = excelUtilities.CreatePdf();
             renderer.RenderDocument();
 
