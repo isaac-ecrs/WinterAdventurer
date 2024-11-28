@@ -22,6 +22,11 @@ namespace WinterAdventurer.Library
         
         readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
 
+        public ExcelUtilities() 
+        {
+            GlobalFontSettings.FontResolver = new CustomFontResolver();
+        }
+
         public void ImportExcel(Stream stream)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -139,16 +144,64 @@ namespace WinterAdventurer.Library
             return workshops.Values.ToList();
         }
 
+        public Document TestFromDocs()
+        {
+            // Create a new MigraDoc document.
+            var document = new Document();
+
+            // Add a section to the document.
+            var section = document.AddSection();
+
+            // Add a paragraph to the section.
+            var paragraph = section.AddParagraph();
+
+            // Set font color.
+            paragraph.Format.Font.Color = Colors.DarkBlue;
+
+            // Add some text to the paragraph.
+            paragraph.AddFormattedText("Hello, World!", TextFormat.Bold);
+
+            // Create the primary footer.
+            var footer = section.Footers.Primary;
+
+            // Add content to footer.
+            paragraph = footer.AddParagraph();
+            paragraph.Format.Alignment = ParagraphAlignment.Center;
+
+            // Add MigraDoc logo.
+            document.LastSection.AddParagraph("blah");
+
+            return document;
+        }
+
+        public Document TestPdf()
+        {
+            // Create a new MigraDoc document.
+            var document = new Document();
+
+            // Add a section to the document.
+            var section = document.AddSection();
+
+            // Add a paragraph to the section.
+            var paragraph = section.AddParagraph();
+
+            // Set font color.
+            // paragraph.Format.Font.Color = Colors.DarkBlue;
+
+            // Add some text to the paragraph.
+            paragraph.AddFormattedText("Hello, World! No footer at all", TextFormat.Bold);
+
+            // Add MigraDoc logo.
+            // document.LastSection.AddParagraph("blah");
+
+            return document;
+        }
+
         public Document CreatePdf()
         {
             if (Workshops != null)
             {
-                GlobalFontSettings.FontResolver = new CustomFontResolver();
-
                 var document = new Document();
-                GlobalFontSettings.FontResolver = new CustomFontResolver();
-                var style = document.Styles["Normal"];
-                style.Font = new Font("noto");
 
                 foreach(var section in PrintWorkshopParticipants())
                 {                    
@@ -157,21 +210,11 @@ namespace WinterAdventurer.Library
                     
                     document.Sections.Add(section);                    
                 }
-                /*
+
                 foreach(var section in PrintSchedules())
                 {
                     document.Sections.Add(section);
-                }
-                */
-
-                foreach(var section in document.Sections)
-                {                    
-                    foreach(var element in section.GetElements())
-                    {                        
-                        Console.WriteLine(element.ToString());
-                        Debug.WriteLine(element.ToString());
-                    }
-                }
+                }                
                 
                 return document;
             }
@@ -182,7 +225,6 @@ namespace WinterAdventurer.Library
         private List<Section> PrintWorkshopParticipants()
         {
             var sections = new List<Section>();
-            var fontResolver = new CustomFontResolver();
 
             foreach(var workshopListing in Workshops)
             {

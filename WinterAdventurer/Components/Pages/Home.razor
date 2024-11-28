@@ -75,20 +75,28 @@
     {
         try
         {
+            var document = excelUtilities.CreatePdf();        
+
             var renderer = new PdfDocumentRenderer()
             {
-                Document = excelUtilities.CreatePdf()
+                Document = document,
+                PdfDocument = new PdfDocument()
+                {
+                    PageLayout = PdfPageLayout.SinglePage,
+                    ViewerPreferences = 
+                    {
+                        FitWindow = true
+                    }
+                }
             };
 
-            renderer.Document = excelUtilities.CreatePdf();
+            GlobalFontSettings.FontResolver = new CustomFontResolver();
+
             renderer.RenderDocument();
 
-            using(var stream = new MemoryStream())
-            {
-                renderer.PdfDocument.Save(stream);
-                var base64File = Convert.ToBase64String(stream.ToArray());
-                downloadFileName = $"data:application/pdf;base64,{base64File}";
-            }            
+            renderer.Save("/home/isaac/test.pdf");
+
+            downloadFileName = $"/home/isaac/test.pdf";     
         }
         catch(Exception e)
         {

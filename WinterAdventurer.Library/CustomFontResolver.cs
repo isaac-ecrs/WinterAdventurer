@@ -17,6 +17,7 @@ namespace WinterAdventurer.Library
             {
                 case "noto":
                 case "notosans":
+                case "arial":
                     return new FontResolverInfo("NotoSans-Regular"); // Noto family base font
                 case "oswald":
                     return new FontResolverInfo("Oswald-Regular");
