@@ -41,23 +41,30 @@ namespace WinterAdventurer.Library
 
         public List<Workshop> ParseWorkshops(ExcelPackage package)
         {
+            var worksheetNames = new List<string>()
+            {
+                "MorningFirstPeriod",
+                "MorningSecondPeriod",
+                "AfternoonPeriod"
+            };
+
             var periodOneSheet = package
                                     .Workbook
                                     .Worksheets
                                     .FirstOrDefault(ws =>
-                                        ws.Name.Contains("MorningFirstPeriod"));
+                                        ws.Name.Contains(worksheetNames[0]));
 
             var periodTwoSheet = package
                                     .Workbook
                                     .Worksheets
                                     .FirstOrDefault(ws =>
-                                        ws.Name.Contains("MorningSecondPeriod"));
+                                        ws.Name.Contains(worksheetNames[1]));
 
             var periodThreeSheet = package
                                     .Workbook
                                     .Worksheets
                                     .FirstOrDefault(ws =>
-                                        ws.Name.Contains("AfternoonPeriod"));
+                                        ws.Name.Contains(worksheetNames[2]));
 
             if (periodOneSheet == null || periodOneSheet == default)
             {
@@ -75,12 +82,12 @@ namespace WinterAdventurer.Library
             }
 
             return
-                CollectWorkshops(periodOneSheet)
-                .Union(CollectWorkshops(periodTwoSheet))
-                .Union(CollectWorkshops(periodThreeSheet)).ToList();
+                CollectWorkshops(periodOneSheet, new Period(worksheetNames[0]))
+                .Union(CollectWorkshops(periodTwoSheet, new Period(worksheetNames[1])))
+                .Union(CollectWorkshops(periodThreeSheet, new Period(worksheetNames[2]))).ToList();
         }
 
-        public List<Workshop> CollectWorkshops(ExcelWorksheet sheet)
+        public List<Workshop> CollectWorkshops(ExcelWorksheet sheet, Period period)
         {
             var rows = sheet.Dimension.Rows;
             var columns = sheet.Dimension.Columns;
@@ -101,7 +108,6 @@ namespace WinterAdventurer.Library
                         if(rowValue != null)
                         {
                             var workshopName = rowValue.ToString().GetWorkshopName();
-                            var leaderName = rowValue.ToString().GetLeaderName();
                             var participantName = new PersonName(
                                 sheet.Cells[j,
                                 Constants.COLUMN_ATTENDEE_NAME].Value.ToString());
@@ -115,7 +121,7 @@ namespace WinterAdventurer.Library
                                     SelectionId = int.Parse(sheet.Cells[j, Constants.COLUMN_SELECTION_ID].Value.ToString()),
                                     FullName = participantName.FullName,
                                     FirstName = participantName.FirstName,
-                                    LastName = participantName.LastName                                
+                                    LastName = participantName.LastName                              
                                 };
 
                                 if(workshops.TryGetValue(rowValue.ToString(), out workshop))
@@ -131,7 +137,8 @@ namespace WinterAdventurer.Library
                                             Selections = new List<WorkshopSelection>()
                                             {
                                                 workshopSelected
-                                            }
+                                            },
+                                            Period = period
                                         }
                                     );
                                 }

@@ -5,13 +5,21 @@
 @using WinterAdventurer.Library
 @using System
 @using System.IO
+@using MudBlazor
+@using WinterAdventurer.Library.Models
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Import Excel File</h1>
 
-<InputFile title="Upload an Excel file" OnChange="UploadExcel" accept=".xlsx" />
+<MudFileUpload T="IBrowserFile" FilesChanged="UploadExcel" Accept=".xlsx">
+    <ActivatorContent>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+            Upload Excel File
+        </MudButton>
+    </ActivatorContent>
+</MudFileUpload>
 
 @if (isLoading)
 {
@@ -20,75 +28,99 @@
 
 @if (workshops != null && workshops.Count > 0)
 {
-    <a href=@downloadFileName download="schedules.pdf">Download File</a>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Leader</th>
-                <th>Type</th>
-                <th>Max Participants</th>
-                <th>Min Age</th>
-                <th>Selections</th>
-            </tr>
-        </thead>
-        <tbody>
+
+    <EditForm Model=workshops OnValidSubmit="BuildPdf">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper Class="pa-4 mud-height-full">
+                @if (!success)
+                    {
+                        <MudText Color="@Color.Error">
+                            <ValidationSummary />
+                        </MudText>
+                    }
+                </MudPaper>
+            </MudItem>
             @foreach (var workshop in workshops)
             {
-                <tr>
-                    <td>@workshop.Name</td>
-                    <td>@workshop.Leader</td>
-                    <td>@workshop.Type</td>
-                    <td>@workshop.MaxParticipants</td>
-                    <td>@workshop.MinAge</td>
-                    <td>@string.Join(", ", workshop.Selections)</td>
-                </tr>
+                <MudItem xs="6">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudTextField Typo="Typo.h4" @bind-Value="workshop.Name" />
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText>@workshop.Selections.Count().ToString() Participants</MudText>
+                            <MudText>@workshop.Period.DisplayName</MudText>
+                            <MudTextField Label="Location" @bind-Value="workshop.Location" />
+                            <MudTextField Label="Leader" @bind-Value="workshop.Leader" />
+                            <MudSwitch Label="Is Mini?" @bind-Value="workshop.IsMini" />
+                            <MudNumericField Label="Max Participants" @bind-Value="workshop.MaxParticipants" />
+                            <MudNumericField Label="Minimum Age" @bind-Value="workshop.MinAge" />
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
             }
-        </tbody>
-    </table>
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">
+                    Create PDF</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+
 }
 
 @code {
-    private List<WinterAdventurer.Library.Models.Workshop> workshops = new List<Library.Models.Workshop>();
+    private List<Workshop> workshops = new List<Library.Models.Workshop>();
     private bool isLoading;
     public string? downloadFileName;
+    private ExcelUtilities context = new ExcelUtilities();
+    private bool success = false;
+    private List<Period> periods = new List<Period>();
 
-    private async Task UploadExcel(InputFileChangeEventArgs e)
+    private async Task UploadExcel(IBrowserFile file)
     {
+        success = true;
         isLoading = true;
         workshops.Clear();
 
-        using (var stream = new FileStream(e.File.Name, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+        using (var stream = new FileStream(file.Name, FileMode.OpenOrCreate, FileAccess.ReadWrite))
         {
-            var excelUtilities = new ExcelUtilities();
-            await e.File.OpenReadStream().CopyToAsync(stream);
-            excelUtilities.ImportExcel(stream);
-            workshops = excelUtilities.Workshops;
-            SetDownloadLink(excelUtilities);
+            await file.OpenReadStream().CopyToAsync(stream);
+            context.ImportExcel(stream);
+            workshops = context.Workshops;
+            periods = workshops.Select(w => w.Period).Distinct().ToList();
         }
 
         isLoading = false;
     }
 
-    private void SetDownloadLink(ExcelUtilities excelUtilities)
+    private void BuildPdf()
+    {
+        //SetDownloadLink();
+    }
+
+    private void SetDownloadLink()
     {
         try
         {
-            var document = excelUtilities.CreatePdf();        
+            var document = context.CreatePdf();
 
             var renderer = new PdfDocumentRenderer()
-            {
-                Document = document,
-                PdfDocument = new PdfDocument()
                 {
-                    PageLayout = PdfPageLayout.SinglePage,
-                    ViewerPreferences = 
+                    Document = document,
+                    PdfDocument = new PdfDocument()
                     {
-                        FitWindow = true
+                        PageLayout = PdfPageLayout.SinglePage,
+                        ViewerPreferences =
+{
+FitWindow = true
+}
                     }
-                }
-            };
+                };
 
             GlobalFontSettings.FontResolver = new CustomFontResolver();
 
@@ -96,9 +128,9 @@
 
             renderer.Save("/home/isaac/test.pdf");
 
-            downloadFileName = $"/home/isaac/test.pdf";     
+            downloadFileName = $"/home/isaac/test.pdf";
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine(e);
         }
