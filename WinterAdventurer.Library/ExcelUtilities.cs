@@ -22,7 +22,8 @@ namespace WinterAdventurer.Library
     public class ExcelUtilities
     {
         public List<Workshop> Workshops = new List<Workshop>();
-        
+        private EventSchema? _schema;
+
         readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
 
         public ExcelUtilities()
@@ -113,16 +114,16 @@ namespace WinterAdventurer.Library
 
         public List<Workshop> ParseWorkshops(ExcelPackage package)
         {
-            var schema = LoadEventSchema();
-            Console.WriteLine($"Loaded schema for: {schema.EventName}");
+            _schema = LoadEventSchema();
+            Console.WriteLine($"Loaded schema for: {_schema.EventName}");
 
             // Step 1: Load all attendees from ClassSelection sheet
-            var attendees = LoadAttendees(package, schema);
+            var attendees = LoadAttendees(package, _schema);
             Console.WriteLine($"Loaded {attendees.Count} attendees");
 
             // Step 2: Parse workshops from each period sheet defined in schema
             var allWorkshops = new List<Workshop>();
-            foreach (var periodConfig in schema.PeriodSheets)
+            foreach (var periodConfig in _schema.PeriodSheets)
             {
                 var sheet = package.Workbook.Worksheets.FirstOrDefault(ws => ws.Name == periodConfig.SheetName);
                 if (sheet == null)
@@ -347,11 +348,16 @@ namespace WinterAdventurer.Library
                     document.Sections.Add(section);
                 }
 
-                // TODO: Add individual schedule generation
-                // foreach(var section in PrintSchedules())
-                // {
-                //     document.Sections.Add(section);
-                // }
+                // Add individual schedules
+                foreach(var section in PrintIndividualSchedules())
+                {
+                    section.PageSetup.TopMargin = Unit.FromInch(.5);
+                    section.PageSetup.LeftMargin = Unit.FromInch(.5);
+                    section.PageSetup.RightMargin = Unit.FromInch(.5);
+                    section.PageSetup.BottomMargin = Unit.FromInch(.5);
+
+                    document.Sections.Add(section);
+                }
 
                 return document;
             }
@@ -544,6 +550,168 @@ namespace WinterAdventurer.Library
                     rightPara.AddText(" [\u2003]");
                 }
             }
+        }
+
+        private List<Section> PrintIndividualSchedules()
+        {
+            var sections = new List<Section>();
+
+            if (_schema == null)
+            {
+                Console.WriteLine("Warning: Cannot generate individual schedules - schema not loaded");
+                return sections;
+            }
+
+            // Get all unique attendees from workshop selections (first choice only)
+            var attendeeSchedules = new Dictionary<string, List<WorkshopSelection>>();
+
+            foreach (var workshop in Workshops)
+            {
+                foreach (var selection in workshop.Selections.Where(s => s.ChoiceNumber == 1))
+                {
+                    if (!attendeeSchedules.ContainsKey(selection.ClassSelectionId))
+                    {
+                        attendeeSchedules[selection.ClassSelectionId] = new List<WorkshopSelection>();
+                    }
+                    attendeeSchedules[selection.ClassSelectionId].Add(selection);
+                }
+            }
+
+            // Create a schedule page for each attendee
+            foreach (var kvp in attendeeSchedules.OrderBy(a => a.Value.First().LastName).ThenBy(a => a.Value.First().FirstName))
+            {
+                var attendeeSelections = kvp.Value;
+                var attendee = attendeeSelections.First(); // Get attendee info from first selection
+
+                var section = new Section();
+
+                // Header with attendee name - Oswald
+                var header = section.AddParagraph();
+                header.Format.Font.Name = "Oswald";
+                header.Format.Font.Color = COLOR_BLACK;
+                header.Format.Font.Size = 22;
+                header.Format.Alignment = ParagraphAlignment.Center;
+                header.AddFormattedText($"{attendee.FullName}'s Schedule", TextFormat.Bold);
+                header.Format.SpaceAfter = Unit.FromPoint(16);
+
+                // Create schedule table
+                var table = section.AddTable();
+                table.Borders.Width = 0.5;
+
+                // Column 0: Period labels
+                table.AddColumn(Unit.FromInch(1.5));
+
+                // Columns 1-4: Days
+                for (int i = 0; i < _schema.TotalDays; i++)
+                {
+                    table.AddColumn(Unit.FromInch(1.5));
+                }
+
+                // Header row with day numbers
+                var headerRow = table.AddRow();
+                headerRow.Shading.Color = Color.FromRgb(240, 240, 240);
+                headerRow.HeadingFormat = true;
+
+                var periodHeaderCell = headerRow.Cells[0];
+                var periodHeaderPara = periodHeaderCell.AddParagraph();
+                periodHeaderPara.Format.Font.Name = "NotoSans";
+                periodHeaderPara.Format.Font.Bold = true;
+                periodHeaderPara.Format.Font.Size = 12;
+                periodHeaderPara.Format.Alignment = ParagraphAlignment.Center;
+                periodHeaderPara.AddText("");
+
+                for (int day = 1; day <= _schema.TotalDays; day++)
+                {
+                    var dayCell = headerRow.Cells[day];
+                    var dayPara = dayCell.AddParagraph();
+                    dayPara.Format.Font.Name = "NotoSans";
+                    dayPara.Format.Font.Bold = true;
+                    dayPara.Format.Font.Size = 12;
+                    dayPara.Format.Alignment = ParagraphAlignment.Center;
+                    dayPara.AddText($"Day {day}");
+                }
+
+                // Breakfast row (merged across all days)
+                AddMergedActivityRow(table, "Breakfast", _schema.TotalDays);
+
+                // Add rows for each period
+                foreach (var periodConfig in _schema.PeriodSheets)
+                {
+                    var row = table.AddRow();
+                    row.VerticalAlignment = VerticalAlignment.Top;
+
+                    // Period label cell
+                    var labelCell = row.Cells[0];
+                    var labelPara = labelCell.AddParagraph();
+                    labelPara.Format.Font.Name = "NotoSans";
+                    labelPara.Format.Font.Size = 10;
+                    labelPara.Format.Alignment = ParagraphAlignment.Center;
+                    labelPara.AddText(periodConfig.DisplayName);
+
+                    // Fill in workshop for each day
+                    for (int day = 1; day <= _schema.TotalDays; day++)
+                    {
+                        var dayCell = row.Cells[day];
+
+                        // Find workshop for this period and day
+                        var workshopForDay = attendeeSelections
+                            .Where(s => s.Duration.StartDay <= day && s.Duration.EndDay >= day)
+                            .Select(s => new
+                            {
+                                Selection = s,
+                                Workshop = Workshops.FirstOrDefault(w =>
+                                    w.Name == s.WorkshopName &&
+                                    w.Duration.StartDay == s.Duration.StartDay &&
+                                    w.Duration.EndDay == s.Duration.EndDay &&
+                                    w.Period.SheetName == periodConfig.SheetName)
+                            })
+                            .FirstOrDefault(x => x.Workshop != null);
+
+                        if (workshopForDay != null)
+                        {
+                            var workshopPara = dayCell.AddParagraph();
+                            workshopPara.Format.Font.Name = "Roboto";
+                            workshopPara.Format.Font.Size = 10;
+                            workshopPara.Format.Alignment = ParagraphAlignment.Center;
+                            workshopPara.AddText($"{workshopForDay.Selection.WorkshopName}");
+
+                            var leaderPara = dayCell.AddParagraph();
+                            leaderPara.Format.Font.Name = "Roboto";
+                            leaderPara.Format.Font.Size = 9;
+                            leaderPara.Format.Font.Italic = true;
+                            leaderPara.Format.Alignment = ParagraphAlignment.Center;
+                            leaderPara.AddText($"({workshopForDay.Workshop.Leader})");
+                        }
+                    }
+                }
+
+                // Lunch row (merged across all days)
+                AddMergedActivityRow(table, "Lunch", _schema.TotalDays);
+
+                // Evening Program row (merged across all days)
+                AddMergedActivityRow(table, "Evening Program", _schema.TotalDays);
+
+                sections.Add(section);
+            }
+
+            return sections;
+        }
+
+        private void AddMergedActivityRow(Table table, string activityName, int totalDays)
+        {
+            var row = table.AddRow();
+            row.Shading.Color = Color.FromRgb(250, 250, 250);
+
+            // First cell (period label column) - empty
+            var firstCell = row.Cells[0];
+            firstCell.MergeRight = totalDays; // Merge all columns including the label column
+
+            var para = firstCell.AddParagraph();
+            para.Format.Font.Name = "Roboto";
+            para.Format.Font.Size = 11;
+            para.Format.Font.Italic = true;
+            para.Format.Alignment = ParagraphAlignment.Center;
+            para.AddText(activityName);
         }
 
         // @TODO switch from hardcoded workshops to those from the uploaded file
