@@ -1,0 +1,117 @@
+{
+  "eventName": "Winter Adventure",
+  "totalDays": 4,
+  "classSelectionSheet": {
+    "sheetName": "ClassSelection",
+    "columns": {
+      "registrationId": {
+        "pattern": "WinterAdventureClassRegist_Id",
+        "description": "Column ending with WinterAdventureClassRegist_Id (may have year prefix)"
+      },
+      "selectionId": "ClassSelection_Id",
+      "firstName": "Name_First",
+      "lastName": "Name_Last",
+      "email": "Email",
+      "age": "Age"
+    }
+  },
+  "periodSheets": [
+    {
+      "sheetName": "MorningFirstPeriod",
+      "displayName": "Morning First Period",
+      "columns": {
+        "registrationId": {
+          "pattern": "WinterAdventureClassRegist_Id"
+        },
+        "selectionId": "ClassSelection_Id",
+        "firstName": "AttendeeName_First",
+        "lastName": "AttendeeName_Last",
+        "fullName": "AttendeeName",
+        "choiceNumber": "ChoiceNumber"
+      },
+      "workshopColumns": [
+        {
+          "columnName": "_4dayClasses",
+          "startDay": 1,
+          "endDay": 4
+        },
+        {
+          "columnName": "_2dayClassesFirst2Days",
+          "startDay": 1,
+          "endDay": 2
+        },
+        {
+          "columnName": "_2dayClassesSecond2Days",
+          "startDay": 3,
+          "endDay": 4
+        }
+      ]
+    },
+    {
+      "sheetName": "MorningSecondPeriod",
+      "displayName": "Morning Second Period",
+      "columns": {
+        "registrationId": {
+          "pattern": "WinterAdventureClassRegist_Id"
+        },
+        "selectionId": "ClassSelection_Id",
+        "firstName": "AttendeeName_First",
+        "lastName": "AttendeeName_Last",
+        "fullName": "AttendeeName",
+        "choiceNumber": "ChoiceNumber"
+      },
+      "workshopColumns": [
+        {
+          "columnName": "_4dayClasses",
+          "startDay": 1,
+          "endDay": 4
+        },
+        {
+          "columnName": "_2dayClassesFirst2Days",
+          "startDay": 1,
+          "endDay": 2
+        },
+        {
+          "columnName": "_2dayClassesSecond2Days",
+          "startDay": 3,
+          "endDay": 4
+        }
+      ]
+    },
+    {
+      "sheetName": "AfternoonPeriod",
+      "displayName": "Afternoon Period",
+      "columns": {
+        "registrationId": {
+          "pattern": "WinterAdventureClassRegist_Id"
+        },
+        "selectionId": "ClassSelection_Id",
+        "firstName": "AttendeeName_First",
+        "lastName": "AttendeeName_Last",
+        "fullName": "AttendeeName",
+        "choiceNumber": "ChoiceNumber"
+      },
+      "workshopColumns": [
+        {
+          "columnName": "_4dayClasses",
+          "startDay": 1,
+          "endDay": 4
+        },
+        {
+          "columnName": "_2dayClassesFirst2Days",
+          "startDay": 1,
+          "endDay": 2
+        },
+        {
+          "columnName": "_2dayClassesSecond2Days",
+          "startDay": 3,
+          "endDay": 4
+        }
+      ]
+    }
+  ],
+  "workshopFormat": {
+    "pattern": "WorkshopName (LeaderName)",
+    "description": "Workshop names contain leader in parentheses"
+  }
+}
