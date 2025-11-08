@@ -367,24 +367,30 @@ namespace WinterAdventurer.Library
             {
                 var section = new Section();
 
-                //Add heading
+                // Workshop name - Oswald (top level header)
                 var header = section.AddParagraph();
+                header.Format.Font.Name = "Oswald";
                 header.Format.Font.Color = COLOR_BLACK;
-                header.Format.Font.Size = 16;
+                header.Format.Font.Size = 20;
+                header.Format.Alignment = ParagraphAlignment.Center;
                 header.AddFormattedText(workshopListing.Name, TextFormat.Bold);
 
-                // Add leader info
+                // Leader info - Noto Sans (second level header)
                 var leaderInfo = section.AddParagraph();
+                leaderInfo.Format.Font.Name = "NotoSans";
                 leaderInfo.Format.Font.Color = COLOR_BLACK;
-                leaderInfo.Format.Font.Size = 12;
+                leaderInfo.Format.Font.Size = 14;
+                leaderInfo.Format.Alignment = ParagraphAlignment.Center;
                 leaderInfo.AddFormattedText($"Leader: {workshopListing.Leader}");
 
-                // Add period and duration info
+                // Period and duration info - Noto Sans (second level header)
                 var periodInfo = section.AddParagraph();
+                periodInfo.Format.Font.Name = "NotoSans";
                 periodInfo.Format.Font.Color = COLOR_BLACK;
-                periodInfo.Format.Font.Size = 10;
+                periodInfo.Format.Font.Size = 12;
+                periodInfo.Format.Alignment = ParagraphAlignment.Center;
                 periodInfo.AddFormattedText($"{workshopListing.Period.DisplayName} - {workshopListing.Duration.Description}");
-                periodInfo.Format.SpaceAfter = Unit.FromPoint(12);
+                periodInfo.Format.SpaceAfter = Unit.FromPoint(16);
 
                 // Separate first choice from backup choices and sort by registration order
                 var firstChoiceAttendees = workshopListing.Selections
@@ -401,16 +407,19 @@ namespace WinterAdventurer.Library
                 if (firstChoiceAttendees.Any())
                 {
                     var firstChoiceHeader = section.AddParagraph();
+                    firstChoiceHeader.Format.Font.Name = "NotoSans";
                     firstChoiceHeader.Format.Font.Color = COLOR_BLACK;
-                    firstChoiceHeader.Format.Font.Size = 12;
+                    firstChoiceHeader.Format.Font.Size = 14;
                     firstChoiceHeader.AddFormattedText($"Enrolled Participants ({firstChoiceAttendees.Count}):", TextFormat.Bold);
-                    firstChoiceHeader.Format.SpaceAfter = Unit.FromPoint(6);
+                    firstChoiceHeader.Format.SpaceAfter = Unit.FromPoint(8);
 
                     int counter = 1;
                     foreach(var attendee in firstChoiceAttendees)
                     {
                         var formattedAttendee = section.AddParagraph();
+                        formattedAttendee.Format.Font.Name = "Roboto";
                         formattedAttendee.Format.Font.Color = COLOR_BLACK;
+                        formattedAttendee.Format.Font.Size = 11;
                         formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
 
                         // Add number, name, then checkbox
@@ -426,25 +435,29 @@ namespace WinterAdventurer.Library
                 if (backupAttendees.Any())
                 {
                     var backupHeader = section.AddParagraph();
+                    backupHeader.Format.Font.Name = "NotoSans";
                     backupHeader.Format.Font.Color = COLOR_BLACK;
-                    backupHeader.Format.Font.Size = 12;
-                    backupHeader.Format.SpaceAfter = Unit.FromPoint(6);
-                    backupHeader.Format.SpaceBefore = Unit.FromPoint(12);
+                    backupHeader.Format.Font.Size = 14;
+                    backupHeader.Format.SpaceAfter = Unit.FromPoint(8);
+                    backupHeader.Format.SpaceBefore = Unit.FromPoint(16);
                     backupHeader.AddFormattedText($"Backup/Alternate Choices ({backupAttendees.Count}):", TextFormat.Bold);
 
                     var backupNote = section.AddParagraph();
+                    backupNote.Format.Font.Name = "Roboto";
                     backupNote.Format.Font.Color = COLOR_BLACK;
-                    backupNote.Format.Font.Size = 9;
+                    backupNote.Format.Font.Size = 10;
                     backupNote.Format.Font.Italic = true;
                     backupNote.Format.LeftIndent = Unit.FromPoint(12);
-                    backupNote.Format.SpaceAfter = Unit.FromPoint(6);
+                    backupNote.Format.SpaceAfter = Unit.FromPoint(8);
                     backupNote.AddText("These participants may join if their first choice is full:");
 
                     int backupCounter = 1;
                     foreach(var attendee in backupAttendees)
                     {
                         var formattedAttendee = section.AddParagraph();
+                        formattedAttendee.Format.Font.Name = "Roboto";
                         formattedAttendee.Format.Font.Color = COLOR_BLACK;
+                        formattedAttendee.Format.Font.Size = 11;
                         formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
 
                         // Add number, name with choice indicator, then checkbox

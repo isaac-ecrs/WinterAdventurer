@@ -48,7 +48,7 @@ namespace WinterAdventurer.Library
                 case "notosans":
                     return "WinterAdventurer.Library.Resources.Fonts.Noto_Sans.static.NotoSans-Regular.ttf";
                 case "oswald":
-                    return "WinterAdventurer.Library.Resources.Fonts.Oswald.Oswald-Regular.ttf";
+                    return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Regular.ttf";
                 case "roboto":
                     return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Regular.ttf";
                 default:
