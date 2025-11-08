@@ -413,12 +413,10 @@ namespace WinterAdventurer.Library
                         formattedAttendee.Format.Font.Color = COLOR_BLACK;
                         formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
 
-                        // Add checkbox and number
-                        formattedAttendee.AddText("☐ ");  // Unicode checkbox
+                        // Add number, name, then checkbox
                         formattedAttendee.AddFormattedText($"{counter}. ", TextFormat.Bold);
                         formattedAttendee.AddText(attendee.FullName);
-                        formattedAttendee.AddTab();
-                        formattedAttendee.AddFormattedText("Confirmed: ______", new Font("NotoSans", 9) { Italic = true });
+                        formattedAttendee.AddText(" ▢");  // White square with rounded corners
 
                         counter++;
                     }
@@ -449,12 +447,10 @@ namespace WinterAdventurer.Library
                         formattedAttendee.Format.Font.Color = COLOR_BLACK;
                         formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
 
-                        // Add checkbox and number for backup participants too
-                        formattedAttendee.AddText("☐ ");  // Unicode checkbox
+                        // Add number, name with choice indicator, then checkbox
                         formattedAttendee.AddFormattedText($"{backupCounter}. ", TextFormat.Bold);
                         formattedAttendee.AddText($"{attendee.FullName} (Choice #{attendee.ChoiceNumber})");
-                        formattedAttendee.AddTab();
-                        formattedAttendee.AddFormattedText("Confirmed: ______", new Font("NotoSans", 9) { Italic = true });
+                        formattedAttendee.AddText(" ▢");  // White square with rounded corners
 
                         backupCounter++;
                     }
