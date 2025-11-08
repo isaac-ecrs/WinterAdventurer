@@ -371,7 +371,7 @@ namespace WinterAdventurer.Library
                 var header = section.AddParagraph();
                 header.Format.Font.Name = "Oswald";
                 header.Format.Font.Color = COLOR_BLACK;
-                header.Format.Font.Size = 20;
+                header.Format.Font.Size = 25;
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.AddFormattedText(workshopListing.Name, TextFormat.Bold);
 
@@ -379,15 +379,15 @@ namespace WinterAdventurer.Library
                 var leaderInfo = section.AddParagraph();
                 leaderInfo.Format.Font.Name = "NotoSans";
                 leaderInfo.Format.Font.Color = COLOR_BLACK;
-                leaderInfo.Format.Font.Size = 14;
+                leaderInfo.Format.Font.Size = 18;
                 leaderInfo.Format.Alignment = ParagraphAlignment.Center;
-                leaderInfo.AddFormattedText($"Leader: {workshopListing.Leader}");
+                leaderInfo.AddFormattedText(workshopListing.Leader);
 
                 // Period and duration info - Noto Sans (second level header)
                 var periodInfo = section.AddParagraph();
                 periodInfo.Format.Font.Name = "NotoSans";
                 periodInfo.Format.Font.Color = COLOR_BLACK;
-                periodInfo.Format.Font.Size = 12;
+                periodInfo.Format.Font.Size = 14;
                 periodInfo.Format.Alignment = ParagraphAlignment.Center;
                 periodInfo.AddFormattedText($"{workshopListing.Period.DisplayName} - {workshopListing.Duration.Description}");
                 periodInfo.Format.SpaceAfter = Unit.FromPoint(16);
@@ -409,26 +409,11 @@ namespace WinterAdventurer.Library
                     var firstChoiceHeader = section.AddParagraph();
                     firstChoiceHeader.Format.Font.Name = "NotoSans";
                     firstChoiceHeader.Format.Font.Color = COLOR_BLACK;
-                    firstChoiceHeader.Format.Font.Size = 14;
+                    firstChoiceHeader.Format.Font.Size = 18;
                     firstChoiceHeader.AddFormattedText($"Enrolled Participants ({firstChoiceAttendees.Count}):", TextFormat.Bold);
                     firstChoiceHeader.Format.SpaceAfter = Unit.FromPoint(8);
 
-                    int counter = 1;
-                    foreach(var attendee in firstChoiceAttendees)
-                    {
-                        var formattedAttendee = section.AddParagraph();
-                        formattedAttendee.Format.Font.Name = "Roboto";
-                        formattedAttendee.Format.Font.Color = COLOR_BLACK;
-                        formattedAttendee.Format.Font.Size = 11;
-                        formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
-
-                        // Add number, name, then checkbox
-                        formattedAttendee.AddFormattedText($"{counter}. ", TextFormat.Bold);
-                        formattedAttendee.AddText(attendee.FullName);
-                        formattedAttendee.AddText(" [ ]");
-
-                        counter++;
-                    }
+                    AddTwoColumnParticipantList(section, firstChoiceAttendees, showChoiceNumber: false);
                 }
 
                 // Backup participants
@@ -437,7 +422,7 @@ namespace WinterAdventurer.Library
                     var backupHeader = section.AddParagraph();
                     backupHeader.Format.Font.Name = "NotoSans";
                     backupHeader.Format.Font.Color = COLOR_BLACK;
-                    backupHeader.Format.Font.Size = 14;
+                    backupHeader.Format.Font.Size = 18;
                     backupHeader.Format.SpaceAfter = Unit.FromPoint(8);
                     backupHeader.Format.SpaceBefore = Unit.FromPoint(16);
                     backupHeader.AddFormattedText($"Backup/Alternate Choices ({backupAttendees.Count}):", TextFormat.Bold);
@@ -445,34 +430,120 @@ namespace WinterAdventurer.Library
                     var backupNote = section.AddParagraph();
                     backupNote.Format.Font.Name = "Roboto";
                     backupNote.Format.Font.Color = COLOR_BLACK;
-                    backupNote.Format.Font.Size = 10;
+                    backupNote.Format.Font.Size = 14;
                     backupNote.Format.Font.Italic = true;
                     backupNote.Format.LeftIndent = Unit.FromPoint(12);
                     backupNote.Format.SpaceAfter = Unit.FromPoint(8);
                     backupNote.AddText("These participants may join if their first choice is full:");
 
-                    int backupCounter = 1;
-                    foreach(var attendee in backupAttendees)
-                    {
-                        var formattedAttendee = section.AddParagraph();
-                        formattedAttendee.Format.Font.Name = "Roboto";
-                        formattedAttendee.Format.Font.Color = COLOR_BLACK;
-                        formattedAttendee.Format.Font.Size = 11;
-                        formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
-
-                        // Add number, name with choice indicator, then checkbox
-                        formattedAttendee.AddFormattedText($"{backupCounter}. ", TextFormat.Bold);
-                        formattedAttendee.AddText($"{attendee.FullName} (Choice #{attendee.ChoiceNumber})");
-                        formattedAttendee.AddText(" [ ]");
-
-                        backupCounter++;
-                    }
+                    AddTwoColumnParticipantList(section, backupAttendees, showChoiceNumber: true);
                 }
 
                 sections.Add(section);
             }
 
             return sections;
+        }
+
+        private int GetParticipantFontSize(string fullName, int counter, bool showChoiceNumber, int? choiceNumber = null)
+        {
+            // Calculate full text length including number, name, choice indicator, and checkbox
+            string text = $"{counter}. {fullName}";
+            if (showChoiceNumber && choiceNumber.HasValue)
+            {
+                text += $" (Choice #{choiceNumber})";
+            }
+            text += " [\u2003]";  // Using em space for wider checkbox
+
+            // Use smaller font for longer names to prevent wrapping
+            return text.Length > 30 ? 13 : 15;
+        }
+
+        private void AddTwoColumnParticipantList(Section section, List<WorkshopSelection> participants, bool showChoiceNumber)
+        {
+            // Create a table with 2 columns
+            var table = section.AddTable();
+            table.Borders.Visible = false;
+
+            // Define column widths (equal width)
+            var columnWidth = Unit.FromInch(3.25); // Roughly half of page width with margins
+            table.AddColumn(columnWidth);
+            table.AddColumn(columnWidth);
+
+            // Split participants into two columns
+            int halfCount = (int)Math.Ceiling(participants.Count / 2.0);
+            var leftColumn = participants.Take(halfCount).ToList();
+            var rightColumn = participants.Skip(halfCount).ToList();
+
+            // Add rows (one row per participant in left column)
+            for (int i = 0; i < leftColumn.Count; i++)
+            {
+                var row = table.AddRow();
+                row.VerticalAlignment = VerticalAlignment.Top;
+                row.TopPadding = 0;
+                row.BottomPadding = 0;
+
+                // Left column participant
+                var leftCell = row.Cells[0];
+                leftCell.VerticalAlignment = VerticalAlignment.Top;
+                var leftPara = leftCell.AddParagraph();
+                leftPara.Format.Font.Name = "Roboto";
+                leftPara.Format.Font.Color = COLOR_BLACK;
+
+                int leftCounter = i + 1;
+                int leftFontSize = GetParticipantFontSize(
+                    leftColumn[i].FullName,
+                    leftCounter,
+                    showChoiceNumber,
+                    leftColumn[i].ChoiceNumber);
+
+                leftPara.Format.Font.Size = leftFontSize;
+                leftPara.Format.LeftIndent = Unit.FromPoint(6);
+                leftPara.Format.SpaceBefore = 0;
+                leftPara.Format.SpaceAfter = Unit.FromPoint(6);
+                leftPara.Format.LineSpacingRule = LineSpacingRule.Exactly;
+                leftPara.Format.LineSpacing = Unit.FromPoint(leftFontSize);
+
+                leftPara.AddFormattedText($"{leftCounter}. ", TextFormat.Bold);
+                leftPara.AddText(leftColumn[i].FullName);
+                if (showChoiceNumber)
+                {
+                    leftPara.AddText($" (Choice #{leftColumn[i].ChoiceNumber})");
+                }
+                leftPara.AddText(" [\u2003]");
+
+                // Right column participant (if exists)
+                if (i < rightColumn.Count)
+                {
+                    var rightCell = row.Cells[1];
+                    rightCell.VerticalAlignment = VerticalAlignment.Top;
+                    var rightPara = rightCell.AddParagraph();
+                    rightPara.Format.Font.Name = "Roboto";
+                    rightPara.Format.Font.Color = COLOR_BLACK;
+
+                    int rightCounter = halfCount + i + 1;
+                    int rightFontSize = GetParticipantFontSize(
+                        rightColumn[i].FullName,
+                        rightCounter,
+                        showChoiceNumber,
+                        rightColumn[i].ChoiceNumber);
+
+                    rightPara.Format.Font.Size = rightFontSize;
+                    rightPara.Format.LeftIndent = Unit.FromPoint(6);
+                    rightPara.Format.SpaceBefore = 0;
+                    rightPara.Format.SpaceAfter = Unit.FromPoint(6);
+                    rightPara.Format.LineSpacingRule = LineSpacingRule.Exactly;
+                    rightPara.Format.LineSpacing = Unit.FromPoint(rightFontSize);
+
+                    rightPara.AddFormattedText($"{rightCounter}. ", TextFormat.Bold);
+                    rightPara.AddText(rightColumn[i].FullName);
+                    if (showChoiceNumber)
+                    {
+                        rightPara.AddText($" (Choice #{rightColumn[i].ChoiceNumber})");
+                    }
+                    rightPara.AddText(" [\u2003]");
+                }
+            }
         }
 
         // @TODO switch from hardcoded workshops to those from the uploaded file
