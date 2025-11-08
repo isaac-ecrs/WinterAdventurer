@@ -332,7 +332,7 @@ namespace WinterAdventurer.Library
             return document;
         }
 
-        public Document CreatePdf()
+        public Document CreatePdf(bool mergeWorkshopCells = true)
         {
             if (Workshops != null)
             {
@@ -349,7 +349,7 @@ namespace WinterAdventurer.Library
                 }
 
                 // Add individual schedules
-                foreach(var section in PrintIndividualSchedules())
+                foreach(var section in PrintIndividualSchedules(mergeWorkshopCells))
                 {
                     section.PageSetup.TopMargin = Unit.FromInch(.5);
                     section.PageSetup.LeftMargin = Unit.FromInch(.5);
@@ -552,7 +552,7 @@ namespace WinterAdventurer.Library
             }
         }
 
-        private List<Section> PrintIndividualSchedules()
+        private List<Section> PrintIndividualSchedules(bool mergeWorkshopCells = true)
         {
             var sections = new List<Section>();
 
@@ -648,24 +648,19 @@ namespace WinterAdventurer.Library
                     labelPara.Format.Alignment = ParagraphAlignment.Center;
                     labelPara.AddText(periodConfig.DisplayName);
 
-                    // Fill in workshop for each day
+                    // Build a map of day -> workshop for this period
+                    var dayWorkshopMap = new Dictionary<int, (Workshop? workshop, bool isLeading)>();
                     for (int day = 1; day <= _schema.TotalDays; day++)
                     {
-                        var dayCell = row.Cells[day];
-
                         // Find workshop they're enrolled in for this period and day
                         var workshopForDay = attendeeSelections
                             .Where(s => s.Duration.StartDay <= day && s.Duration.EndDay >= day)
-                            .Select(s => new
-                            {
-                                Selection = s,
-                                Workshop = Workshops.FirstOrDefault(w =>
-                                    w.Name == s.WorkshopName &&
-                                    w.Duration.StartDay == s.Duration.StartDay &&
-                                    w.Duration.EndDay == s.Duration.EndDay &&
-                                    w.Period.SheetName == periodConfig.SheetName)
-                            })
-                            .FirstOrDefault(x => x.Workshop != null);
+                            .Select(s => Workshops.FirstOrDefault(w =>
+                                w.Name == s.WorkshopName &&
+                                w.Duration.StartDay == s.Duration.StartDay &&
+                                w.Duration.EndDay == s.Duration.EndDay &&
+                                w.Period.SheetName == periodConfig.SheetName))
+                            .FirstOrDefault(w => w != null);
 
                         // Also check if they're leading a workshop in this period/day
                         var leadingWorkshop = Workshops.FirstOrDefault(w =>
@@ -675,11 +670,46 @@ namespace WinterAdventurer.Library
                             w.Duration.EndDay >= day);
 
                         // Prefer the workshop they're leading if both exist
-                        var workshopToShow = leadingWorkshop ?? workshopForDay?.Workshop;
+                        var workshopToShow = leadingWorkshop ?? workshopForDay;
                         bool isLeading = leadingWorkshop != null;
 
-                        if (workshopToShow != null)
+                        dayWorkshopMap[day] = (workshopToShow, isLeading);
+                    }
+
+                    // Process days and merge cells for consecutive same workshops
+                    int currentDay = 1;
+                    while (currentDay <= _schema.TotalDays)
+                    {
+                        var (workshop, isLeading) = dayWorkshopMap[currentDay];
+
+                        if (workshop != null)
                         {
+                            // Find how many consecutive days have the same workshop
+                            int spanDays = 1;
+                            for (int nextDay = currentDay + 1; nextDay <= _schema.TotalDays; nextDay++)
+                            {
+                                var (nextWorkshop, nextIsLeading) = dayWorkshopMap[nextDay];
+                                if (nextWorkshop != null &&
+                                    nextWorkshop.Name == workshop.Name &&
+                                    nextWorkshop.Leader == workshop.Leader &&
+                                    nextIsLeading == isLeading)
+                                {
+                                    spanDays++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            // Get the cell and merge if spanning multiple days
+                            var dayCell = row.Cells[currentDay];
+                            if (mergeWorkshopCells && spanDays > 1)
+                            {
+                                dayCell.MergeRight = spanDays - 1;
+                            }
+
+                            // Add workshop content
                             var workshopPara = dayCell.AddParagraph();
                             workshopPara.Format.Font.Size = 10;
                             workshopPara.Format.Alignment = ParagraphAlignment.Center;
@@ -688,22 +718,22 @@ namespace WinterAdventurer.Library
                             {
                                 workshopPara.Format.Font.Name = "NotoSans";
                                 workshopPara.Format.Font.Bold = true;
-                                workshopPara.AddText($"Leading {workshopToShow.Name}");
+                                workshopPara.AddText($"Leading {workshop.Name}");
                             }
                             else
                             {
                                 workshopPara.Format.Font.Name = "Roboto";
-                                workshopPara.AddText($"{workshopToShow.Name}");
+                                workshopPara.AddText($"{workshop.Name}");
                             }
 
                             // Add leader info
                             if (isLeading)
                             {
                                 // Check if co-leading (leader field contains "and")
-                                if (workshopToShow.Leader.Contains(" and "))
+                                if (workshop.Leader.Contains(" and "))
                                 {
                                     // Extract the other leader's name
-                                    var leaders = workshopToShow.Leader.Split(new[] { " and " }, StringSplitOptions.None);
+                                    var leaders = workshop.Leader.Split(new[] { " and " }, StringSplitOptions.None);
                                     var otherLeader = leaders.FirstOrDefault(l => l.Trim() != attendee.FullName)?.Trim();
 
                                     if (!string.IsNullOrEmpty(otherLeader))
@@ -726,8 +756,15 @@ namespace WinterAdventurer.Library
                                 leaderPara.Format.Font.Size = 9;
                                 leaderPara.Format.Font.Italic = true;
                                 leaderPara.Format.Alignment = ParagraphAlignment.Center;
-                                leaderPara.AddText($"({workshopToShow.Leader})");
+                                leaderPara.AddText($"({workshop.Leader})");
                             }
+
+                            // If merging, skip the merged days; otherwise just move to next day
+                            currentDay += mergeWorkshopCells ? spanDays : 1;
+                        }
+                        else
+                        {
+                            currentDay++;
                         }
                     }
                 }

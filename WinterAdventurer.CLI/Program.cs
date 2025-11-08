@@ -10,10 +10,12 @@ Console.WriteLine("Hello, World!");
 if (args.Length == 0)
 {
     Console.WriteLine("Please provide the path to the Excel file as an argument.");
+    Console.WriteLine("Usage: WinterAdventurer.CLI <excel-file> [--no-merge-workshops]");
     return;
 }
 
 string filePath = args[0];
+bool mergeWorkshopCells = !args.Contains("--no-merge-workshops");
 
 if (!File.Exists(filePath))
 {
@@ -40,7 +42,8 @@ using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
     }
 
     Console.WriteLine($"\n=== GENERATING PDF ===");
-    var document = excelUtilities.CreatePdf();
+    Console.WriteLine($"Merge workshop cells: {mergeWorkshopCells}");
+    var document = excelUtilities.CreatePdf(mergeWorkshopCells);
 
     GlobalFontSettings.FontResolver = new CustomFontResolver();
 
