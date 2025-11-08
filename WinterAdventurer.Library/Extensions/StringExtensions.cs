@@ -17,7 +17,10 @@ namespace WinterAdventurer.Library.Extensions
 
             foreach (var word in splitInput)
             {
-                combinedInput = combinedInput + " " + word[0].ToString().ToUpper() + word.Substring(1);
+                if (!string.IsNullOrWhiteSpace(word))
+                {
+                    combinedInput = combinedInput + " " + word[0].ToString().ToUpper() + word.Substring(1).ToLower();
+                }
             }
 
             return combinedInput.Trim();
