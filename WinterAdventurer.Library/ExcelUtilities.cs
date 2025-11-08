@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using OfficeOpenXml;
 using WinterAdventurer.Library.Extensions;
 using WinterAdventurer.Library.Models;
+using WinterAdventurer.Library.EventSchemas;
 using MigraDoc;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
@@ -13,6 +15,7 @@ using PdfSharp.Fonts;
 using System.Diagnostics;
 using MigraDoc.DocumentObjectModel.Visitors;
 using PdfSharp.Pdf;
+using Newtonsoft.Json;
 
 namespace WinterAdventurer.Library
 {
@@ -22,9 +25,34 @@ namespace WinterAdventurer.Library
         
         readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
 
-        public ExcelUtilities() 
+        public ExcelUtilities()
         {
             GlobalFontSettings.FontResolver = new CustomFontResolver();
+        }
+
+        private EventSchema LoadEventSchema()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "WinterAdventurer.Library.EventSchemas.WinterAdventureSchema.json";
+
+            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    throw new FileNotFoundException($"Could not find embedded resource: {resourceName}");
+                }
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string json = reader.ReadToEnd();
+                    var schema = JsonConvert.DeserializeObject<EventSchema>(json);
+                    if (schema == null)
+                    {
+                        throw new InvalidDataException("Failed to deserialize event schema");
+                    }
+                    return schema;
+                }
+            }
         }
 
         public void ImportExcel(Stream stream)
@@ -32,121 +60,215 @@ namespace WinterAdventurer.Library
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             stream.Position = 0;
-            
+
             using (var package = new ExcelPackage(stream))
             {
-                Workshops.AddRange(ParseWorkshops(package));                                
+                Workshops.AddRange(ParseWorkshops(package));
+            }
+        }
+
+        public void DumpExcelSchema(Stream stream, string outputPath)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            stream.Position = 0;
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var schema = new
+                {
+                    WorksheetCount = package.Workbook.Worksheets.Count,
+                    Worksheets = package.Workbook.Worksheets.Select(ws =>
+                    {
+                        var headers = ws.Dimension != null
+                            ? Enumerable.Range(1, ws.Dimension.Columns)
+                                .Select(i => new { Column = i, Value = ws.Cells[1, i].Value?.ToString() })
+                                .Cast<object>()
+                                .ToList()
+                            : new List<object>();
+
+                        var sampleRow = ws.Dimension != null
+                            ? Enumerable.Range(1, ws.Dimension.Columns)
+                                .Select(i => new { Column = i, Value = ws.Cells[2, i].Value?.ToString() })
+                                .Cast<object>()
+                                .ToList()
+                            : new List<object>();
+
+                        return new
+                        {
+                            Name = ws.Name,
+                            Dimensions = ws.Dimension?.Address,
+                            RowCount = ws.Dimension?.Rows,
+                            ColumnCount = ws.Dimension?.Columns,
+                            Headers = headers,
+                            SampleRow = sampleRow
+                        };
+                    }).ToList()
+                };
+
+                var json = JsonConvert.SerializeObject(schema, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(outputPath, json);
+                Console.WriteLine($"Excel schema written to: {outputPath}");
             }
         }
 
         public List<Workshop> ParseWorkshops(ExcelPackage package)
         {
-            var worksheetNames = new List<string>()
+            var schema = LoadEventSchema();
+            Console.WriteLine($"Loaded schema for: {schema.EventName}");
+
+            // Step 1: Load all attendees from ClassSelection sheet
+            var attendees = LoadAttendees(package, schema);
+            Console.WriteLine($"Loaded {attendees.Count} attendees");
+
+            // Step 2: Parse workshops from each period sheet defined in schema
+            var allWorkshops = new List<Workshop>();
+            foreach (var periodConfig in schema.PeriodSheets)
             {
-                "MorningFirstPeriod",
-                "MorningSecondPeriod",
-                "AfternoonPeriod"
-            };
+                var sheet = package.Workbook.Worksheets.FirstOrDefault(ws => ws.Name == periodConfig.SheetName);
+                if (sheet == null)
+                {
+                    Console.WriteLine($"Warning: Could not find sheet {periodConfig.SheetName}");
+                    continue;
+                }
 
-            var periodOneSheet = package
-                                    .Workbook
-                                    .Worksheets
-                                    .FirstOrDefault(ws =>
-                                        ws.Name.Contains(worksheetNames[0]));
-
-            var periodTwoSheet = package
-                                    .Workbook
-                                    .Worksheets
-                                    .FirstOrDefault(ws =>
-                                        ws.Name.Contains(worksheetNames[1]));
-
-            var periodThreeSheet = package
-                                    .Workbook
-                                    .Worksheets
-                                    .FirstOrDefault(ws =>
-                                        ws.Name.Contains(worksheetNames[2]));
-
-            if (periodOneSheet == null || periodOneSheet == default)
-            {
-                throw new InvalidDataException("Could not find the Morning First Period worksheet.");
+                Console.WriteLine($"Processing sheet: {sheet.Name}");
+                var workshops = CollectWorkshops(sheet, periodConfig, attendees);
+                allWorkshops.AddRange(workshops);
+                Console.WriteLine($"  Found {workshops.Count} workshops in {sheet.Name}");
             }
 
-            if (periodTwoSheet == null || periodTwoSheet == default)
-            {
-                throw new InvalidDataException("Could not find the Morning Second Period worksheet.");
-            }
-
-            if (periodThreeSheet == null || periodThreeSheet == default)
-            {
-                throw new InvalidDataException("Could not find the Afternoon Period worksheet.");
-            }
-
-            return
-                CollectWorkshops(periodOneSheet, new Period(worksheetNames[0]))
-                .Union(CollectWorkshops(periodTwoSheet, new Period(worksheetNames[1])))
-                .Union(CollectWorkshops(periodThreeSheet, new Period(worksheetNames[2]))).ToList();
+            Console.WriteLine($"Total workshops parsed: {allWorkshops.Count}");
+            return allWorkshops;
         }
 
-        public List<Workshop> CollectWorkshops(ExcelWorksheet sheet, Period period)
+        private Dictionary<string, Attendee> LoadAttendees(ExcelPackage package, EventSchema schema)
         {
-            var rows = sheet.Dimension.Rows;
-            var columns = sheet.Dimension.Columns;
-            var workshops = new Dictionary<string, Workshop>();
-            Workshop workshop;
+            var attendees = new Dictionary<string, Attendee>();
+            var sheetConfig = schema.ClassSelectionSheet;
+            var sheet = package.Workbook.Worksheets.FirstOrDefault(ws => ws.Name == sheetConfig.SheetName);
 
-            // First get all the workshops, find the correct column by name and then get distinct values
-            // Put the column header in the type value for each workshop
-            for(int i = 1; i <= columns; i++)
+            if (sheet == null || sheet.Dimension == null)
             {
-                // There's a value in the column header and it's a class
-                if(sheet.Cells[1,i].Value != null && sheet.Cells[1,i].Value.ToString().ToLower().Contains("classes"))
+                Console.WriteLine($"Warning: Could not find {sheetConfig.SheetName} sheet");
+                return attendees;
+            }
+
+            var helper = new SheetHelper(sheet);
+            var rows = sheet.Dimension.Rows;
+
+            for (int row = 2; row <= rows; row++)
+            {
+                var selectionId = helper.GetCellValueByPattern(row, sheetConfig.GetColumnName("selectionId"));
+                var firstName = helper.GetCellValue(row, sheetConfig.GetColumnName("firstName"));
+                var lastName = helper.GetCellValue(row, sheetConfig.GetColumnName("lastName"));
+                var email = helper.GetCellValue(row, sheetConfig.GetColumnName("email"));
+                var age = helper.GetCellValue(row, sheetConfig.GetColumnName("age"));
+
+                // Skip rows with no name
+                if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
+                    continue;
+
+                // Generate fallback ID if missing
+                if (string.IsNullOrWhiteSpace(selectionId))
                 {
-                    for(int j = 2; j <= rows; j++)
+                    selectionId = $"{firstName}{lastName}".Replace(" ", "");
+                }
+
+                attendees[selectionId] = new Attendee
+                {
+                    ClassSelectionId = selectionId,
+                    FirstName = firstName ?? "",
+                    LastName = lastName ?? "",
+                    Email = email ?? "",
+                    Age = age ?? ""
+                };
+            }
+
+            return attendees;
+        }
+
+        private List<Workshop> CollectWorkshops(ExcelWorksheet sheet, PeriodSheetConfig periodConfig, Dictionary<string, Attendee> attendees)
+        {
+            if (sheet.Dimension == null) return new List<Workshop>();
+
+            var helper = new SheetHelper(sheet);
+            var period = new Period(periodConfig.SheetName);
+            period.DisplayName = periodConfig.DisplayName;
+            var workshops = new Dictionary<string, Workshop>();
+            var rows = sheet.Dimension.Rows;
+
+            for (int row = 2; row <= rows; row++)
+            {
+                var selectionId = helper.GetCellValueByPattern(row, periodConfig.GetColumnName("selectionId"));
+                var choiceNumberStr = helper.GetCellValue(row, periodConfig.GetColumnName("choiceNumber"));
+
+                if (!int.TryParse(choiceNumberStr, out int choiceNumber))
+                    choiceNumber = 1;
+
+                // Process each workshop column configured for this period
+                foreach (var workshopCol in periodConfig.WorkshopColumns)
+                {
+                    var cellValue = helper.GetCellValue(row, workshopCol.ColumnName);
+                    if (string.IsNullOrWhiteSpace(cellValue)) continue;
+
+                    var workshopName = cellValue.GetWorkshopName();
+                    var leaderName = cellValue.GetLeaderName();
+
+                    if (string.IsNullOrWhiteSpace(workshopName)) continue;
+
+                    // Find or create attendee
+                    Attendee? attendee = null;
+                    if (!string.IsNullOrWhiteSpace(selectionId) && attendees.ContainsKey(selectionId))
                     {
-                        var rowValue = sheet.Cells[j,i].Value;
-
-                        if(rowValue != null)
+                        attendee = attendees[selectionId];
+                    }
+                    else
+                    {
+                        // Fallback: try to get name from the row
+                        var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? "";
+                        var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? "";
+                        attendee = new Attendee
                         {
-                            var workshopName = rowValue.ToString().GetWorkshopName();
-                            var participantName = new PersonName(
-                                sheet.Cells[j,
-                                Constants.COLUMN_ATTENDEE_NAME].Value.ToString());
+                            ClassSelectionId = selectionId ?? $"{firstName}{lastName}",
+                            FirstName = firstName,
+                            LastName = lastName
+                        };
+                    }
 
-                            if(!string.IsNullOrWhiteSpace(workshopName))
-                            {
-                                var workshopSelected = new WorkshopSelection()
-                                {
-                                    ClassName = workshopName,
-                                    RegistrationId = int.Parse(sheet.Cells[j, Constants.COLUMN_REGISTRATION_ID].Value.ToString()),
-                                    SelectionId = int.Parse(sheet.Cells[j, Constants.COLUMN_SELECTION_ID].Value.ToString()),
-                                    FullName = participantName.FullName,
-                                    FirstName = participantName.FirstName,
-                                    LastName = participantName.LastName                              
-                                };
+                    // Create workshop selection
+                    var duration = new WorkshopDuration(workshopCol.StartDay, workshopCol.EndDay);
+                    var selection = new WorkshopSelection
+                    {
+                        ClassSelectionId = attendee.ClassSelectionId,
+                        WorkshopName = workshopName,
+                        FirstName = attendee.FirstName,
+                        LastName = attendee.LastName,
+                        FullName = attendee.FullName,
+                        ChoiceNumber = choiceNumber,
+                        Duration = duration
+                    };
 
-                                if(workshops.TryGetValue(rowValue.ToString(), out workshop))
-                                {
-                                    workshops[rowValue.ToString()].Selections.Add(workshopSelected);
-                                }
-                                else
-                                {
-                                    workshops.Add(rowValue.ToString(), new Workshop() 
-                                        {
-                                            Name = rowValue.ToString().GetWorkshopName(),
-                                            Leader = rowValue.ToString().GetLeaderName(),
-                                            Selections = new List<WorkshopSelection>()
-                                            {
-                                                workshopSelected
-                                            },
-                                            Period = period
-                                        }
-                                    );
-                                }
-                            }                       
-                        }
+                    // Create unique key for this workshop offering
+                    var workshopKey = $"{period.SheetName}|{workshopName}|{leaderName}|{duration.StartDay}-{duration.EndDay}";
+
+                    // Add to workshops dictionary
+                    if (workshops.TryGetValue(workshopKey, out var existingWorkshop))
+                    {
+                        existingWorkshop.Selections.Add(selection);
+                    }
+                    else
+                    {
+                        workshops[workshopKey] = new Workshop
+                        {
+                            Name = workshopName,
+                            Leader = leaderName,
+                            Period = period,
+                            Duration = duration,
+                            Selections = new List<WorkshopSelection> { selection }
+                        };
                     }
                 }
-            }            
+            }
 
             return workshops.Values.ToList();
         }
@@ -211,18 +333,21 @@ namespace WinterAdventurer.Library
                 var document = new Document();
 
                 foreach(var section in PrintWorkshopParticipants())
-                {                    
-                    section.PageSetup.TopMargin = Unit.FromInch(.25);
-                    section.PageSetup.LeftMargin = Unit.FromInch(.25);
-                    
-                    document.Sections.Add(section);                    
+                {
+                    section.PageSetup.TopMargin = Unit.FromInch(.5);
+                    section.PageSetup.LeftMargin = Unit.FromInch(.5);
+                    section.PageSetup.RightMargin = Unit.FromInch(.5);
+                    section.PageSetup.BottomMargin = Unit.FromInch(.5);
+
+                    document.Sections.Add(section);
                 }
 
-                foreach(var section in PrintSchedules())
-                {
-                    document.Sections.Add(section);
-                }                
-                
+                // TODO: Add individual schedule generation
+                // foreach(var section in PrintSchedules())
+                // {
+                //     document.Sections.Add(section);
+                // }
+
                 return document;
             }
 
@@ -235,20 +360,76 @@ namespace WinterAdventurer.Library
 
             foreach(var workshopListing in Workshops)
             {
-                var section = new Section();                
+                var section = new Section();
 
                 //Add heading
                 var header = section.AddParagraph();
-                header.Format.Font.Color = COLOR_BLACK;                
-                header.AddFormattedText(workshopListing.Name + " (" + workshopListing.Leader + ")", TextFormat.Bold);
+                header.Format.Font.Color = COLOR_BLACK;
+                header.Format.Font.Size = 16;
+                header.AddFormattedText(workshopListing.Name, TextFormat.Bold);
 
-                foreach(var attendee in workshopListing.Selections)
+                // Add leader info
+                var leaderInfo = section.AddParagraph();
+                leaderInfo.Format.Font.Color = COLOR_BLACK;
+                leaderInfo.Format.Font.Size = 12;
+                leaderInfo.AddFormattedText($"Leader: {workshopListing.Leader}");
+
+                // Add period and duration info
+                var periodInfo = section.AddParagraph();
+                periodInfo.Format.Font.Color = COLOR_BLACK;
+                periodInfo.Format.Font.Size = 10;
+                periodInfo.AddFormattedText($"{workshopListing.Period.DisplayName} - {workshopListing.Duration.Description}");
+                periodInfo.Format.SpaceAfter = Unit.FromPoint(12);
+
+                // Separate first choice from backup choices
+                var firstChoiceAttendees = workshopListing.Selections.Where(s => s.ChoiceNumber == 1).OrderBy(s => s.LastName).ToList();
+                var backupAttendees = workshopListing.Selections.Where(s => s.ChoiceNumber > 1).OrderBy(s => s.LastName).ThenBy(s => s.ChoiceNumber).ToList();
+
+                // First choice participants
+                if (firstChoiceAttendees.Any())
                 {
-                    var formattedAttendee = section.AddParagraph();
-                    formattedAttendee.Format.Font.Color = COLOR_BLACK;
-                    formattedAttendee.AddFormattedText(attendee.FullName);
+                    var firstChoiceHeader = section.AddParagraph();
+                    firstChoiceHeader.Format.Font.Color = COLOR_BLACK;
+                    firstChoiceHeader.Format.Font.Size = 12;
+                    firstChoiceHeader.AddFormattedText($"Enrolled Participants ({firstChoiceAttendees.Count}):", TextFormat.Bold);
+                    firstChoiceHeader.Format.SpaceAfter = Unit.FromPoint(6);
+
+                    foreach(var attendee in firstChoiceAttendees)
+                    {
+                        var formattedAttendee = section.AddParagraph();
+                        formattedAttendee.Format.Font.Color = COLOR_BLACK;
+                        formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
+                        formattedAttendee.AddFormattedText(attendee.FullName);
+                    }
                 }
-                
+
+                // Backup participants
+                if (backupAttendees.Any())
+                {
+                    var backupHeader = section.AddParagraph();
+                    backupHeader.Format.Font.Color = COLOR_BLACK;
+                    backupHeader.Format.Font.Size = 12;
+                    backupHeader.Format.SpaceAfter = Unit.FromPoint(6);
+                    backupHeader.Format.SpaceBefore = Unit.FromPoint(12);
+                    backupHeader.AddFormattedText($"Backup/Alternate Choices ({backupAttendees.Count}):", TextFormat.Bold);
+
+                    var backupNote = section.AddParagraph();
+                    backupNote.Format.Font.Color = COLOR_BLACK;
+                    backupNote.Format.Font.Size = 9;
+                    backupNote.Format.Font.Italic = true;
+                    backupNote.Format.LeftIndent = Unit.FromPoint(12);
+                    backupNote.Format.SpaceAfter = Unit.FromPoint(6);
+                    backupNote.AddText("These participants may join if their first choice is full:");
+
+                    foreach(var attendee in backupAttendees)
+                    {
+                        var formattedAttendee = section.AddParagraph();
+                        formattedAttendee.Format.Font.Color = COLOR_BLACK;
+                        formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
+                        formattedAttendee.AddFormattedText($"{attendee.FullName} (Choice #{attendee.ChoiceNumber})");
+                    }
+                }
+
                 sections.Add(section);
             }
 
@@ -398,7 +579,7 @@ namespace WinterAdventurer.Library
 
             foreach(var selection in selections)
             {
-                result += selection.ClassName + '\n';
+                result += selection.WorkshopName + '\n';
             }
 
             return result;
@@ -435,6 +616,7 @@ namespace WinterAdventurer.Library
             return people;
         }
 
+        // OBSOLETE: This method is no longer used. We now use LoadAttendees with schema.
         private List<WorkshopSelection> ParseClassSelections(ExcelPackage package)
         {
             var classSelectionsSheet = package
@@ -453,16 +635,19 @@ namespace WinterAdventurer.Library
 
             for (int i = 2; i <= rows; i++)
             {
+                var selectionId = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "ClassSelection_Id").Start.Column].Value?.ToString() ?? "";
+                var firstName = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "Name_First").Start.Column].Value?.ToString() ?? "";
+                var lastName = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "Name_Last").Start.Column].Value?.ToString() ?? "";
+
                 selections.Add(
                     new WorkshopSelection()
                     {
-                        RegistrationId = int.Parse(
-                            classSelectionsSheet.Cells[i,
-                            classSelectionsSheet.Cells["1:1"].First(cell =>
-                                cell.Value.ToString().StartsWith("WinterAdventure")).Start.Column].Value.ToString()),
-                        SelectionId = (int)classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "ClassSelection_Id").Start.Column].Value,
-                        FirstName = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "Name_First").Start.Column].Value.ToString(),
-                        LastName = classSelectionsSheet.Cells[i, classSelectionsSheet.Cells["1:1"].First(cell => cell.Value.ToString() == "Name_Last").Start.Column].Value.ToString()
+                        ClassSelectionId = selectionId,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        WorkshopName = "", // Not available in this context
+                        ChoiceNumber = 1,
+                        Duration = new WorkshopDuration(1, 1)
                     }
                 );
             };
