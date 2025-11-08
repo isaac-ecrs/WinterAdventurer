@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Sample data
 SampleDate/*
+# Generated output files
+SampleData/*.pdf
+SampleData/*.json
