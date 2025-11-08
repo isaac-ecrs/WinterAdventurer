@@ -653,7 +653,7 @@ namespace WinterAdventurer.Library
                     {
                         var dayCell = row.Cells[day];
 
-                        // Find workshop for this period and day
+                        // Find workshop they're enrolled in for this period and day
                         var workshopForDay = attendeeSelections
                             .Where(s => s.Duration.StartDay <= day && s.Duration.EndDay >= day)
                             .Select(s => new
@@ -667,20 +667,67 @@ namespace WinterAdventurer.Library
                             })
                             .FirstOrDefault(x => x.Workshop != null);
 
-                        if (workshopForDay != null)
+                        // Also check if they're leading a workshop in this period/day
+                        var leadingWorkshop = Workshops.FirstOrDefault(w =>
+                            w.Leader.Contains(attendee.FullName) &&
+                            w.Period.SheetName == periodConfig.SheetName &&
+                            w.Duration.StartDay <= day &&
+                            w.Duration.EndDay >= day);
+
+                        // Prefer the workshop they're leading if both exist
+                        var workshopToShow = leadingWorkshop ?? workshopForDay?.Workshop;
+                        bool isLeading = leadingWorkshop != null;
+
+                        if (workshopToShow != null)
                         {
                             var workshopPara = dayCell.AddParagraph();
-                            workshopPara.Format.Font.Name = "Roboto";
                             workshopPara.Format.Font.Size = 10;
                             workshopPara.Format.Alignment = ParagraphAlignment.Center;
-                            workshopPara.AddText($"{workshopForDay.Selection.WorkshopName}");
 
-                            var leaderPara = dayCell.AddParagraph();
-                            leaderPara.Format.Font.Name = "Roboto";
-                            leaderPara.Format.Font.Size = 9;
-                            leaderPara.Format.Font.Italic = true;
-                            leaderPara.Format.Alignment = ParagraphAlignment.Center;
-                            leaderPara.AddText($"({workshopForDay.Workshop.Leader})");
+                            if (isLeading)
+                            {
+                                workshopPara.Format.Font.Name = "NotoSans";
+                                workshopPara.Format.Font.Bold = true;
+                                workshopPara.AddText($"Leading {workshopToShow.Name}");
+                            }
+                            else
+                            {
+                                workshopPara.Format.Font.Name = "Roboto";
+                                workshopPara.AddText($"{workshopToShow.Name}");
+                            }
+
+                            // Add leader info
+                            if (isLeading)
+                            {
+                                // Check if co-leading (leader field contains "and")
+                                if (workshopToShow.Leader.Contains(" and "))
+                                {
+                                    // Extract the other leader's name
+                                    var leaders = workshopToShow.Leader.Split(new[] { " and " }, StringSplitOptions.None);
+                                    var otherLeader = leaders.FirstOrDefault(l => l.Trim() != attendee.FullName)?.Trim();
+
+                                    if (!string.IsNullOrEmpty(otherLeader))
+                                    {
+                                        var leaderPara = dayCell.AddParagraph();
+                                        leaderPara.Format.Font.Name = "Roboto";
+                                        leaderPara.Format.Font.Size = 9;
+                                        leaderPara.Format.Font.Italic = true;
+                                        leaderPara.Format.Alignment = ParagraphAlignment.Center;
+                                        leaderPara.AddText($"with {otherLeader}");
+                                    }
+                                }
+                                // If solo leader, don't show anything
+                            }
+                            else
+                            {
+                                // Not leading, show full leader info
+                                var leaderPara = dayCell.AddParagraph();
+                                leaderPara.Format.Font.Name = "Roboto";
+                                leaderPara.Format.Font.Size = 9;
+                                leaderPara.Format.Font.Italic = true;
+                                leaderPara.Format.Alignment = ParagraphAlignment.Center;
+                                leaderPara.AddText($"({workshopToShow.Leader})");
+                            }
                         }
                     }
                 }

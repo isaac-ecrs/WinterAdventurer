@@ -18,10 +18,16 @@ namespace WinterAdventurer.Library
                 case "noto":
                 case "notosans":
                 case "arial":
-                    return new FontResolverInfo("NotoSans-Regular"); // Noto family base font
+                    if (isBold)
+                        return new FontResolverInfo("NotoSans-Bold");
+                    return new FontResolverInfo("NotoSans-Regular");
                 case "oswald":
+                    if (isBold)
+                        return new FontResolverInfo("Oswald-Bold");
                     return new FontResolverInfo("Oswald-Regular");
                 case "roboto":
+                    if (isBold)
+                        return new FontResolverInfo("Roboto-Bold");
                     return new FontResolverInfo("Roboto-Regular");
 
                 default:
@@ -42,15 +48,20 @@ namespace WinterAdventurer.Library
         // Map font family name to the corresponding embedded resource name
         private string GetFontResourceName(string faceName)
         {
-            switch (faceName.Split('-').FirstOrDefault().ToLower())
+            switch (faceName.ToLower())
             {
-                case "noto":
-                case "notosans":
+                case "notosans-regular":
                     return "WinterAdventurer.Library.Resources.Fonts.Noto_Sans.static.NotoSans-Regular.ttf";
-                case "oswald":
+                case "notosans-bold":
+                    return "WinterAdventurer.Library.Resources.Fonts.Noto_Sans.static.NotoSans-Bold.ttf";
+                case "oswald-regular":
                     return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Regular.ttf";
-                case "roboto":
+                case "oswald-bold":
+                    return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Bold.ttf";
+                case "roboto-regular":
                     return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Regular.ttf";
+                case "roboto-bold":
+                    return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Bold.ttf";
                 default:
                     return null;
             }
