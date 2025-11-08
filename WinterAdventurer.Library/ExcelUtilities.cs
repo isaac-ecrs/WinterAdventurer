@@ -201,9 +201,13 @@ namespace WinterAdventurer.Library
             {
                 var selectionId = helper.GetCellValueByPattern(row, periodConfig.GetColumnName("selectionId"));
                 var choiceNumberStr = helper.GetCellValue(row, periodConfig.GetColumnName("choiceNumber"));
+                var registrationIdStr = helper.GetCellValueByPattern(row, periodConfig.GetColumnName("registrationId"));
 
                 if (!int.TryParse(choiceNumberStr, out int choiceNumber))
                     choiceNumber = 1;
+
+                if (!int.TryParse(registrationIdStr, out int registrationId))
+                    registrationId = 0;
 
                 // Process each workshop column configured for this period
                 foreach (var workshopCol in periodConfig.WorkshopColumns)
@@ -245,7 +249,8 @@ namespace WinterAdventurer.Library
                         LastName = attendee.LastName,
                         FullName = attendee.FullName,
                         ChoiceNumber = choiceNumber,
-                        Duration = duration
+                        Duration = duration,
+                        RegistrationId = registrationId
                     };
 
                     // Create unique key for this workshop offering
@@ -381,9 +386,16 @@ namespace WinterAdventurer.Library
                 periodInfo.AddFormattedText($"{workshopListing.Period.DisplayName} - {workshopListing.Duration.Description}");
                 periodInfo.Format.SpaceAfter = Unit.FromPoint(12);
 
-                // Separate first choice from backup choices
-                var firstChoiceAttendees = workshopListing.Selections.Where(s => s.ChoiceNumber == 1).OrderBy(s => s.LastName).ToList();
-                var backupAttendees = workshopListing.Selections.Where(s => s.ChoiceNumber > 1).OrderBy(s => s.LastName).ThenBy(s => s.ChoiceNumber).ToList();
+                // Separate first choice from backup choices and sort by registration order
+                var firstChoiceAttendees = workshopListing.Selections
+                    .Where(s => s.ChoiceNumber == 1)
+                    .OrderBy(s => s.RegistrationId)
+                    .ToList();
+                var backupAttendees = workshopListing.Selections
+                    .Where(s => s.ChoiceNumber > 1)
+                    .OrderBy(s => s.RegistrationId)
+                    .ThenBy(s => s.ChoiceNumber)
+                    .ToList();
 
                 // First choice participants
                 if (firstChoiceAttendees.Any())
@@ -394,12 +406,21 @@ namespace WinterAdventurer.Library
                     firstChoiceHeader.AddFormattedText($"Enrolled Participants ({firstChoiceAttendees.Count}):", TextFormat.Bold);
                     firstChoiceHeader.Format.SpaceAfter = Unit.FromPoint(6);
 
+                    int counter = 1;
                     foreach(var attendee in firstChoiceAttendees)
                     {
                         var formattedAttendee = section.AddParagraph();
                         formattedAttendee.Format.Font.Color = COLOR_BLACK;
                         formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
-                        formattedAttendee.AddFormattedText(attendee.FullName);
+
+                        // Add checkbox and number
+                        formattedAttendee.AddText("☐ ");  // Unicode checkbox
+                        formattedAttendee.AddFormattedText($"{counter}. ", TextFormat.Bold);
+                        formattedAttendee.AddText(attendee.FullName);
+                        formattedAttendee.AddTab();
+                        formattedAttendee.AddFormattedText("Confirmed: ______", new Font("NotoSans", 9) { Italic = true });
+
+                        counter++;
                     }
                 }
 
@@ -421,12 +442,21 @@ namespace WinterAdventurer.Library
                     backupNote.Format.SpaceAfter = Unit.FromPoint(6);
                     backupNote.AddText("These participants may join if their first choice is full:");
 
+                    int backupCounter = 1;
                     foreach(var attendee in backupAttendees)
                     {
                         var formattedAttendee = section.AddParagraph();
                         formattedAttendee.Format.Font.Color = COLOR_BLACK;
                         formattedAttendee.Format.LeftIndent = Unit.FromPoint(12);
-                        formattedAttendee.AddFormattedText($"{attendee.FullName} (Choice #{attendee.ChoiceNumber})");
+
+                        // Add checkbox and number for backup participants too
+                        formattedAttendee.AddText("☐ ");  // Unicode checkbox
+                        formattedAttendee.AddFormattedText($"{backupCounter}. ", TextFormat.Bold);
+                        formattedAttendee.AddText($"{attendee.FullName} (Choice #{attendee.ChoiceNumber})");
+                        formattedAttendee.AddTab();
+                        formattedAttendee.AddFormattedText("Confirmed: ______", new Font("NotoSans", 9) { Italic = true });
+
+                        backupCounter++;
                     }
                 }
 

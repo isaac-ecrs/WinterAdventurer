@@ -16,6 +16,7 @@ namespace WinterAdventurer.Library.Models
         public string LastName { get; set; } = string.Empty;
         public int ChoiceNumber { get; set; }
         public WorkshopDuration Duration { get; set; } = new WorkshopDuration(1, 1);
+        public int RegistrationId { get; set; }  // For chronological sorting
 
         public override string ToString()
         {
