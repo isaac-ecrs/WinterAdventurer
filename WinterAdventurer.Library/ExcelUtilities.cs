@@ -416,7 +416,7 @@ namespace WinterAdventurer.Library
                         // Add number, name, then checkbox
                         formattedAttendee.AddFormattedText($"{counter}. ", TextFormat.Bold);
                         formattedAttendee.AddText(attendee.FullName);
-                        formattedAttendee.AddText(" □");  // White square
+                        formattedAttendee.AddText(" [ ]");
 
                         counter++;
                     }
@@ -450,7 +450,7 @@ namespace WinterAdventurer.Library
                         // Add number, name with choice indicator, then checkbox
                         formattedAttendee.AddFormattedText($"{backupCounter}. ", TextFormat.Bold);
                         formattedAttendee.AddText($"{attendee.FullName} (Choice #{attendee.ChoiceNumber})");
-                        formattedAttendee.AddText(" □");  // White square
+                        formattedAttendee.AddText(" [ ]");
 
                         backupCounter++;
                     }
