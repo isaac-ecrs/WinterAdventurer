@@ -25,22 +25,32 @@ using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
 {
     var excelUtilities = new ExcelUtilities();
 
+    // Import and parse Excel
     excelUtilities.ImportExcel(stream);
 
+    Console.WriteLine($"\n=== PARSED WORKSHOPS ===");
     foreach (var workshop in excelUtilities.Workshops)
     {
-        Console.WriteLine(workshop.ToString());
-    }    
+        Console.WriteLine($"\n{workshop.Name} ({workshop.Leader})");
+        Console.WriteLine($"  Period: {workshop.Period.DisplayName}");
+        Console.WriteLine($"  Duration: {workshop.Duration.Description}");
+        Console.WriteLine($"  Participants: {workshop.Selections.Count}");
+        Console.WriteLine($"    First choice: {workshop.Selections.Count(s => s.ChoiceNumber == 1)}");
+        Console.WriteLine($"    Backup choices: {workshop.Selections.Count(s => s.ChoiceNumber > 1)}");
+    }
 
+    Console.WriteLine($"\n=== GENERATING PDF ===");
     var document = excelUtilities.CreatePdf();
 
     GlobalFontSettings.FontResolver = new CustomFontResolver();
 
     var renderer = new PdfDocumentRenderer();
     renderer.Document = document;
-    document.Styles["Normal"].Font.Name = "NotoSans-Medium";   
+    document.Styles["Normal"].Font.Name = "NotoSans";
 
     renderer.RenderDocument();
-    renderer.Save(filePath);
-    //Process.Start(filename);
+
+    var outputPath = Path.Combine(Path.GetDirectoryName(filePath) ?? ".", "ClassRosters.pdf");
+    renderer.Save(outputPath);
+    Console.WriteLine($"PDF saved to: {outputPath}");
 }
