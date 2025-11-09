@@ -389,6 +389,17 @@ namespace WinterAdventurer.Library
                 leaderInfo.Format.Alignment = ParagraphAlignment.Center;
                 leaderInfo.AddFormattedText(workshopListing.Leader);
 
+                // Location info - Noto Sans
+                if (!string.IsNullOrWhiteSpace(workshopListing.Location))
+                {
+                    var locationInfo = section.AddParagraph();
+                    locationInfo.Format.Font.Name = "NotoSans";
+                    locationInfo.Format.Font.Color = COLOR_BLACK;
+                    locationInfo.Format.Font.Size = 16;
+                    locationInfo.Format.Alignment = ParagraphAlignment.Center;
+                    locationInfo.AddFormattedText($"Location: {workshopListing.Location}");
+                }
+
                 // Period and duration info - Noto Sans (second level header)
                 var periodInfo = section.AddParagraph();
                 periodInfo.Format.Font.Name = "NotoSans";
@@ -622,7 +633,7 @@ namespace WinterAdventurer.Library
                 var periodHeaderPara = periodHeaderCell.AddParagraph();
                 periodHeaderPara.Format.Font.Name = "NotoSans";
                 periodHeaderPara.Format.Font.Bold = true;
-                periodHeaderPara.Format.Font.Size = 12;
+                periodHeaderPara.Format.Font.Size = 14;
                 periodHeaderPara.Format.Alignment = ParagraphAlignment.Center;
                 periodHeaderPara.AddText("Time");
 
@@ -632,7 +643,7 @@ namespace WinterAdventurer.Library
                     var dayPara = dayCell.AddParagraph();
                     dayPara.Format.Font.Name = "NotoSans";
                     dayPara.Format.Font.Bold = true;
-                    dayPara.Format.Font.Size = 12;
+                    dayPara.Format.Font.Size = 14;
                     dayPara.Format.Alignment = ParagraphAlignment.Center;
                     dayPara.AddText($"Day {day}");
                 }
@@ -661,7 +672,7 @@ namespace WinterAdventurer.Library
                         {
                             var timePara = timeCell.AddParagraph();
                             timePara.Format.Font.Name = "Roboto";
-                            timePara.Format.Font.Size = 9;
+                            timePara.Format.Font.Size = 10;
                             timePara.Format.Alignment = ParagraphAlignment.Center;
                             timePara.AddText(timeslot.TimeRange);
                         }
@@ -729,7 +740,7 @@ namespace WinterAdventurer.Library
 
                                 // Add workshop content
                                 var workshopPara = dayCell.AddParagraph();
-                                workshopPara.Format.Font.Size = 10;
+                                workshopPara.Format.Font.Size = 13;
                                 workshopPara.Format.Alignment = ParagraphAlignment.Center;
 
                                 if (isLeading)
@@ -758,7 +769,7 @@ namespace WinterAdventurer.Library
                                         {
                                             var leaderPara = dayCell.AddParagraph();
                                             leaderPara.Format.Font.Name = "Roboto";
-                                            leaderPara.Format.Font.Size = 9;
+                                            leaderPara.Format.Font.Size = 10;
                                             leaderPara.Format.Font.Italic = true;
                                             leaderPara.Format.Alignment = ParagraphAlignment.Center;
                                             leaderPara.AddText($"with {otherLeader}");
@@ -771,10 +782,21 @@ namespace WinterAdventurer.Library
                                     // Not leading, show full leader info
                                     var leaderPara = dayCell.AddParagraph();
                                     leaderPara.Format.Font.Name = "Roboto";
-                                    leaderPara.Format.Font.Size = 9;
+                                    leaderPara.Format.Font.Size = 10;
                                     leaderPara.Format.Font.Italic = true;
                                     leaderPara.Format.Alignment = ParagraphAlignment.Center;
                                     leaderPara.AddText($"({workshop.Leader})");
+                                }
+
+                                // Add location info
+                                if (!string.IsNullOrWhiteSpace(workshop.Location))
+                                {
+                                    var locationPara = dayCell.AddParagraph();
+                                    locationPara.Format.Font.Name = "Roboto";
+                                    locationPara.Format.Font.Size = 9;
+                                    locationPara.Format.Font.Bold = true;
+                                    locationPara.Format.Alignment = ParagraphAlignment.Center;
+                                    locationPara.AddText(workshop.Location);
                                 }
 
                                 // If merging, skip the merged days; otherwise just move to next day
@@ -810,7 +832,7 @@ namespace WinterAdventurer.Library
             {
                 var timePara = timeCell.AddParagraph();
                 timePara.Format.Font.Name = "Roboto";
-                timePara.Format.Font.Size = 9;
+                timePara.Format.Font.Size = 10;
                 timePara.Format.Alignment = ParagraphAlignment.Center;
                 timePara.AddText(timeRange);
             }
@@ -821,7 +843,7 @@ namespace WinterAdventurer.Library
 
             var para = activityCell.AddParagraph();
             para.Format.Font.Name = "Roboto";
-            para.Format.Font.Size = 11;
+            para.Format.Font.Size = 13;
             para.Format.Font.Italic = true;
             para.Format.Alignment = ParagraphAlignment.Center;
             para.AddFormattedText(activityName, TextFormat.Bold);

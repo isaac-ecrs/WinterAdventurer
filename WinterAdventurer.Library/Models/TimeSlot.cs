@@ -19,6 +19,12 @@ namespace WinterAdventurer.Library.Models
                     var endDateTime = DateTime.Today.Add(EndTime.Value);
                     return $"{startDateTime:h:mm tt} - {endDateTime:h:mm tt}";
                 }
+                else if (StartTime.HasValue && !EndTime.HasValue)
+                {
+                    // Open-ended timeslot (e.g., "Late Night Activities")
+                    var startDateTime = DateTime.Today.Add(StartTime.Value);
+                    return $"{startDateTime:h:mm tt} - ?";
+                }
                 return "";
             }
         }
