@@ -332,7 +332,7 @@ namespace WinterAdventurer.Library
             return document;
         }
 
-        public Document CreatePdf(bool mergeWorkshopCells = true)
+        public Document CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             if (Workshops != null)
             {
@@ -349,7 +349,7 @@ namespace WinterAdventurer.Library
                 }
 
                 // Add individual schedules
-                foreach(var section in PrintIndividualSchedules(mergeWorkshopCells))
+                foreach(var section in PrintIndividualSchedules(mergeWorkshopCells, timeslots))
                 {
                     section.PageSetup.TopMargin = Unit.FromInch(.5);
                     section.PageSetup.LeftMargin = Unit.FromInch(.5);
@@ -552,7 +552,7 @@ namespace WinterAdventurer.Library
             }
         }
 
-        private List<Section> PrintIndividualSchedules(bool mergeWorkshopCells = true)
+        private List<Section> PrintIndividualSchedules(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
@@ -560,6 +560,12 @@ namespace WinterAdventurer.Library
             {
                 Console.WriteLine("Warning: Cannot generate individual schedules - schema not loaded");
                 return sections;
+            }
+
+            // If no timeslots provided, create default minimal set
+            if (timeslots == null || !timeslots.Any())
+            {
+                timeslots = CreateDefaultTimeslots();
             }
 
             // Get all unique attendees from workshop selections (first choice only)
@@ -781,7 +787,7 @@ namespace WinterAdventurer.Library
             return sections;
         }
 
-        private void AddMergedActivityRow(Table table, string activityName, int totalDays)
+        private void AddMergedActivityRow(Table table, string activityName, int totalDays, string timeRange = "")
         {
             var row = table.AddRow();
             row.Shading.Color = Color.FromRgb(250, 250, 250);
@@ -795,7 +801,51 @@ namespace WinterAdventurer.Library
             para.Format.Font.Size = 11;
             para.Format.Font.Italic = true;
             para.Format.Alignment = ParagraphAlignment.Center;
-            para.AddText(activityName);
+            para.AddFormattedText(activityName, TextFormat.Bold);
+
+            if (!string.IsNullOrWhiteSpace(timeRange))
+            {
+                para.AddText($" ({timeRange})");
+            }
+        }
+
+        private List<Models.TimeSlot> CreateDefaultTimeslots()
+        {
+            var timeslots = new List<Models.TimeSlot>();
+
+            // Add periods from schema
+            if (_schema != null)
+            {
+                foreach (var period in _schema.PeriodSheets)
+                {
+                    timeslots.Add(new Models.TimeSlot
+                    {
+                        Label = period.DisplayName,
+                        IsPeriod = true
+                    });
+                }
+            }
+
+            // Add default non-period activities
+            timeslots.Insert(0, new Models.TimeSlot
+            {
+                Label = "Breakfast",
+                IsPeriod = false
+            });
+
+            timeslots.Add(new Models.TimeSlot
+            {
+                Label = "Lunch",
+                IsPeriod = false
+            });
+
+            timeslots.Add(new Models.TimeSlot
+            {
+                Label = "Evening Program",
+                IsPeriod = false
+            });
+
+            return timeslots;
         }
 
         // @TODO switch from hardcoded workshops to those from the uploaded file

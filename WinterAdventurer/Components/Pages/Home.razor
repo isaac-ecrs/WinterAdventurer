@@ -7,11 +7,14 @@
 @using System.IO
 @using MudBlazor
 @using WinterAdventurer.Library.Models
+@using Microsoft.JSInterop
+@using System.Text.Json
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Import Excel File</h1>
+<h1>Winter Adventurer Workshop Manager</h1>
 
 <MudFileUpload T="IBrowserFile" FilesChanged="UploadExcel" Accept=".xlsx">
     <ActivatorContent>
@@ -23,12 +26,79 @@
 
 @if (isLoading)
 {
-    <p>Uploading...</p>
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    <MudText>Processing...</MudText>
 }
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+}
+
+<!-- Timeslot Configuration Section - Always rendered but hidden until file uploaded -->
+<div style="display: @(workshops.Count > 0 ? "block" : "none")">
+    @if (hasOverlappingTimeslots)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-4 mb-4">
+            Warning: You have overlapping timeslots. Please adjust the times and click "Save Times" again.
+        </MudAlert>
+    }
+
+    <MudPaper Class="pa-4 mb-4">
+        <MudText Typo="Typo.h5" Class="mb-3">Configure Schedule Times</MudText>
+
+        @foreach (var timeslot in timeslots)
+        {
+            <MudGrid Class="mb-2" @key="@timeslot.Id">
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudField Label="Start Time" Variant="Variant.Outlined">
+                        <input type="time"
+                               class="mud-input-slot mud-input-root mud-input-root-outlined"
+                               style="padding: 10px; width: 100%;"
+                               value="@FormatTimeSpan(timeslot.StartTime)"
+                               @onchange="@(e => timeslot.StartTime = ParseTimeString(e.Value?.ToString()))" />
+                    </MudField>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudField Label="End Time" Variant="Variant.Outlined">
+                        <input type="time"
+                               class="mud-input-slot mud-input-root mud-input-root-outlined"
+                               style="padding: 10px; width: 100%;"
+                               value="@FormatTimeSpan(timeslot.EndTime)"
+                               @onchange="@(e => timeslot.EndTime = ParseTimeString(e.Value?.ToString()))" />
+                    </MudField>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                  Color="Color.Error"
+                                  Disabled="@timeslot.IsPeriod"
+                                  OnClick="() => RemoveTimeslot(timeslot)" />
+                </MudItem>
+            </MudGrid>
+        }
+
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Text" OnClick="AddTimeslot">
+            Add Non-Period Time Slot (e.g., Lunch, Break)
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" Variant="Variant.Filled" OnClick="SaveTimeslots" Class="ml-2">
+            Save Times
+        </MudButton>
+
+        @if (timeslots.Count > 0)
+        {
+            <MudText Typo="Typo.caption" Class="mt-2">
+                Note: Period timeslots (from Excel) cannot be deleted or renamed. Add additional timeslots for lunch, breaks, etc.
+            </MudText>
+        }
+    </MudPaper>
+</div>
 
 @if (workshops != null && workshops.Count > 0)
 {
-
+    <MudText Typo="Typo.h5" Class="mb-3">Workshop Details</MudText>
 
     <EditForm Model=workshops OnValidSubmit="BuildPdf">
     <DataAnnotationsValidator />
@@ -57,9 +127,6 @@
                             <MudText>@workshop.Period.DisplayName</MudText>
                             <MudTextField Label="Location" @bind-Value="workshop.Location" />
                             <MudTextField Label="Leader" @bind-Value="workshop.Leader" />
-                            <MudSwitch Label="Is Mini?" @bind-Value="workshop.IsMini" />
-                            <MudNumericField Label="Max Participants" @bind-Value="workshop.MaxParticipants" />
-                            <MudNumericField Label="Minimum Age" @bind-Value="workshop.MinAge" />
                         </MudCardContent>
                     </MudCard>
                 </MudItem>
@@ -73,66 +140,341 @@
 
 }
 
+@implements IDisposable
+
 @code {
     private List<Workshop> workshops = new List<Library.Models.Workshop>();
     private bool isLoading;
-    public string? downloadFileName;
     private ExcelUtilities context = new ExcelUtilities();
     private bool success = false;
+    private string? errorMessage;
     private List<Period> periods = new List<Period>();
+    private List<TimeSlot> timeslots = new List<TimeSlot>();
+    private bool hasOverlappingTimeslots = false;
+    private bool _disposed = false;
+    private CancellationTokenSource? _cts;
+    private bool _hasRendered = false;
+
+    public class TimeSlot
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string Label { get; set; } = string.Empty;
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public bool IsPeriod { get; set; } = false; // True if from Excel periods, false if user-added
+    }
+
+    protected override void OnInitialized()
+    {
+        _cts = new CancellationTokenSource();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_disposed)
+        {
+            _hasRendered = true;
+            await LoadTimeslots();
+
+            // Safe state change after async operation
+            if (!_disposed)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private async Task LoadTimeslots()
+    {
+        if (_disposed) return;
+
+        try
+        {
+            var json = await JSRuntime.InvokeAsync<string>("localStorage.getItem", _cts?.Token ?? default, "timeslots");
+
+            if (!string.IsNullOrEmpty(json))
+            {
+                var loaded = JsonSerializer.Deserialize<List<TimeSlot>>(json);
+                if (loaded != null && loaded.Count > 0)
+                {
+                    // Clear and re-add instead of reassigning to avoid disposal issues
+                    timeslots.Clear();
+                    timeslots.AddRange(loaded);
+                    SortTimeslots();
+                    CheckForOverlaps();
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading timeslots: {ex.Message}");
+        }
+
+        // Ensure list is empty if nothing loaded
+        timeslots.Clear();
+    }
+
+    private async Task SaveTimeslots()
+    {
+        if (_disposed || !_hasRendered) return;
+
+        try
+        {
+            // Sort and check overlaps before saving
+            SortTimeslots();
+            CheckForOverlaps();
+
+            var json = JsonSerializer.Serialize(timeslots);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", _cts?.Token ?? default, "timeslots", json);
+
+            // Safe state update after async operation
+            if (!_disposed)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (!_disposed)
+            {
+                errorMessage = $"Error saving timeslots: {ex.Message}";
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private void SortTimeslots()
+    {
+        if (_disposed) return;
+
+        // Sort in-place instead of reassigning to avoid disposal issues
+        timeslots.Sort((a, b) =>
+        {
+            var aTime = a.StartTime ?? TimeSpan.MaxValue;
+            var bTime = b.StartTime ?? TimeSpan.MaxValue;
+            return aTime.CompareTo(bTime);
+        });
+    }
+
+    private void CheckForOverlaps()
+    {
+        if (_disposed) return;
+
+        hasOverlappingTimeslots = false;
+
+        for (int i = 0; i < timeslots.Count - 1; i++)
+        {
+            var current = timeslots[i];
+            var next = timeslots[i + 1];
+
+            if (current.StartTime.HasValue && current.EndTime.HasValue &&
+                next.StartTime.HasValue && next.EndTime.HasValue)
+            {
+                // Check if current end time is after next start time
+                if (current.EndTime > next.StartTime)
+                {
+                    hasOverlappingTimeslots = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    private async Task AddTimeslot()
+    {
+        if (_disposed) return;
+
+        var newSlot = new TimeSlot { IsPeriod = false };
+        timeslots.Add(newSlot);
+
+        if (!_disposed)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RemoveTimeslot(TimeSlot timeslot)
+    {
+        if (_disposed) return;
+
+        if (!timeslot.IsPeriod)
+        {
+            timeslots.Remove(timeslot);
+
+            if (!_disposed)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private void PopulateTimeslotsFromPeriods()
+    {
+        if (_disposed) return;
+
+        // Create a mapping of existing period labels to preserve IDs
+        var existingPeriods = timeslots.Where(t => t.IsPeriod)
+            .ToDictionary(t => t.Label, t => t);
+
+        // Keep user-added timeslots
+        var userSlots = timeslots.Where(t => !t.IsPeriod).ToList();
+
+        // Clear all timeslots at once
+        timeslots.Clear();
+
+        // Re-add or create period timeslots, preserving IDs for existing ones
+        foreach (var period in periods)
+        {
+            if (existingPeriods.TryGetValue(period.DisplayName, out var existingSlot))
+            {
+                // Reuse existing slot to preserve @key identity
+                timeslots.Add(existingSlot);
+            }
+            else
+            {
+                // Create new slot for new periods
+                timeslots.Add(new TimeSlot
+                {
+                    Label = period.DisplayName,
+                    IsPeriod = true,
+                    StartTime = null,
+                    EndTime = null
+                });
+            }
+        }
+
+        // Re-add user slots
+        timeslots.AddRange(userSlots);
+    }
 
     private async Task UploadExcel(IBrowserFile file)
     {
+        if (_disposed) return;
+
         success = true;
+        errorMessage = null;
         isLoading = true;
         workshops.Clear();
 
-        using (var stream = new FileStream(file.Name, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+        try
         {
-            await file.OpenReadStream().CopyToAsync(stream);
-            context.ImportExcel(stream);
-            workshops = context.Workshops;
-            periods = workshops.Select(w => w.Period).Distinct().ToList();
+            using (var stream = new MemoryStream())
+            {
+                await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(stream);
+                stream.Position = 0;
+                context.ImportExcel(stream);
+                workshops = context.Workshops;
+                periods = workshops.Select(w => w.Period).Distinct().ToList();
+
+                // Populate timeslots with periods from the Excel file
+                PopulateTimeslotsFromPeriods();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading file: {ex.Message}");
+            errorMessage = $"Error uploading file: {ex.Message}";
+            success = false;
         }
 
         isLoading = false;
+
+        // Safe state update after async operation
+        if (!_disposed)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
-    private void BuildPdf()
+    private async Task BuildPdf()
     {
-        //SetDownloadLink();
-    }
+        if (_disposed || !_hasRendered) return;
 
-    private void SetDownloadLink()
-    {
         try
         {
-            var document = context.CreatePdf();
+            errorMessage = null;
+            isLoading = true;
 
-            var renderer = new PdfDocumentRenderer()
-                {
-                    Document = document,
-                    PdfDocument = new PdfDocument()
-                    {
-                        PageLayout = PdfPageLayout.SinglePage,
-                        ViewerPreferences =
-{
-FitWindow = true
-}
-                    }
-                };
+            // Generate PDF document
+            var document = context.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
 
-            GlobalFontSettings.FontResolver = new CustomFontResolver();
+            // Set up document styles (font resolver configured at startup)
+            document.Styles["Normal"].Font.Name = "NotoSans";
 
+            // Render the document
+            var renderer = new PdfDocumentRenderer();
+            renderer.Document = document;
             renderer.RenderDocument();
 
-            renderer.Save("/home/isaac/test.pdf");
+            // Save to memory stream
+            using (var stream = new MemoryStream())
+            {
+                renderer.PdfDocument.Save(stream, false);
+                stream.Position = 0;
 
-            downloadFileName = $"/home/isaac/test.pdf";
+                // Convert to byte array for download
+                var bytes = stream.ToArray();
+                var base64 = Convert.ToBase64String(bytes);
+
+                // Trigger download in browser
+                await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "ClassRosters.pdf", base64);
+            }
+
+            isLoading = false;
+
+            // Safe state update after async operation
+            if (!_disposed)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e);
+            if (!_disposed)
+            {
+                Console.WriteLine($"Error generating PDF: {ex.Message}");
+                errorMessage = $"Error generating PDF: {ex.Message}";
+                success = false;
+                isLoading = false;
+                await InvokeAsync(StateHasChanged);
+            }
         }
+    }
+
+    // Helper methods for native HTML5 time input conversion
+    private string FormatTimeSpan(TimeSpan? time)
+    {
+        return time?.ToString(@"hh\:mm") ?? "";
+    }
+
+    private TimeSpan? ParseTimeString(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (TimeSpan.TryParse(value, out var result))
+            return result;
+
+        return null;
+    }
+
+    private List<WinterAdventurer.Library.Models.TimeSlot> ConvertToLibraryTimeSlots()
+    {
+        return timeslots.Select(t => new WinterAdventurer.Library.Models.TimeSlot
+        {
+            Id = t.Id,
+            Label = t.Label,
+            StartTime = t.StartTime,
+            EndTime = t.EndTime,
+            IsPeriod = t.IsPeriod
+        }).ToList();
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 }

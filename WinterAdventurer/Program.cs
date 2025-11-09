@@ -1,5 +1,7 @@
 using WinterAdventurer.Components;
 using MudBlazor.Services;
+using PdfSharp.Fonts;
+using WinterAdventurer.Library;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddMudServices();
+
+// Configure PDF font resolver (must be set once at startup)
+GlobalFontSettings.FontResolver = new CustomFontResolver();
 
 var app = builder.Build();
 
