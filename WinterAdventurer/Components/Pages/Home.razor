@@ -288,6 +288,9 @@
         var newSlot = new TimeSlot { IsPeriod = false };
         timeslots.Add(newSlot);
 
+        // Sort timeslots to maintain order
+        SortTimeslots();
+
         if (!_disposed)
         {
             await InvokeAsync(StateHasChanged);
@@ -346,6 +349,9 @@
 
         // Re-add user slots
         timeslots.AddRange(userSlots);
+
+        // Sort timeslots by start time
+        SortTimeslots();
     }
 
     private async Task UploadExcel(IBrowserFile file)

@@ -624,7 +624,7 @@ namespace WinterAdventurer.Library
                 periodHeaderPara.Format.Font.Bold = true;
                 periodHeaderPara.Format.Font.Size = 12;
                 periodHeaderPara.Format.Alignment = ParagraphAlignment.Center;
-                periodHeaderPara.AddText("");
+                periodHeaderPara.AddText("Time");
 
                 for (int day = 1; day <= _schema.TotalDays; day++)
                 {
@@ -637,149 +637,161 @@ namespace WinterAdventurer.Library
                     dayPara.AddText($"Day {day}");
                 }
 
-                // Breakfast row (merged across all days)
-                AddMergedActivityRow(table, "Breakfast", _schema.TotalDays);
-
-                // Add rows for each period
-                foreach (var periodConfig in _schema.PeriodSheets)
+                // Add rows dynamically based on timeslots
+                foreach (var timeslot in timeslots)
                 {
-                    var row = table.AddRow();
-                    row.VerticalAlignment = VerticalAlignment.Top;
-
-                    // Period label cell
-                    var labelCell = row.Cells[0];
-                    var labelPara = labelCell.AddParagraph();
-                    labelPara.Format.Font.Name = "NotoSans";
-                    labelPara.Format.Font.Size = 10;
-                    labelPara.Format.Alignment = ParagraphAlignment.Center;
-                    labelPara.AddText(periodConfig.DisplayName);
-
-                    // Build a map of day -> workshop for this period
-                    var dayWorkshopMap = new Dictionary<int, (Workshop? workshop, bool isLeading)>();
-                    for (int day = 1; day <= _schema.TotalDays; day++)
+                    if (timeslot.IsPeriod)
                     {
-                        // Find workshop they're enrolled in for this period and day
-                        var workshopForDay = attendeeSelections
-                            .Where(s => s.Duration.StartDay <= day && s.Duration.EndDay >= day)
-                            .Select(s => Workshops.FirstOrDefault(w =>
-                                w.Name == s.WorkshopName &&
-                                w.Duration.StartDay == s.Duration.StartDay &&
-                                w.Duration.EndDay == s.Duration.EndDay &&
-                                w.Period.SheetName == periodConfig.SheetName))
-                            .FirstOrDefault(w => w != null);
+                        // Find the matching period from schema
+                        var periodConfig = _schema.PeriodSheets.FirstOrDefault(p =>
+                            p.DisplayName.Equals(timeslot.Label, StringComparison.OrdinalIgnoreCase));
 
-                        // Also check if they're leading a workshop in this period/day
-                        var leadingWorkshop = Workshops.FirstOrDefault(w =>
-                            w.Leader.Contains(attendee.FullName) &&
-                            w.Period.SheetName == periodConfig.SheetName &&
-                            w.Duration.StartDay <= day &&
-                            w.Duration.EndDay >= day);
-
-                        // Prefer the workshop they're leading if both exist
-                        var workshopToShow = leadingWorkshop ?? workshopForDay;
-                        bool isLeading = leadingWorkshop != null;
-
-                        dayWorkshopMap[day] = (workshopToShow, isLeading);
-                    }
-
-                    // Process days and merge cells for consecutive same workshops
-                    int currentDay = 1;
-                    while (currentDay <= _schema.TotalDays)
-                    {
-                        var (workshop, isLeading) = dayWorkshopMap[currentDay];
-
-                        if (workshop != null)
+                        if (periodConfig == null)
                         {
-                            // Find how many consecutive days have the same workshop
-                            int spanDays = 1;
-                            for (int nextDay = currentDay + 1; nextDay <= _schema.TotalDays; nextDay++)
+                            // If we can't find a matching period, skip this timeslot
+                            continue;
+                        }
+
+                        var row = table.AddRow();
+                        row.VerticalAlignment = VerticalAlignment.Top;
+
+                        // Time cell (first column) - only show time range, no label
+                        var timeCell = row.Cells[0];
+                        if (!string.IsNullOrWhiteSpace(timeslot.TimeRange))
+                        {
+                            var timePara = timeCell.AddParagraph();
+                            timePara.Format.Font.Name = "Roboto";
+                            timePara.Format.Font.Size = 9;
+                            timePara.Format.Alignment = ParagraphAlignment.Center;
+                            timePara.AddText(timeslot.TimeRange);
+                        }
+
+                        // Build a map of day -> workshop for this period
+                        var dayWorkshopMap = new Dictionary<int, (Workshop? workshop, bool isLeading)>();
+                        for (int day = 1; day <= _schema.TotalDays; day++)
+                        {
+                            // Find workshop they're enrolled in for this period and day
+                            var workshopForDay = attendeeSelections
+                                .Where(s => s.Duration.StartDay <= day && s.Duration.EndDay >= day)
+                                .Select(s => Workshops.FirstOrDefault(w =>
+                                    w.Name == s.WorkshopName &&
+                                    w.Duration.StartDay == s.Duration.StartDay &&
+                                    w.Duration.EndDay == s.Duration.EndDay &&
+                                    w.Period.SheetName == periodConfig.SheetName))
+                                .FirstOrDefault(w => w != null);
+
+                            // Also check if they're leading a workshop in this period/day
+                            var leadingWorkshop = Workshops.FirstOrDefault(w =>
+                                w.Leader.Contains(attendee.FullName) &&
+                                w.Period.SheetName == periodConfig.SheetName &&
+                                w.Duration.StartDay <= day &&
+                                w.Duration.EndDay >= day);
+
+                            // Prefer the workshop they're leading if both exist
+                            var workshopToShow = leadingWorkshop ?? workshopForDay;
+                            bool isLeading = leadingWorkshop != null;
+
+                            dayWorkshopMap[day] = (workshopToShow, isLeading);
+                        }
+
+                        // Process days and merge cells for consecutive same workshops
+                        int currentDay = 1;
+                        while (currentDay <= _schema.TotalDays)
+                        {
+                            var (workshop, isLeading) = dayWorkshopMap[currentDay];
+
+                            if (workshop != null)
                             {
-                                var (nextWorkshop, nextIsLeading) = dayWorkshopMap[nextDay];
-                                if (nextWorkshop != null &&
-                                    nextWorkshop.Name == workshop.Name &&
-                                    nextWorkshop.Leader == workshop.Leader &&
-                                    nextIsLeading == isLeading)
+                                // Find how many consecutive days have the same workshop
+                                int spanDays = 1;
+                                for (int nextDay = currentDay + 1; nextDay <= _schema.TotalDays; nextDay++)
                                 {
-                                    spanDays++;
+                                    var (nextWorkshop, nextIsLeading) = dayWorkshopMap[nextDay];
+                                    if (nextWorkshop != null &&
+                                        nextWorkshop.Name == workshop.Name &&
+                                        nextWorkshop.Leader == workshop.Leader &&
+                                        nextIsLeading == isLeading)
+                                    {
+                                        spanDays++;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                // Get the cell and merge if spanning multiple days
+                                var dayCell = row.Cells[currentDay];
+                                if (mergeWorkshopCells && spanDays > 1)
+                                {
+                                    dayCell.MergeRight = spanDays - 1;
+                                }
+
+                                // Add workshop content
+                                var workshopPara = dayCell.AddParagraph();
+                                workshopPara.Format.Font.Size = 10;
+                                workshopPara.Format.Alignment = ParagraphAlignment.Center;
+
+                                if (isLeading)
+                                {
+                                    workshopPara.Format.Font.Name = "NotoSans";
+                                    workshopPara.Format.Font.Bold = true;
+                                    workshopPara.AddText($"Leading {workshop.Name}");
                                 }
                                 else
                                 {
-                                    break;
+                                    workshopPara.Format.Font.Name = "Roboto";
+                                    workshopPara.AddText($"{workshop.Name}");
                                 }
-                            }
 
-                            // Get the cell and merge if spanning multiple days
-                            var dayCell = row.Cells[currentDay];
-                            if (mergeWorkshopCells && spanDays > 1)
-                            {
-                                dayCell.MergeRight = spanDays - 1;
-                            }
-
-                            // Add workshop content
-                            var workshopPara = dayCell.AddParagraph();
-                            workshopPara.Format.Font.Size = 10;
-                            workshopPara.Format.Alignment = ParagraphAlignment.Center;
-
-                            if (isLeading)
-                            {
-                                workshopPara.Format.Font.Name = "NotoSans";
-                                workshopPara.Format.Font.Bold = true;
-                                workshopPara.AddText($"Leading {workshop.Name}");
-                            }
-                            else
-                            {
-                                workshopPara.Format.Font.Name = "Roboto";
-                                workshopPara.AddText($"{workshop.Name}");
-                            }
-
-                            // Add leader info
-                            if (isLeading)
-                            {
-                                // Check if co-leading (leader field contains "and")
-                                if (workshop.Leader.Contains(" and "))
+                                // Add leader info
+                                if (isLeading)
                                 {
-                                    // Extract the other leader's name
-                                    var leaders = workshop.Leader.Split(new[] { " and " }, StringSplitOptions.None);
-                                    var otherLeader = leaders.FirstOrDefault(l => l.Trim() != attendee.FullName)?.Trim();
-
-                                    if (!string.IsNullOrEmpty(otherLeader))
+                                    // Check if co-leading (leader field contains "and")
+                                    if (workshop.Leader.Contains(" and "))
                                     {
-                                        var leaderPara = dayCell.AddParagraph();
-                                        leaderPara.Format.Font.Name = "Roboto";
-                                        leaderPara.Format.Font.Size = 9;
-                                        leaderPara.Format.Font.Italic = true;
-                                        leaderPara.Format.Alignment = ParagraphAlignment.Center;
-                                        leaderPara.AddText($"with {otherLeader}");
+                                        // Extract the other leader's name
+                                        var leaders = workshop.Leader.Split(new[] { " and " }, StringSplitOptions.None);
+                                        var otherLeader = leaders.FirstOrDefault(l => l.Trim() != attendee.FullName)?.Trim();
+
+                                        if (!string.IsNullOrEmpty(otherLeader))
+                                        {
+                                            var leaderPara = dayCell.AddParagraph();
+                                            leaderPara.Format.Font.Name = "Roboto";
+                                            leaderPara.Format.Font.Size = 9;
+                                            leaderPara.Format.Font.Italic = true;
+                                            leaderPara.Format.Alignment = ParagraphAlignment.Center;
+                                            leaderPara.AddText($"with {otherLeader}");
+                                        }
                                     }
+                                    // If solo leader, don't show anything
                                 }
-                                // If solo leader, don't show anything
+                                else
+                                {
+                                    // Not leading, show full leader info
+                                    var leaderPara = dayCell.AddParagraph();
+                                    leaderPara.Format.Font.Name = "Roboto";
+                                    leaderPara.Format.Font.Size = 9;
+                                    leaderPara.Format.Font.Italic = true;
+                                    leaderPara.Format.Alignment = ParagraphAlignment.Center;
+                                    leaderPara.AddText($"({workshop.Leader})");
+                                }
+
+                                // If merging, skip the merged days; otherwise just move to next day
+                                currentDay += mergeWorkshopCells ? spanDays : 1;
                             }
                             else
                             {
-                                // Not leading, show full leader info
-                                var leaderPara = dayCell.AddParagraph();
-                                leaderPara.Format.Font.Name = "Roboto";
-                                leaderPara.Format.Font.Size = 9;
-                                leaderPara.Format.Font.Italic = true;
-                                leaderPara.Format.Alignment = ParagraphAlignment.Center;
-                                leaderPara.AddText($"({workshop.Leader})");
+                                currentDay++;
                             }
-
-                            // If merging, skip the merged days; otherwise just move to next day
-                            currentDay += mergeWorkshopCells ? spanDays : 1;
-                        }
-                        else
-                        {
-                            currentDay++;
                         }
                     }
+                    else
+                    {
+                        // Non-period activity (Breakfast, Lunch, etc.)
+                        AddMergedActivityRow(table, timeslot.Label, _schema.TotalDays, timeslot.TimeRange);
+                    }
                 }
-
-                // Lunch row (merged across all days)
-                AddMergedActivityRow(table, "Lunch", _schema.TotalDays);
-
-                // Evening Program row (merged across all days)
-                AddMergedActivityRow(table, "Evening Program", _schema.TotalDays);
 
                 sections.Add(section);
             }
@@ -792,21 +804,27 @@ namespace WinterAdventurer.Library
             var row = table.AddRow();
             row.Shading.Color = Color.FromRgb(250, 250, 250);
 
-            // First cell (period label column) - empty
-            var firstCell = row.Cells[0];
-            firstCell.MergeRight = totalDays; // Merge all columns including the label column
+            // First cell: time range (not merged)
+            var timeCell = row.Cells[0];
+            if (!string.IsNullOrWhiteSpace(timeRange))
+            {
+                var timePara = timeCell.AddParagraph();
+                timePara.Format.Font.Name = "Roboto";
+                timePara.Format.Font.Size = 9;
+                timePara.Format.Alignment = ParagraphAlignment.Center;
+                timePara.AddText(timeRange);
+            }
 
-            var para = firstCell.AddParagraph();
+            // Second cell: activity name merged across all day columns
+            var activityCell = row.Cells[1];
+            activityCell.MergeRight = totalDays - 1; // Merge across day columns only
+
+            var para = activityCell.AddParagraph();
             para.Format.Font.Name = "Roboto";
             para.Format.Font.Size = 11;
             para.Format.Font.Italic = true;
             para.Format.Alignment = ParagraphAlignment.Center;
             para.AddFormattedText(activityName, TextFormat.Bold);
-
-            if (!string.IsNullOrWhiteSpace(timeRange))
-            {
-                para.AddText($" ({timeRange})");
-            }
         }
 
         private List<Models.TimeSlot> CreateDefaultTimeslots()

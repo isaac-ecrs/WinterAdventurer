@@ -14,7 +14,10 @@ namespace WinterAdventurer.Library.Models
             {
                 if (StartTime.HasValue && EndTime.HasValue)
                 {
-                    return $"{StartTime.Value:hh\\:mm tt} - {EndTime.Value:hh\\:mm tt}";
+                    // Convert TimeSpan to formatted time string (12-hour format with AM/PM)
+                    var startDateTime = DateTime.Today.Add(StartTime.Value);
+                    var endDateTime = DateTime.Today.Add(EndTime.Value);
+                    return $"{startDateTime:h:mm tt} - {endDateTime:h:mm tt}";
                 }
                 return "";
             }
