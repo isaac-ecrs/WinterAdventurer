@@ -129,7 +129,7 @@
                         <MudCardContent>
                             <MudText>@workshop.Selections.Count().ToString() Participants</MudText>
                             <MudText>@workshop.Period.DisplayName</MudText>
-                            <div @onfocusout="@(() => OnLocationBlur(workshop))">
+                            <div @onfocusout="@(() => OnLocationBlur(workshop))" @key="@($"loc-{workshop.Name}-{locationListVersion}")">
                                 <MudAutocomplete T="string"
                                                Label="Location"
                                                @bind-Value="@workshop.Location"
@@ -187,6 +187,7 @@
     private bool _hasRendered = false;
     private List<string> availableLocations = new List<string>();
     private Dictionary<string, string> previousLocations = new Dictionary<string, string>();
+    private int locationListVersion = 0; // Increment to force autocomplete recreation
 
     public class TimeSlot
     {
@@ -590,7 +591,9 @@
                 {
                     availableLocations.Add(currentLocation);
                     availableLocations.Sort();
-                    Logger.LogInformation("OnLocationBlur: Added '{Location}' to cached list", currentLocation);
+                    locationListVersion++; // Force autocomplete refresh
+                    Logger.LogInformation("OnLocationBlur: Added '{Location}' to cached list (version: {Version})",
+                        currentLocation, locationListVersion);
                 }
             }
             catch (Exception ex)
@@ -625,6 +628,10 @@
                         Logger.LogInformation("OnDeleteLocation: Cleared location from workshop '{Workshop}'", workshop.Name);
                     }
                 }
+
+                // Increment version to force autocomplete recreation (closes open dropdowns)
+                locationListVersion++;
+                Logger.LogDebug("OnDeleteLocation: Incremented locationListVersion to {Version}", locationListVersion);
 
                 // Refresh UI
                 await InvokeAsync(StateHasChanged);
