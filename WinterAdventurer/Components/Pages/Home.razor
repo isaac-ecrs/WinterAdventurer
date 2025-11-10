@@ -133,7 +133,7 @@
                                 <MudAutocomplete T="string"
                                                Label="Location"
                                                @bind-Value="@workshop.Location"
-                                               SearchFunc="@SearchLocations"
+                                               SearchFunc="@((value, token) => SearchLocations(value, token, workshop))"
                                                CoerceText="true"
                                                CoerceValue="true"
                                                ResetValueOnEmptyText="true"
@@ -551,20 +551,36 @@
         }
     }
 
-    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token)
+    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token, Workshop currentWorkshop)
     {
-        Logger.LogDebug("SearchLocations called with value: '{Value}' (length: {Length})",
-            value ?? "NULL", value?.Length ?? 0);
+        Logger.LogDebug("SearchLocations called for workshop '{Workshop}' in period '{Period}' with value: '{Value}'",
+            currentWorkshop.Name, currentWorkshop.Period.DisplayName, value ?? "NULL");
 
-        // If value is empty or null, return all locations
+        // Get locations already used by OTHER workshops in the SAME period
+        var usedLocations = workshops
+            .Where(w => w.Period.SheetName == currentWorkshop.Period.SheetName &&
+                       w.Name != currentWorkshop.Name &&
+                       !string.IsNullOrWhiteSpace(w.Location))
+            .Select(w => w.Location)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Logger.LogDebug("SearchLocations: {Count} locations already used in period '{Period}': {Locations}",
+            usedLocations.Count, currentWorkshop.Period.DisplayName, string.Join(", ", usedLocations));
+
+        // Filter out used locations
+        var available = availableLocations
+            .Where(loc => !usedLocations.Contains(loc))
+            .ToList();
+
+        // If value is empty or null, return all available locations
         if (string.IsNullOrWhiteSpace(value))
         {
-            Logger.LogDebug("SearchLocations: Returning all {Count} locations (empty search)", availableLocations.Count);
-            return availableLocations;
+            Logger.LogDebug("SearchLocations: Returning {Count} available locations (empty search)", available.Count);
+            return available;
         }
 
         // Filter locations that contain the search value (case insensitive)
-        var filtered = availableLocations
+        var filtered = available
             .Where(loc => loc.Contains(value, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -609,9 +625,7 @@
                 {
                     availableLocations.Add(currentLocation);
                     availableLocations.Sort();
-                    locationListVersion++; // Force autocomplete refresh
-                    Logger.LogInformation("OnLocationBlur: Added '{Location}' to cached list (version: {Version})",
-                        currentLocation, locationListVersion);
+                    Logger.LogInformation("OnLocationBlur: Added '{Location}' to cached list", currentLocation);
                 }
             }
             catch (Exception ex)
@@ -619,6 +633,10 @@
                 Logger.LogError(ex, "OnLocationBlur: ERROR saving location '{Location}'", currentLocation);
             }
         }
+
+        // Always increment version to refresh all dropdowns (for period-based filtering)
+        locationListVersion++;
+        Logger.LogDebug("OnLocationBlur: Incremented locationListVersion to {Version} to refresh all dropdowns", locationListVersion);
     }
 
     private async Task OnDeleteLocation(string locationName, MouseEventArgs e)
