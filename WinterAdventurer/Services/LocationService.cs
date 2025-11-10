@@ -9,6 +9,7 @@ public interface ILocationService
     Task<List<string>> GetAllLocationNamesAsync();
     Task<Location?> GetLocationByNameAsync(string name);
     Task<Location> AddOrGetLocationAsync(string name);
+    Task<bool> DeleteLocationAsync(string name);
 }
 
 public class LocationService : ILocationService
@@ -64,5 +65,22 @@ public class LocationService : ILocationService
         await _context.SaveChangesAsync();
         _logger.LogInformation("NEW LOCATION SAVED: '{Name}' (ID: {Id})", name, location.Id);
         return location;
+    }
+
+    public async Task<bool> DeleteLocationAsync(string name)
+    {
+        _logger.LogInformation("DeleteLocation called for: '{Name}'", name);
+
+        var location = await GetLocationByNameAsync(name);
+        if (location == null)
+        {
+            _logger.LogWarning("Cannot delete location '{Name}': Not found", name);
+            return false;
+        }
+
+        _context.Locations.Remove(location);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("LOCATION DELETED: '{Name}' (ID: {Id})", name, location.Id);
+        return true;
     }
 }
