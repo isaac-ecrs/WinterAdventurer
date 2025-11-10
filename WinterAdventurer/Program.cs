@@ -45,6 +45,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add location service
 builder.Services.AddScoped<ILocationService, LocationService>();
 
+// Add theme service
+builder.Services.AddScoped<ThemeService>();
+
 // Configure PDF font resolver (must be set once at startup)
 GlobalFontSettings.FontResolver = new CustomFontResolver();
 

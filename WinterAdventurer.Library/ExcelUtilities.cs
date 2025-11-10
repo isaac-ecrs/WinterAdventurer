@@ -339,7 +339,7 @@ namespace WinterAdventurer.Library
             {
                 var document = new Document();
 
-                foreach(var section in PrintWorkshopParticipants())
+                foreach(var section in PrintWorkshopParticipants(timeslots))
                 {
                     section.PageSetup.TopMargin = Unit.FromInch(.5);
                     section.PageSetup.LeftMargin = Unit.FromInch(.5);
@@ -366,7 +366,7 @@ namespace WinterAdventurer.Library
             return null;
         }
 
-        private List<Section> PrintWorkshopParticipants()
+        private List<Section> PrintWorkshopParticipants(List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
@@ -407,7 +407,19 @@ namespace WinterAdventurer.Library
                 periodInfo.Format.Font.Color = COLOR_BLACK;
                 periodInfo.Format.Font.Size = 14;
                 periodInfo.Format.Alignment = ParagraphAlignment.Center;
-                periodInfo.AddFormattedText($"{workshopListing.Period.DisplayName} - {workshopListing.Duration.Description}");
+
+                // Find the timeslot for this period to get the time range
+                var periodTimeslot = timeslots?.FirstOrDefault(t =>
+                    t.IsPeriod && t.Label == workshopListing.Period.DisplayName);
+
+                string periodText = workshopListing.Period.DisplayName;
+                if (periodTimeslot != null && !string.IsNullOrEmpty(periodTimeslot.TimeRange))
+                {
+                    periodText += $" ({periodTimeslot.TimeRange})";
+                }
+                periodText += $" - {workshopListing.Duration.Description}";
+
+                periodInfo.AddFormattedText(periodText);
                 periodInfo.Format.SpaceAfter = Unit.FromPoint(16);
 
                 // Separate first choice from backup choices and sort by registration order
@@ -473,8 +485,11 @@ namespace WinterAdventurer.Library
             }
             text += " [\u2003]";  // Using em space for wider checkbox
 
-            // Use smaller font for longer names to prevent wrapping
-            return text.Length > 30 ? 13 : 15;
+            // Use progressively smaller fonts for longer names to prevent wrapping
+            if (text.Length > 45) return 10;
+            if (text.Length > 35) return 11;
+            if (text.Length > 28) return 13;
+            return 15;
         }
 
         private void AddTwoColumnParticipantList(Section section, List<WorkshopSelection> participants, bool showChoiceNumber)
@@ -515,20 +530,28 @@ namespace WinterAdventurer.Library
                     showChoiceNumber,
                     leftColumn[i].ChoiceNumber);
 
-                leftPara.Format.Font.Size = leftFontSize;
+                leftPara.Format.Font.Size = 15; // Base size for number
                 leftPara.Format.LeftIndent = Unit.FromPoint(6);
                 leftPara.Format.SpaceBefore = 0;
                 leftPara.Format.SpaceAfter = Unit.FromPoint(6);
-                leftPara.Format.LineSpacingRule = LineSpacingRule.Exactly;
-                leftPara.Format.LineSpacing = Unit.FromPoint(leftFontSize);
+                leftPara.Format.LineSpacingRule = LineSpacingRule.Multiple;
+                leftPara.Format.LineSpacing = 1.1; // 110% of font size allows room for wrapped text
 
+                // Add number at base size (bold)
                 leftPara.AddFormattedText($"{leftCounter}. ", TextFormat.Bold);
-                leftPara.AddText(leftColumn[i].FullName);
+
+                // Add name at calculated size
+                var nameText = leftPara.AddFormattedText(leftColumn[i].FullName);
+                nameText.Font.Size = leftFontSize;
+
                 if (showChoiceNumber)
                 {
-                    leftPara.AddText($" (Choice #{leftColumn[i].ChoiceNumber})");
+                    var choiceText = leftPara.AddFormattedText($" (Choice #{leftColumn[i].ChoiceNumber})");
+                    choiceText.Font.Size = leftFontSize;
                 }
-                leftPara.AddText(" [\u2003]");
+
+                var checkboxText = leftPara.AddFormattedText(" [\u2003]");
+                checkboxText.Font.Size = leftFontSize;
 
                 // Right column participant (if exists)
                 if (i < rightColumn.Count)
@@ -546,20 +569,28 @@ namespace WinterAdventurer.Library
                         showChoiceNumber,
                         rightColumn[i].ChoiceNumber);
 
-                    rightPara.Format.Font.Size = rightFontSize;
+                    rightPara.Format.Font.Size = 15; // Base size for number
                     rightPara.Format.LeftIndent = Unit.FromPoint(6);
                     rightPara.Format.SpaceBefore = 0;
                     rightPara.Format.SpaceAfter = Unit.FromPoint(6);
-                    rightPara.Format.LineSpacingRule = LineSpacingRule.Exactly;
-                    rightPara.Format.LineSpacing = Unit.FromPoint(rightFontSize);
+                    rightPara.Format.LineSpacingRule = LineSpacingRule.Multiple;
+                    rightPara.Format.LineSpacing = 1.1; // 110% of font size allows room for wrapped text
 
+                    // Add number at base size (bold)
                     rightPara.AddFormattedText($"{rightCounter}. ", TextFormat.Bold);
-                    rightPara.AddText(rightColumn[i].FullName);
+
+                    // Add name at calculated size
+                    var rightNameText = rightPara.AddFormattedText(rightColumn[i].FullName);
+                    rightNameText.Font.Size = rightFontSize;
+
                     if (showChoiceNumber)
                     {
-                        rightPara.AddText($" (Choice #{rightColumn[i].ChoiceNumber})");
+                        var rightChoiceText = rightPara.AddFormattedText($" (Choice #{rightColumn[i].ChoiceNumber})");
+                        rightChoiceText.Font.Size = rightFontSize;
                     }
-                    rightPara.AddText(" [\u2003]");
+
+                    var rightCheckboxText = rightPara.AddFormattedText(" [\u2003]");
+                    rightCheckboxText.Font.Size = rightFontSize;
                 }
             }
         }
@@ -621,29 +652,26 @@ namespace WinterAdventurer.Library
                 header.AddFormattedText($"{attendee.FullName}'s Schedule", TextFormat.Bold);
                 header.Format.SpaceAfter = Unit.FromPoint(16);
 
-                // Create a TextFrame to contain the table with explicit positioning
-                double tableWidth = 10.0; // 2.0 + (4 * 2.0) - fills the entire usable width
-                double pageWidth = 11.0 - 1.0; // landscape width minus combined margins
-                double leftPosition = (pageWidth - tableWidth) / 2.0;
-
-                var frame = section.AddTextFrame();
-                frame.Left = Unit.FromInch(leftPosition);
-                frame.RelativeHorizontal = RelativeHorizontal.Margin;
-                frame.Top = Unit.FromInch(0);
-                frame.RelativeVertical = RelativeVertical.Paragraph;
-                frame.Width = Unit.FromInch(tableWidth);
-
-                // Create schedule table inside the frame
-                var table = frame.AddTable();
+                // Create schedule table
+                var table = section.AddTable();
                 table.Borders.Width = 0.5;
 
-                // Column 0: Period labels (time column)
-                table.AddColumn(Unit.FromInch(2.0));
+                // Column widths: 11" page - 1" margins = 10" usable width
+                // Make table narrower (9.2") and center it with left indent
+                var timeColumnWidth = 1.8;
+                var dayColumnWidth = 1.85;
+                var tableWidth = timeColumnWidth + (_schema.TotalDays * dayColumnWidth); // 1.8 + 7.4 = 9.2
+                var usableWidth = 10.0;
+                var leftIndent = 0.7; // Push table more to the right for better centering
+
+                table.Rows.LeftIndent = Unit.FromInch(leftIndent);
+
+                table.AddColumn(Unit.FromInch(timeColumnWidth));
 
                 // Columns 1-4: Days
                 for (int i = 0; i < _schema.TotalDays; i++)
                 {
-                    table.AddColumn(Unit.FromInch(2.0));
+                    table.AddColumn(Unit.FromInch(dayColumnWidth));
                 }
 
                 // Header row with day numbers
