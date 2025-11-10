@@ -10,6 +10,9 @@ public interface ILocationService
     Task<Location?> GetLocationByNameAsync(string name);
     Task<Location> AddOrGetLocationAsync(string name);
     Task<bool> DeleteLocationAsync(string name);
+    Task<string?> GetWorkshopLocationMappingAsync(string workshopName);
+    Task SaveWorkshopLocationMappingAsync(string workshopName, string locationName);
+    Task<Dictionary<string, string>> GetAllWorkshopLocationMappingsAsync();
 }
 
 public class LocationService : ILocationService
@@ -82,5 +85,60 @@ public class LocationService : ILocationService
         await _context.SaveChangesAsync();
         _logger.LogInformation("LOCATION DELETED: '{Name}' (ID: {Id})", name, location.Id);
         return true;
+    }
+
+    public async Task<string?> GetWorkshopLocationMappingAsync(string workshopName)
+    {
+        _logger.LogDebug("Looking up location mapping for workshop: '{WorkshopName}'", workshopName);
+
+        var mapping = await _context.WorkshopLocationMappings
+            .FirstOrDefaultAsync(m => m.WorkshopName == workshopName);
+
+        var result = mapping?.LocationName;
+        _logger.LogDebug("Workshop '{WorkshopName}' mapping result: {Location}",
+            workshopName, result ?? "NOT FOUND");
+
+        return result;
+    }
+
+    public async Task SaveWorkshopLocationMappingAsync(string workshopName, string locationName)
+    {
+        _logger.LogInformation("Saving workshop-location mapping: '{WorkshopName}' -> '{LocationName}'",
+            workshopName, locationName);
+
+        var existing = await _context.WorkshopLocationMappings
+            .FirstOrDefaultAsync(m => m.WorkshopName == workshopName);
+
+        if (existing != null)
+        {
+            existing.LocationName = locationName;
+            existing.LastUpdated = DateTime.UtcNow;
+            _logger.LogDebug("Updated existing mapping for '{WorkshopName}'", workshopName);
+        }
+        else
+        {
+            var mapping = new WorkshopLocationMapping
+            {
+                WorkshopName = workshopName,
+                LocationName = locationName
+            };
+            _context.WorkshopLocationMappings.Add(mapping);
+            _logger.LogDebug("Created new mapping for '{WorkshopName}'", workshopName);
+        }
+
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("MAPPING SAVED: '{WorkshopName}' -> '{LocationName}'",
+            workshopName, locationName);
+    }
+
+    public async Task<Dictionary<string, string>> GetAllWorkshopLocationMappingsAsync()
+    {
+        _logger.LogDebug("Loading all workshop-location mappings from database");
+
+        var mappings = await _context.WorkshopLocationMappings
+            .ToDictionaryAsync(m => m.WorkshopName, m => m.LocationName);
+
+        _logger.LogDebug("Loaded {Count} workshop-location mappings", mappings.Count);
+        return mappings;
     }
 }

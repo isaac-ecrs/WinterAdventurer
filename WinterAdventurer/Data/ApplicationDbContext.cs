@@ -10,6 +10,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<Location> Locations { get; set; } = null!;
+    public DbSet<WorkshopLocationMapping> WorkshopLocationMappings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,6 +20,12 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Location>(entity =>
         {
             entity.HasIndex(e => e.Name).IsUnique();
+        });
+
+        // Configure WorkshopLocationMapping entity
+        modelBuilder.Entity<WorkshopLocationMapping>(entity =>
+        {
+            entity.HasIndex(e => e.WorkshopName).IsUnique();
         });
     }
 }

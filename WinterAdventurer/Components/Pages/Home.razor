@@ -408,6 +408,21 @@
                 workshops = context.Workshops;
                 periods = workshops.Select(w => w.Period).Distinct().ToList();
 
+                // Restore locations from saved mappings
+                Logger.LogInformation("Restoring workshop locations from saved mappings");
+                var mappings = await LocationService.GetAllWorkshopLocationMappingsAsync();
+                Logger.LogInformation("Found {Count} saved workshop-location mappings", mappings.Count);
+
+                foreach (var workshop in workshops)
+                {
+                    if (mappings.TryGetValue(workshop.Name, out var savedLocation))
+                    {
+                        workshop.Location = savedLocation;
+                        Logger.LogDebug("Restored location '{Location}' for workshop '{Workshop}'",
+                            savedLocation, workshop.Name);
+                    }
+                }
+
                 // Initialize previous locations tracking
                 previousLocations.Clear();
                 foreach (var workshop in workshops)
@@ -585,6 +600,9 @@
                 Logger.LogInformation("OnLocationBlur: Saving location '{Location}' for workshop '{Workshop}'",
                     currentLocation, workshop.Name);
                 await LocationService.AddOrGetLocationAsync(currentLocation);
+
+                // Save the workshop-to-location mapping
+                await LocationService.SaveWorkshopLocationMappingAsync(workshop.Name, currentLocation);
 
                 // Update cached list if new
                 if (!availableLocations.Contains(currentLocation))
