@@ -164,12 +164,6 @@ excelUtilities.DumpExcelSchema(stream, "output.json");
 
 Useful for understanding new Excel file formats before creating schemas.
 
-## Known Incomplete Features
-
-- **Individual schedule cards**: `PrintSchedules()` method exists but is not fully implemented
-- **Blazor PDF download**: `BuildPdf()` button handler in Home.razor is stubbed out
-- **Schedule templates**: `BuildScheduleTemplate()` contains hardcoded workshop data from a 2022 event
-
 ## Common Development Tasks
 
 **To modify column mappings**:
