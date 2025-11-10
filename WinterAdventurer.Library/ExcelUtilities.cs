@@ -9,6 +9,7 @@ using WinterAdventurer.Library.EventSchemas;
 using MigraDoc;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
+using MigraDoc.DocumentObjectModel.Shapes;
 using System.Data.Common;
 using System.Xml;
 using PdfSharp.Fonts;
@@ -602,26 +603,47 @@ namespace WinterAdventurer.Library
 
                 var section = new Section();
 
+                // Set landscape orientation for individual schedules
+                section.PageSetup.Orientation = Orientation.Landscape;
+
+                // Set margins for landscape pages
+                section.PageSetup.LeftMargin = Unit.FromInch(0.5);
+                section.PageSetup.RightMargin = Unit.FromInch(0.5);
+                section.PageSetup.TopMargin = Unit.FromInch(0.5);
+                section.PageSetup.BottomMargin = Unit.FromInch(0.5);
+
                 // Header with attendee name - Oswald
                 var header = section.AddParagraph();
                 header.Format.Font.Name = "Oswald";
                 header.Format.Font.Color = COLOR_BLACK;
-                header.Format.Font.Size = 22;
+                header.Format.Font.Size = 30;
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.AddFormattedText($"{attendee.FullName}'s Schedule", TextFormat.Bold);
                 header.Format.SpaceAfter = Unit.FromPoint(16);
 
-                // Create schedule table
-                var table = section.AddTable();
+                // Create a TextFrame to contain the table with explicit positioning
+                double tableWidth = 10.0; // 2.0 + (4 * 2.0) - fills the entire usable width
+                double pageWidth = 11.0 - 1.0; // landscape width minus combined margins
+                double leftPosition = (pageWidth - tableWidth) / 2.0;
+
+                var frame = section.AddTextFrame();
+                frame.Left = Unit.FromInch(leftPosition);
+                frame.RelativeHorizontal = RelativeHorizontal.Margin;
+                frame.Top = Unit.FromInch(0);
+                frame.RelativeVertical = RelativeVertical.Paragraph;
+                frame.Width = Unit.FromInch(tableWidth);
+
+                // Create schedule table inside the frame
+                var table = frame.AddTable();
                 table.Borders.Width = 0.5;
 
-                // Column 0: Period labels
-                table.AddColumn(Unit.FromInch(1.5));
+                // Column 0: Period labels (time column)
+                table.AddColumn(Unit.FromInch(2.0));
 
                 // Columns 1-4: Days
                 for (int i = 0; i < _schema.TotalDays; i++)
                 {
-                    table.AddColumn(Unit.FromInch(1.5));
+                    table.AddColumn(Unit.FromInch(2.0));
                 }
 
                 // Header row with day numbers
@@ -633,7 +655,7 @@ namespace WinterAdventurer.Library
                 var periodHeaderPara = periodHeaderCell.AddParagraph();
                 periodHeaderPara.Format.Font.Name = "NotoSans";
                 periodHeaderPara.Format.Font.Bold = true;
-                periodHeaderPara.Format.Font.Size = 14;
+                periodHeaderPara.Format.Font.Size = 18;
                 periodHeaderPara.Format.Alignment = ParagraphAlignment.Center;
                 periodHeaderPara.AddText("Time");
 
@@ -643,7 +665,7 @@ namespace WinterAdventurer.Library
                     var dayPara = dayCell.AddParagraph();
                     dayPara.Format.Font.Name = "NotoSans";
                     dayPara.Format.Font.Bold = true;
-                    dayPara.Format.Font.Size = 14;
+                    dayPara.Format.Font.Size = 18;
                     dayPara.Format.Alignment = ParagraphAlignment.Center;
                     dayPara.AddText($"Day {day}");
                 }
@@ -672,7 +694,7 @@ namespace WinterAdventurer.Library
                         {
                             var timePara = timeCell.AddParagraph();
                             timePara.Format.Font.Name = "Roboto";
-                            timePara.Format.Font.Size = 10;
+                            timePara.Format.Font.Size = 12;
                             timePara.Format.Alignment = ParagraphAlignment.Center;
                             timePara.AddText(timeslot.TimeRange);
                         }
@@ -740,7 +762,7 @@ namespace WinterAdventurer.Library
 
                                 // Add workshop content
                                 var workshopPara = dayCell.AddParagraph();
-                                workshopPara.Format.Font.Size = 13;
+                                workshopPara.Format.Font.Size = 17;
                                 workshopPara.Format.Alignment = ParagraphAlignment.Center;
 
                                 if (isLeading)
@@ -769,7 +791,7 @@ namespace WinterAdventurer.Library
                                         {
                                             var leaderPara = dayCell.AddParagraph();
                                             leaderPara.Format.Font.Name = "Roboto";
-                                            leaderPara.Format.Font.Size = 10;
+                                            leaderPara.Format.Font.Size = 12;
                                             leaderPara.Format.Font.Italic = true;
                                             leaderPara.Format.Alignment = ParagraphAlignment.Center;
                                             leaderPara.AddText($"with {otherLeader}");
@@ -782,7 +804,7 @@ namespace WinterAdventurer.Library
                                     // Not leading, show full leader info
                                     var leaderPara = dayCell.AddParagraph();
                                     leaderPara.Format.Font.Name = "Roboto";
-                                    leaderPara.Format.Font.Size = 10;
+                                    leaderPara.Format.Font.Size = 12;
                                     leaderPara.Format.Font.Italic = true;
                                     leaderPara.Format.Alignment = ParagraphAlignment.Center;
                                     leaderPara.AddText($"({workshop.Leader})");
@@ -793,7 +815,7 @@ namespace WinterAdventurer.Library
                                 {
                                     var locationPara = dayCell.AddParagraph();
                                     locationPara.Format.Font.Name = "Roboto";
-                                    locationPara.Format.Font.Size = 9;
+                                    locationPara.Format.Font.Size = 12;
                                     locationPara.Format.Font.Bold = true;
                                     locationPara.Format.Alignment = ParagraphAlignment.Center;
                                     locationPara.AddText(workshop.Location);
@@ -832,7 +854,7 @@ namespace WinterAdventurer.Library
             {
                 var timePara = timeCell.AddParagraph();
                 timePara.Format.Font.Name = "Roboto";
-                timePara.Format.Font.Size = 10;
+                timePara.Format.Font.Size = 12;
                 timePara.Format.Alignment = ParagraphAlignment.Center;
                 timePara.AddText(timeRange);
             }
@@ -843,7 +865,7 @@ namespace WinterAdventurer.Library
 
             var para = activityCell.AddParagraph();
             para.Format.Font.Name = "Roboto";
-            para.Format.Font.Size = 13;
+            para.Format.Font.Size = 20;
             para.Format.Font.Italic = true;
             para.Format.Alignment = ParagraphAlignment.Center;
             para.AddFormattedText(activityName, TextFormat.Bold);
