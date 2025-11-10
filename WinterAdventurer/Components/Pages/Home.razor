@@ -611,8 +611,8 @@
             var deleted = await LocationService.DeleteLocationAsync(locationName);
             if (deleted)
             {
-                // Remove from cached list
-                availableLocations.Remove(locationName);
+                // Create a new list instance to trigger change detection in MudAutocomplete
+                availableLocations = availableLocations.Where(l => l != locationName).ToList();
                 Logger.LogInformation("OnDeleteLocation: Removed '{Location}' from cached list", locationName);
 
                 // Clear any workshops that were using this location
