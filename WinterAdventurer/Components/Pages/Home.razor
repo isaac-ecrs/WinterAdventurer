@@ -9,7 +9,9 @@
 @using WinterAdventurer.Library.Models
 @using Microsoft.JSInterop
 @using System.Text.Json
+@using WinterAdventurer.Services
 @inject IJSRuntime JSRuntime
+@inject ILocationService LocationService
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -130,10 +132,15 @@
                                            Value="@workshop.Location"
                                            SearchFunc="@SearchLocations"
                                            CoerceText="true"
-                                           CoerceValue="false"
-                                           ResetValueOnEmptyText="false"
+                                           CoerceValue="true"
+                                           ResetValueOnEmptyText="true"
                                            AdornmentIcon="@Icons.Material.Filled.LocationOn"
                                            AdornmentColor="Color.Primary"
+                                           MinCharacters="0"
+                                           DebounceInterval="300"
+                                           ShowProgressIndicator="false"
+                                           Dense="true"
+                                           Variant="Variant.Outlined"
                                            ValueChanged="@((string val) => OnLocationChanged(workshop, val))" />
                             <MudTextField Label="Leader" @bind-Value="workshop.Leader" />
                         </MudCardContent>
@@ -164,7 +171,6 @@
     private CancellationTokenSource? _cts;
     private bool _hasRendered = false;
     private List<string> availableLocations = new List<string>();
-    private Dictionary<string, string> workshopLocations = new Dictionary<string, string>();
 
     public class TimeSlot
     {
@@ -385,15 +391,6 @@
                 workshops = context.Workshops;
                 periods = workshops.Select(w => w.Period).Distinct().ToList();
 
-                // Restore saved locations for workshops
-                foreach (var workshop in workshops)
-                {
-                    if (workshopLocations.TryGetValue(workshop.Name, out var savedLocation))
-                    {
-                        workshop.Location = savedLocation;
-                    }
-                }
-
                 // Populate timeslots with periods from the Excel file
                 PopulateTimeslotsFromPeriods();
             }
@@ -504,27 +501,8 @@
 
         try
         {
-            // Load available locations list
-            var locationsJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", _cts?.Token ?? default, "availableLocations");
-            if (!string.IsNullOrEmpty(locationsJson))
-            {
-                var loaded = JsonSerializer.Deserialize<List<string>>(locationsJson);
-                if (loaded != null)
-                {
-                    availableLocations = loaded;
-                }
-            }
-
-            // Load workshop location mappings
-            var mappingsJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", _cts?.Token ?? default, "workshopLocations");
-            if (!string.IsNullOrEmpty(mappingsJson))
-            {
-                var loaded = JsonSerializer.Deserialize<Dictionary<string, string>>(mappingsJson);
-                if (loaded != null)
-                {
-                    workshopLocations = loaded;
-                }
-            }
+            // Load all locations from database
+            availableLocations = await LocationService.GetAllLocationNamesAsync();
         }
         catch (Exception ex)
         {
@@ -532,61 +510,50 @@
         }
     }
 
-    private async Task SaveLocations()
+    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token)
     {
-        if (_disposed || !_hasRendered) return;
-
-        try
-        {
-            // Save available locations
-            var locationsJson = JsonSerializer.Serialize(availableLocations);
-            await JSRuntime.InvokeVoidAsync("localStorage.setItem", _cts?.Token ?? default, "availableLocations", locationsJson);
-
-            // Save workshop location mappings
-            var mappingsJson = JsonSerializer.Serialize(workshopLocations);
-            await JSRuntime.InvokeVoidAsync("localStorage.setItem", _cts?.Token ?? default, "workshopLocations", mappingsJson);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error saving locations: {ex.Message}");
-        }
-    }
-
-    private Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token)
-    {
-        // If value is empty, return all locations
+        // If value is empty or null, return all locations
         if (string.IsNullOrWhiteSpace(value))
         {
-            return Task.FromResult(availableLocations.AsEnumerable());
+            return availableLocations;
         }
 
-        // Filter locations that contain the search value
-        var filtered = availableLocations
+        // Filter locations that contain the search value (case insensitive)
+        return await Task.FromResult(availableLocations
             .Where(loc => loc.Contains(value, StringComparison.OrdinalIgnoreCase))
-            .AsEnumerable();
-
-        return Task.FromResult(filtered);
+            .ToList());
     }
 
     private async Task OnLocationChanged(Workshop workshop, string newLocation)
     {
         if (_disposed) return;
 
-        workshop.Location = newLocation;
+        // Update the workshop location
+        workshop.Location = newLocation ?? string.Empty;
 
-        // Add to available locations if it's new and not empty
-        if (!string.IsNullOrWhiteSpace(newLocation) && !availableLocations.Contains(newLocation))
+        // Save to database if not empty
+        if (!string.IsNullOrWhiteSpace(newLocation))
         {
-            availableLocations.Add(newLocation);
-            availableLocations.Sort();
+            try
+            {
+                await LocationService.AddOrGetLocationAsync(newLocation);
+
+                // Update the cached list if it's a new location
+                if (!availableLocations.Contains(newLocation))
+                {
+                    availableLocations.Add(newLocation);
+                    availableLocations.Sort();
+                }
+
+                Console.WriteLine($"Location '{newLocation}' saved for workshop '{workshop.Name}'");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving location: {ex.Message}");
+            }
         }
 
-        // Update workshop location mapping
-        workshopLocations[workshop.Name] = newLocation;
-
-        // Save to localStorage
-        await SaveLocations();
-
+        // Trigger UI update
         if (!_disposed)
         {
             await InvokeAsync(StateHasChanged);

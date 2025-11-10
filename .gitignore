@@ -367,3 +367,8 @@ SampleDate/*
 # Generated output files
 SampleData/*.pdf
 SampleData/*.json
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
