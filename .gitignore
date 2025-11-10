@@ -372,3 +372,7 @@ SampleData/*.json
 *.db
 *.db-shm
 *.db-wal
+
+# Serilog log files
+logs/
+*.log

@@ -10,8 +10,10 @@
 @using Microsoft.JSInterop
 @using System.Text.Json
 @using WinterAdventurer.Services
+@using Microsoft.Extensions.Logging
 @inject IJSRuntime JSRuntime
 @inject ILocationService LocationService
+@inject ILogger<Home> Logger
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -501,56 +503,83 @@
 
         try
         {
+            Logger.LogInformation("LoadLocations: Starting to load locations from database");
             // Load all locations from database
             availableLocations = await LocationService.GetAllLocationNamesAsync();
+            Logger.LogInformation("LoadLocations: Loaded {Count} locations", availableLocations.Count);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading locations: {ex.Message}");
+            Logger.LogError(ex, "Error loading locations from database");
         }
     }
 
     private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token)
     {
+        Logger.LogDebug("SearchLocations called with value: '{Value}' (length: {Length})",
+            value ?? "NULL", value?.Length ?? 0);
+
         // If value is empty or null, return all locations
         if (string.IsNullOrWhiteSpace(value))
         {
+            Logger.LogDebug("SearchLocations: Returning all {Count} locations (empty search)", availableLocations.Count);
             return availableLocations;
         }
 
         // Filter locations that contain the search value (case insensitive)
-        return await Task.FromResult(availableLocations
+        var filtered = availableLocations
             .Where(loc => loc.Contains(value, StringComparison.OrdinalIgnoreCase))
-            .ToList());
+            .ToList();
+
+        Logger.LogDebug("SearchLocations: Found {Count} matches for '{Value}'", filtered.Count, value);
+        return await Task.FromResult(filtered);
     }
 
     private async Task OnLocationChanged(Workshop workshop, string newLocation)
     {
-        if (_disposed) return;
+        Logger.LogWarning("=== OnLocationChanged FIRED === Workshop: '{WorkshopName}', NewLocation: '{NewLocation}' (length: {Length})",
+            workshop.Name, newLocation ?? "NULL", newLocation?.Length ?? 0);
+
+        if (_disposed)
+        {
+            Logger.LogDebug("OnLocationChanged: Component disposed, exiting");
+            return;
+        }
 
         // Update the workshop location
+        var oldLocation = workshop.Location;
         workshop.Location = newLocation ?? string.Empty;
+        Logger.LogInformation("OnLocationChanged: Updated workshop '{WorkshopName}' location from '{Old}' to '{New}'",
+            workshop.Name, oldLocation, workshop.Location);
 
         // Save to database if not empty
         if (!string.IsNullOrWhiteSpace(newLocation))
         {
             try
             {
+                Logger.LogInformation("OnLocationChanged: Calling AddOrGetLocationAsync for '{Location}'", newLocation);
                 await LocationService.AddOrGetLocationAsync(newLocation);
 
                 // Update the cached list if it's a new location
                 if (!availableLocations.Contains(newLocation))
                 {
+                    Logger.LogInformation("OnLocationChanged: Adding '{Location}' to cached list", newLocation);
                     availableLocations.Add(newLocation);
                     availableLocations.Sort();
                 }
-
-                Console.WriteLine($"Location '{newLocation}' saved for workshop '{workshop.Name}'");
+                else
+                {
+                    Logger.LogDebug("OnLocationChanged: '{Location}' already in cached list", newLocation);
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving location: {ex.Message}");
+                Logger.LogError(ex, "OnLocationChanged: ERROR saving location '{Location}'", newLocation);
             }
+        }
+        else
+        {
+            Logger.LogDebug("OnLocationChanged: Empty location, skipping database save");
         }
 
         // Trigger UI update
