@@ -13,6 +13,14 @@ public interface ILocationService
     Task<string?> GetWorkshopLocationMappingAsync(string workshopName);
     Task SaveWorkshopLocationMappingAsync(string workshopName, string locationName);
     Task<Dictionary<string, string>> GetAllWorkshopLocationMappingsAsync();
+
+    // TimeSlot operations
+    Task<List<TimeSlot>> GetAllTimeSlotsAsync();
+    Task<TimeSlot?> GetTimeSlotByIdAsync(string id);
+    Task<TimeSlot> SaveTimeSlotAsync(TimeSlot timeSlot);
+    Task<bool> DeleteTimeSlotAsync(string id);
+    Task ClearAllTimeSlotsAsync();
+    Task SaveAllTimeSlotsAsync(List<TimeSlot> timeSlots);
 }
 
 public class LocationService : ILocationService
@@ -140,5 +148,92 @@ public class LocationService : ILocationService
 
         _logger.LogDebug("Loaded {Count} workshop-location mappings", mappings.Count);
         return mappings;
+    }
+
+    // TimeSlot operations
+    public async Task<List<TimeSlot>> GetAllTimeSlotsAsync()
+    {
+        _logger.LogDebug("Loading all timeslots from database");
+        var timeSlots = await _context.TimeSlots.ToListAsync();
+        _logger.LogDebug("Loaded {Count} timeslots", timeSlots.Count);
+        return timeSlots;
+    }
+
+    public async Task<TimeSlot?> GetTimeSlotByIdAsync(string id)
+    {
+        _logger.LogDebug("Looking up timeslot by ID: '{Id}'", id);
+        var timeSlot = await _context.TimeSlots.FirstOrDefaultAsync(t => t.Id == id);
+        _logger.LogDebug("TimeSlot lookup result: {Found}", timeSlot != null ? "FOUND" : "NOT FOUND");
+        return timeSlot;
+    }
+
+    public async Task<TimeSlot> SaveTimeSlotAsync(TimeSlot timeSlot)
+    {
+        _logger.LogInformation("Saving timeslot: '{Label}' (ID: {Id})", timeSlot.Label, timeSlot.Id);
+
+        var existing = await GetTimeSlotByIdAsync(timeSlot.Id);
+        if (existing != null)
+        {
+            // Update existing
+            existing.Label = timeSlot.Label;
+            existing.StartTime = timeSlot.StartTime;
+            existing.EndTime = timeSlot.EndTime;
+            existing.IsPeriod = timeSlot.IsPeriod;
+            existing.LastUpdated = DateTime.UtcNow;
+            _logger.LogDebug("Updated existing timeslot '{Label}'", timeSlot.Label);
+        }
+        else
+        {
+            // Add new
+            _context.TimeSlots.Add(timeSlot);
+            _logger.LogDebug("Added new timeslot '{Label}'", timeSlot.Label);
+        }
+
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("TIMESLOT SAVED: '{Label}' (ID: {Id})", timeSlot.Label, timeSlot.Id);
+        return existing ?? timeSlot;
+    }
+
+    public async Task<bool> DeleteTimeSlotAsync(string id)
+    {
+        _logger.LogInformation("DeleteTimeSlot called for ID: '{Id}'", id);
+
+        var timeSlot = await GetTimeSlotByIdAsync(id);
+        if (timeSlot == null)
+        {
+            _logger.LogWarning("Cannot delete timeslot '{Id}': Not found", id);
+            return false;
+        }
+
+        _context.TimeSlots.Remove(timeSlot);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("TIMESLOT DELETED: '{Label}' (ID: {Id})", timeSlot.Label, id);
+        return true;
+    }
+
+    public async Task ClearAllTimeSlotsAsync()
+    {
+        _logger.LogInformation("Clearing all timeslots from database");
+        var allTimeSlots = await _context.TimeSlots.ToListAsync();
+        _context.TimeSlots.RemoveRange(allTimeSlots);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("CLEARED {Count} timeslots", allTimeSlots.Count);
+    }
+
+    public async Task SaveAllTimeSlotsAsync(List<TimeSlot> timeSlots)
+    {
+        _logger.LogInformation("Saving {Count} timeslots to database", timeSlots.Count);
+
+        // Clear existing and add all new ones
+        await ClearAllTimeSlotsAsync();
+
+        foreach (var timeSlot in timeSlots)
+        {
+            timeSlot.LastUpdated = DateTime.UtcNow;
+            _context.TimeSlots.Add(timeSlot);
+        }
+
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("SAVED {Count} timeslots to database", timeSlots.Count);
     }
 }

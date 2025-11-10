@@ -8,7 +8,6 @@
 @using MudBlazor
 @using WinterAdventurer.Library.Models
 @using Microsoft.JSInterop
-@using System.Text.Json
 @using WinterAdventurer.Services
 @using Microsoft.Extensions.Logging
 @inject IJSRuntime JSRuntime
@@ -225,25 +224,34 @@
 
         try
         {
-            var json = await JSRuntime.InvokeAsync<string>("localStorage.getItem", _cts?.Token ?? default, "timeslots");
+            Logger.LogInformation("LoadTimeslots: Loading timeslots from database");
+            var dbTimeSlots = await LocationService.GetAllTimeSlotsAsync();
 
-            if (!string.IsNullOrEmpty(json))
+            if (dbTimeSlots != null && dbTimeSlots.Count > 0)
             {
-                var loaded = JsonSerializer.Deserialize<List<TimeSlot>>(json);
-                if (loaded != null && loaded.Count > 0)
+                Logger.LogInformation("LoadTimeslots: Loaded {Count} timeslots from database", dbTimeSlots.Count);
+
+                // Convert database TimeSlots to UI TimeSlots
+                var loaded = dbTimeSlots.Select(t => new TimeSlot
                 {
-                    // Clear and re-add instead of reassigning to avoid disposal issues
-                    timeslots.Clear();
-                    timeslots.AddRange(loaded);
-                    SortTimeslots();
-                    CheckForOverlaps();
-                    return;
-                }
+                    Id = t.Id,
+                    Label = t.Label,
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime,
+                    IsPeriod = t.IsPeriod
+                }).ToList();
+
+                // Clear and re-add instead of reassigning to avoid disposal issues
+                timeslots.Clear();
+                timeslots.AddRange(loaded);
+                SortTimeslots();
+                CheckForOverlaps();
+                return;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading timeslots: {ex.Message}");
+            Logger.LogError(ex, "Error loading timeslots from database");
         }
 
         // Ensure list is empty if nothing loaded
@@ -260,8 +268,20 @@
             SortTimeslots();
             CheckForOverlaps();
 
-            var json = JsonSerializer.Serialize(timeslots);
-            await JSRuntime.InvokeVoidAsync("localStorage.setItem", _cts?.Token ?? default, "timeslots", json);
+            Logger.LogInformation("SaveTimeslots: Saving {Count} timeslots to database", timeslots.Count);
+
+            // Convert UI TimeSlots to database TimeSlots
+            var dbTimeSlots = timeslots.Select(t => new WinterAdventurer.Data.TimeSlot
+            {
+                Id = t.Id,
+                Label = t.Label,
+                StartTime = t.StartTime,
+                EndTime = t.EndTime,
+                IsPeriod = t.IsPeriod
+            }).ToList();
+
+            await LocationService.SaveAllTimeSlotsAsync(dbTimeSlots);
+            Logger.LogInformation("SaveTimeslots: Successfully saved timeslots to database");
 
             // Safe state update after async operation
             if (!_disposed)
@@ -273,6 +293,7 @@
         {
             if (!_disposed)
             {
+                Logger.LogError(ex, "Error saving timeslots to database");
                 errorMessage = $"Error saving timeslots: {ex.Message}";
                 await InvokeAsync(StateHasChanged);
             }

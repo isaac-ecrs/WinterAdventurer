@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Location> Locations { get; set; } = null!;
     public DbSet<WorkshopLocationMapping> WorkshopLocationMappings { get; set; } = null!;
+    public DbSet<TimeSlot> TimeSlots { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
