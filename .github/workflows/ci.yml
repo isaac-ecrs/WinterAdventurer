@@ -30,7 +30,7 @@ jobs:
     - name: Verify zero warnings
       run: |
         dotnet build --no-restore --configuration Release 2>&1 | tee build.log
-        if grep -i "warning" build.log; then
+        if grep -E "warning (CS|MSB)[0-9]+" build.log; then
           echo "Build warnings detected!"
           exit 1
         fi

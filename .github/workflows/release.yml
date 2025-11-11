@@ -31,22 +31,33 @@ jobs:
 
           Workshop registration management system for multi-day events.
 
+          **Version Format:** Date-based (YYYY.MM.DD) - reflecting the once-a-year usage pattern
+
           ### Downloads
           Choose the appropriate version for your operating system:
           - **Windows**: `WinterAdventurer-win-x64.zip`
           - **Linux**: `WinterAdventurer-linux-x64.zip`
           - **macOS**: `WinterAdventurer-osx-x64.zip`
 
-          ### Usage
-          1. Extract the zip file
+          ### Quick Start
+          1. Download and extract the zip file for your OS
           2. Run the executable:
-             - Windows: Double-click `WinterAdventurer.exe`
-             - Linux/macOS: Run `./WinterAdventurer` in terminal
+             - **Windows**: Double-click `WinterAdventurer.exe`
+             - **Linux/macOS**: Run `./WinterAdventurer` in terminal (may need `chmod +x` first)
           3. Open your browser to http://localhost:5001
-          4. Upload your Excel file and generate PDFs!
+          4. Upload your Excel file, edit workshops, and generate PDFs!
+
+          ### Features
+          - Import Excel spreadsheets with workshop registration data
+          - Generate class rosters for workshop leaders
+          - Create individual schedules for participants
+          - Generate master schedule grid
+          - Edit workshop assignments and locations
+          - Dark mode support
+          - Optimized for black and white printing
 
           ### What's New
-          See commit history for changes in this release.
+          See commit history for detailed changes in this release.
 
   build-release:
     needs: create-release
