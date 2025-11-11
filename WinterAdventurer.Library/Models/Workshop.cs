@@ -15,7 +15,7 @@ namespace WinterAdventurer.Library.Models
         [Required]
         public string Location { get; set; } = string.Empty;
         [Required]
-        public Period Period { get; set; }
+        public Period Period { get; set; } = new Period(string.Empty);
         [Required]
         public WorkshopDuration Duration { get; set; } = new WorkshopDuration(1, 1);
         [Required]

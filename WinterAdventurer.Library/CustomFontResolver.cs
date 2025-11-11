@@ -31,14 +31,16 @@ namespace WinterAdventurer.Library
                     return new FontResolverInfo("Roboto-Regular");
 
                 default:
-                    return PlatformFontResolver.ResolveTypeface(familyName, isBold, isItalic);
+                    // Fall back to NotoSans for unknown fonts
+                    return PlatformFontResolver.ResolveTypeface(familyName, isBold, isItalic)
+                        ?? new FontResolverInfo("NotoSans-Regular");
             }
         }
 
         // Get the font from embedded resources
         public byte[] GetFont(string faceName)
         {
-            string resourceName = GetFontResourceName(faceName);
+            string? resourceName = GetFontResourceName(faceName);
             if (resourceName == null)
                 throw new InvalidOperationException($"Font resource for {faceName} not found.");
 
@@ -46,7 +48,7 @@ namespace WinterAdventurer.Library
         }
 
         // Map font family name to the corresponding embedded resource name
-        private string GetFontResourceName(string faceName)
+        private string? GetFontResourceName(string faceName)
         {
             switch (faceName.ToLower())
             {
@@ -73,7 +75,7 @@ namespace WinterAdventurer.Library
             var assembly = Assembly.GetExecutingAssembly();
             var resources = assembly.GetManifestResourceNames();
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
             {
                 if (stream == null)
                     throw new InvalidOperationException($"Resource {resourceName} not found.");

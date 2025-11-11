@@ -45,11 +45,17 @@ using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
     Console.WriteLine($"Merge workshop cells: {mergeWorkshopCells}");
     var document = excelUtilities.CreatePdf(mergeWorkshopCells);
 
+    if (document == null)
+    {
+        Console.WriteLine("Error: No document generated (no workshops found)");
+        return;
+    }
+
     GlobalFontSettings.FontResolver = new CustomFontResolver();
 
     var renderer = new PdfDocumentRenderer();
     renderer.Document = document;
-    document.Styles["Normal"].Font.Name = "NotoSans";
+    document!.Styles["Normal"]!.Font.Name = "NotoSans";
 
     renderer.RenderDocument();
 

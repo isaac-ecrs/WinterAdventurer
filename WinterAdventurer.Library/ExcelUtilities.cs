@@ -333,7 +333,7 @@ namespace WinterAdventurer.Library
             return document;
         }
 
-        public Document CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
+        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             if (Workshops != null)
             {
@@ -366,7 +366,7 @@ namespace WinterAdventurer.Library
             return null;
         }
 
-        public Document CreateMasterSchedulePdf(string eventName = "Master Schedule", List<Models.TimeSlot>? timeslots = null)
+        public Document? CreateMasterSchedulePdf(string eventName = "Master Schedule", List<Models.TimeSlot>? timeslots = null)
         {
             if (Workshops != null)
             {
@@ -689,7 +689,6 @@ namespace WinterAdventurer.Library
                 var timeColumnWidth = 1.8;
                 var dayColumnWidth = 1.85;
                 var tableWidth = timeColumnWidth + (_schema.TotalDays * dayColumnWidth); // 1.8 + 7.4 = 9.2
-                var usableWidth = 10.0;
                 var leftIndent = 0.7; // Push table more to the right for better centering
 
                 table.Rows.LeftIndent = Unit.FromInch(leftIndent);

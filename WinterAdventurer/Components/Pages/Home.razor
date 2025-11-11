@@ -497,7 +497,12 @@
                 try
                 {
                     var document = context.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
-                    document.Styles["Normal"].Font.Name = "NotoSans";
+                    if (document == null)
+                    {
+                        return (Array.Empty<byte>(), "No document generated (no workshops found)");
+                    }
+
+                    document!.Styles["Normal"]!.Font.Name = "NotoSans";
 
                     var renderer = new PdfDocumentRenderer();
                     renderer.Document = document;
@@ -558,7 +563,12 @@
                 try
                 {
                     var document = context.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
-                    document.Styles["Normal"].Font.Name = "NotoSans";
+                    if (document == null)
+                    {
+                        return (Array.Empty<byte>(), "No document generated (no workshops found)");
+                    }
+
+                    document!.Styles["Normal"]!.Font.Name = "NotoSans";
 
                     var renderer = new PdfDocumentRenderer();
                     renderer.Document = document;
