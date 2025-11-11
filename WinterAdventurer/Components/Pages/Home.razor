@@ -489,39 +489,45 @@
         {
             errorMessage = null;
             isLoading = true;
+            await InvokeAsync(StateHasChanged); // Immediate UI update
 
-            // Generate PDF document
-            var document = context.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
-
-            // Set up document styles (font resolver configured at startup)
-            document.Styles["Normal"].Font.Name = "NotoSans";
-
-            // Render the document
-            var renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
-            renderer.RenderDocument();
-
-            // Save to memory stream
-            using (var stream = new MemoryStream())
+            // Generate PDF in background thread to keep SignalR circuit alive
+            var (pdfBytes, error) = await Task.Run(() =>
             {
-                renderer.PdfDocument.Save(stream, false);
-                stream.Position = 0;
+                try
+                {
+                    var document = context.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
+                    document.Styles["Normal"].Font.Name = "NotoSans";
 
-                // Convert to byte array for download
-                var bytes = stream.ToArray();
-                var base64 = Convert.ToBase64String(bytes);
+                    var renderer = new PdfDocumentRenderer();
+                    renderer.Document = document;
+                    renderer.RenderDocument();
 
-                // Trigger download in browser
+                    using (var stream = new MemoryStream())
+                    {
+                        renderer.PdfDocument.Save(stream, false);
+                        return (stream.ToArray(), (string?)null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return (Array.Empty<byte>(), ex.Message);
+                }
+            });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                errorMessage = $"Error generating PDF: {error}";
+                success = false;
+            }
+            else
+            {
+                var base64 = Convert.ToBase64String(pdfBytes);
                 await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "ClassRosters.pdf", base64);
             }
 
             isLoading = false;
-
-            // Safe state update after async operation
-            if (!_disposed)
-            {
-                await InvokeAsync(StateHasChanged);
-            }
+            if (!_disposed) await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
@@ -544,45 +550,50 @@
         {
             errorMessage = null;
             isLoading = true;
+            await InvokeAsync(StateHasChanged); // Immediate UI update
 
-            // Generate master schedule PDF document
-            var document = context.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
-
-            // Set up document styles (font resolver configured at startup)
-            document.Styles["Normal"].Font.Name = "NotoSans";
-
-            // Render the document
-            var renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
-            renderer.RenderDocument();
-
-            // Save to memory stream
-            using (var stream = new MemoryStream())
+            // Generate PDF in background thread to keep SignalR circuit alive
+            var (pdfBytes, error) = await Task.Run(() =>
             {
-                renderer.PdfDocument.Save(stream, false);
-                stream.Position = 0;
+                try
+                {
+                    var document = context.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
+                    document.Styles["Normal"].Font.Name = "NotoSans";
 
-                // Convert to byte array for download
-                var bytes = stream.ToArray();
-                var base64 = Convert.ToBase64String(bytes);
+                    var renderer = new PdfDocumentRenderer();
+                    renderer.Document = document;
+                    renderer.RenderDocument();
 
-                // Trigger download in browser
+                    using (var stream = new MemoryStream())
+                    {
+                        renderer.PdfDocument.Save(stream, false);
+                        return (stream.ToArray(), (string?)null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return (Array.Empty<byte>(), ex.Message);
+                }
+            });
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                errorMessage = $"Error generating master schedule PDF: {error}";
+                success = false;
+            }
+            else
+            {
+                var base64 = Convert.ToBase64String(pdfBytes);
                 await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "MasterSchedule.pdf", base64);
             }
 
             isLoading = false;
-
-            // Safe state update after async operation
-            if (!_disposed)
-            {
-                await InvokeAsync(StateHasChanged);
-            }
+            if (!_disposed) await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             if (!_disposed)
             {
-                Console.WriteLine($"Error generating master schedule PDF: {ex.Message}");
                 errorMessage = $"Error generating master schedule PDF: {ex.Message}";
                 success = false;
                 isLoading = false;

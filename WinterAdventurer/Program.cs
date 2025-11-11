@@ -34,7 +34,16 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(3);
+    })
+    .AddHubOptions(options =>
+    {
+        options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+        options.MaximumReceiveMessageSize = 128 * 1024; // 128KB for large PDFs
+    });
 builder.Services.AddMudServices();
 
 // Add database context
