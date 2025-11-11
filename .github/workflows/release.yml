@@ -37,15 +37,7 @@ jobs:
       run: dotnet restore
 
     - name: Build and Publish
-      run: |
-        dotnet publish WinterAdventurer/WinterAdventurer.csproj \
-          -c Release \
-          -r ${{ matrix.runtime }} \
-          --self-contained true \
-          -p:PublishSingleFile=true \
-          -p:PublishTrimmed=false \
-          -p:IncludeNativeLibrariesForSelfExtract=true \
-          -o publish/${{ matrix.artifact }}
+      run: dotnet publish WinterAdventurer/WinterAdventurer.csproj -c Release -r ${{ matrix.runtime }} --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true -o publish/${{ matrix.artifact }}
 
     - name: Create README for release
       shell: bash
