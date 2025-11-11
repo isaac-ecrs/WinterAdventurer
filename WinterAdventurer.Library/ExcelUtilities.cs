@@ -366,6 +366,28 @@ namespace WinterAdventurer.Library
             return null;
         }
 
+        public Document CreateMasterSchedulePdf(string eventName = "Master Schedule", List<Models.TimeSlot>? timeslots = null)
+        {
+            if (Workshops != null)
+            {
+                var document = new Document();
+
+                foreach(var section in PrintMasterSchedule(eventName, timeslots))
+                {
+                    section.PageSetup.TopMargin = Unit.FromInch(.5);
+                    section.PageSetup.LeftMargin = Unit.FromInch(.5);
+                    section.PageSetup.RightMargin = Unit.FromInch(.5);
+                    section.PageSetup.BottomMargin = Unit.FromInch(.5);
+
+                    document.Sections.Add(section);
+                }
+
+                return document;
+            }
+
+            return null;
+        }
+
         private List<Section> PrintWorkshopParticipants(List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
@@ -373,6 +395,9 @@ namespace WinterAdventurer.Library
             foreach(var workshopListing in Workshops)
             {
                 var section = new Section();
+
+                // Add logo to section
+                AddLogoToSection(section, "roster");
 
                 // Workshop name - Oswald (top level header)
                 var header = section.AddParagraph();
@@ -642,6 +667,9 @@ namespace WinterAdventurer.Library
                 section.PageSetup.RightMargin = Unit.FromInch(0.5);
                 section.PageSetup.TopMargin = Unit.FromInch(0.5);
                 section.PageSetup.BottomMargin = Unit.FromInch(0.5);
+
+                // Add logo to section
+                AddLogoToSection(section, "individual");
 
                 // Header with attendee name - Oswald
                 var header = section.AddParagraph();
@@ -936,6 +964,333 @@ namespace WinterAdventurer.Library
             });
 
             return timeslots;
+        }
+
+        private List<Section> PrintMasterSchedule(string eventName, List<Models.TimeSlot>? timeslots = null)
+        {
+            var sections = new List<Section>();
+
+            // If no timeslots provided, create default set
+            if (timeslots == null || !timeslots.Any())
+            {
+                timeslots = CreateDefaultTimeslots();
+            }
+
+            // Get unique locations sorted alphabetically
+            var locations = GetUniqueLocations();
+
+            if (!locations.Any())
+            {
+                // No locations assigned, skip master schedule
+                return sections;
+            }
+
+            var section = new Section();
+
+            // Auto-detect orientation based on location count
+            if (locations.Count > 5)
+            {
+                section.PageSetup.Orientation = Orientation.Landscape;
+            }
+            else
+            {
+                section.PageSetup.Orientation = Orientation.Portrait;
+            }
+
+            // Add logo to section
+            AddLogoToSection(section, "master");
+
+            // Title
+            var title = section.AddParagraph();
+            title.Format.Font.Name = "Oswald";
+            title.Format.Font.Color = COLOR_BLACK;
+            title.Format.Font.Size = 28;
+            title.Format.Alignment = ParagraphAlignment.Center;
+            title.AddFormattedText(eventName, TextFormat.Bold);
+            title.Format.SpaceAfter = Unit.FromPoint(20);
+
+            // Create table
+            var table = section.AddTable();
+            table.Borders.Width = 0.5;
+
+            // Column widths
+            var timeColumnWidth = 1.5;
+            var daysColumnWidth = 0.8;
+            var totalUsableWidth = section.PageSetup.Orientation == Orientation.Landscape ? 10.0 : 7.5;
+            var locationColumnWidth = (totalUsableWidth - timeColumnWidth - daysColumnWidth) / locations.Count;
+
+            // Add columns
+            table.AddColumn(Unit.FromInch(timeColumnWidth));  // Time
+            table.AddColumn(Unit.FromInch(daysColumnWidth));  // Days indicator
+            foreach (var location in locations)
+            {
+                table.AddColumn(Unit.FromInch(locationColumnWidth));
+            }
+
+            // Header row
+            var headerRow = table.AddRow();
+            headerRow.Shading.Color = Color.FromRgb(220, 220, 220);
+            headerRow.HeadingFormat = true;
+
+            // Time header
+            var timeHeader = headerRow.Cells[0];
+            var timeHeaderPara = timeHeader.AddParagraph();
+            timeHeaderPara.Format.Font.Name = "NotoSans";
+            timeHeaderPara.Format.Font.Bold = true;
+            timeHeaderPara.Format.Font.Size = 12;
+            timeHeaderPara.Format.Alignment = ParagraphAlignment.Center;
+            timeHeaderPara.AddText("Time");
+
+            // Days header
+            var daysHeader = headerRow.Cells[1];
+            var daysHeaderPara = daysHeader.AddParagraph();
+            daysHeaderPara.Format.Font.Name = "NotoSans";
+            daysHeaderPara.Format.Font.Bold = true;
+            daysHeaderPara.Format.Font.Size = 12;
+            daysHeaderPara.Format.Alignment = ParagraphAlignment.Center;
+            daysHeaderPara.AddText("Days");
+
+            // Location headers
+            for (int i = 0; i < locations.Count; i++)
+            {
+                var locationHeader = headerRow.Cells[i + 2];
+                var locationHeaderPara = locationHeader.AddParagraph();
+                locationHeaderPara.Format.Font.Name = "NotoSans";
+                locationHeaderPara.Format.Font.Bold = true;
+                locationHeaderPara.Format.Font.Size = 11;
+                locationHeaderPara.Format.Alignment = ParagraphAlignment.Center;
+                locationHeaderPara.AddText(locations[i]);
+            }
+
+            // Add rows for each timeslot
+            foreach (var timeslot in timeslots)
+            {
+                if (timeslot.IsPeriod)
+                {
+                    // Period: create two sub-rows for Days 1-2 and Days 3-4
+                    AddPeriodRows(table, timeslot, locations);
+                }
+                else
+                {
+                    // Activity: create single merged row
+                    AddActivityRow(table, timeslot, locations.Count);
+                }
+            }
+
+            sections.Add(section);
+            return sections;
+        }
+
+        private void AddPeriodRows(Table table, Models.TimeSlot timeslot, List<string> locations)
+        {
+            // Create two rows: Days 1-2 and Days 3-4
+            var row12 = table.AddRow();
+            var row34 = table.AddRow();
+
+            // Time cell (merge across both rows)
+            var timeCell = row12.Cells[0];
+            timeCell.MergeDown = 1;
+            timeCell.VerticalAlignment = VerticalAlignment.Center;
+            var timePara = timeCell.AddParagraph();
+            timePara.Format.Font.Name = "NotoSans";
+            timePara.Format.Font.Size = 10;
+            timePara.Format.Alignment = ParagraphAlignment.Center;
+
+            if (!string.IsNullOrEmpty(timeslot.TimeRange))
+            {
+                timePara.AddText(timeslot.TimeRange);
+            }
+            else
+            {
+                timePara.AddText(timeslot.Label);
+            }
+
+            // Days 1-2 cell
+            var days12Cell = row12.Cells[1];
+            days12Cell.VerticalAlignment = VerticalAlignment.Center;
+            var days12Para = days12Cell.AddParagraph();
+            days12Para.Format.Font.Name = "NotoSans";
+            days12Para.Format.Font.Size = 9;
+            days12Para.Format.Alignment = ParagraphAlignment.Center;
+            days12Para.AddText("Days\n1-2");
+
+            // Days 3-4 cell
+            var days34Cell = row34.Cells[1];
+            days34Cell.VerticalAlignment = VerticalAlignment.Center;
+            var days34Para = days34Cell.AddParagraph();
+            days34Para.Format.Font.Name = "NotoSans";
+            days34Para.Format.Font.Size = 9;
+            days34Para.Format.Alignment = ParagraphAlignment.Center;
+            days34Para.AddText("Days\n3-4");
+
+            // Location columns
+            for (int i = 0; i < locations.Count; i++)
+            {
+                var location = locations[i];
+
+                // Check for 4-day workshop first
+                var workshop4Day = Workshops.FirstOrDefault(w =>
+                    w.Period.DisplayName == timeslot.Label &&
+                    w.Location == location &&
+                    w.Duration.StartDay == 1 &&
+                    w.Duration.EndDay == 4);
+
+                if (workshop4Day != null)
+                {
+                    // 4-day workshop spans both rows
+                    var cell = row12.Cells[i + 2];
+                    cell.MergeDown = 1;
+                    cell.VerticalAlignment = VerticalAlignment.Center;
+                    AddWorkshopToCell(cell, workshop4Day);
+                }
+                else
+                {
+                    // Check for Days 1-2 workshop
+                    var workshop12 = Workshops.FirstOrDefault(w =>
+                        w.Period.DisplayName == timeslot.Label &&
+                        w.Location == location &&
+                        w.Duration.StartDay == 1 &&
+                        w.Duration.EndDay == 2);
+
+                    if (workshop12 != null)
+                    {
+                        AddWorkshopToCell(row12.Cells[i + 2], workshop12);
+                    }
+
+                    // Check for Days 3-4 workshop
+                    var workshop34 = Workshops.FirstOrDefault(w =>
+                        w.Period.DisplayName == timeslot.Label &&
+                        w.Location == location &&
+                        w.Duration.StartDay == 3 &&
+                        w.Duration.EndDay == 4);
+
+                    if (workshop34 != null)
+                    {
+                        AddWorkshopToCell(row34.Cells[i + 2], workshop34);
+                    }
+                }
+            }
+        }
+
+        private void AddActivityRow(Table table, Models.TimeSlot timeslot, int locationCount)
+        {
+            var row = table.AddRow();
+            row.Shading.Color = Color.FromRgb(240, 248, 255);
+
+            // Time cell
+            var timeCell = row.Cells[0];
+            var timePara = timeCell.AddParagraph();
+            timePara.Format.Font.Name = "NotoSans";
+            timePara.Format.Font.Size = 10;
+            timePara.Format.Alignment = ParagraphAlignment.Center;
+
+            if (!string.IsNullOrEmpty(timeslot.TimeRange))
+            {
+                timePara.AddText(timeslot.TimeRange);
+            }
+            else
+            {
+                timePara.AddText(timeslot.Label);
+            }
+
+            // Merge days and all location columns
+            var activityCell = row.Cells[1];
+            activityCell.MergeRight = locationCount; // Merge Days + all location columns
+            activityCell.VerticalAlignment = VerticalAlignment.Center;
+            var activityPara = activityCell.AddParagraph();
+            activityPara.Format.Font.Name = "Roboto";
+            activityPara.Format.Font.Size = 14;
+            activityPara.Format.Font.Italic = true;
+            activityPara.Format.Alignment = ParagraphAlignment.Center;
+            activityPara.AddFormattedText(timeslot.Label, TextFormat.Bold);
+        }
+
+        private void AddWorkshopToCell(Cell cell, Workshop workshop)
+        {
+            cell.VerticalAlignment = VerticalAlignment.Center;
+            var para = cell.AddParagraph();
+            para.Format.Font.Name = "NotoSans";
+            para.Format.Font.Size = 10;
+            para.Format.Alignment = ParagraphAlignment.Center;
+
+            // Workshop name
+            para.AddFormattedText(workshop.Name, TextFormat.Bold);
+            para.AddLineBreak();
+
+            // Leader in parentheses
+            var leaderText = para.AddFormattedText($"({workshop.Leader})");
+            leaderText.Font.Size = 9;
+            leaderText.Font.Italic = true;
+        }
+
+        private List<string> GetUniqueLocations()
+        {
+            return Workshops
+                .Where(w => !string.IsNullOrWhiteSpace(w.Location))
+                .Select(w => w.Location)
+                .Distinct()
+                .OrderBy(loc => loc)
+                .ToList();
+        }
+
+        private void AddLogoToSection(Section section, string documentType = "roster")
+        {
+            try
+            {
+                // Load logo from embedded resources
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = "WinterAdventurer.Library.Resources.Images.ECRS_Logo_Minimal_Gray.png";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream != null)
+                    {
+                        // Save to temporary file (MigraDoc requires file path for images)
+                        var tempPath = Path.Combine(Path.GetTempPath(), "ecrs_logo_temp.png");
+                        using (var fileStream = File.Create(tempPath))
+                        {
+                            stream.CopyTo(fileStream);
+                        }
+
+                        // Add logo with position/size based on document type
+                        var logo = section.AddImage(tempPath);
+                        logo.LockAspectRatio = true;
+                        logo.RelativeVertical = RelativeVertical.Page;
+                        logo.RelativeHorizontal = RelativeHorizontal.Margin;
+                        logo.WrapFormat.Style = WrapStyle.Through;
+
+                        // Adjust size and position based on document type
+                        if (documentType == "individual")
+                        {
+                            // Individual schedules are landscape - logo on far right
+                            logo.Height = Unit.FromInch(1.0);
+                            logo.Top = Unit.FromInch(0.2);
+                            logo.Left = Unit.FromInch(8.5); // Far right for landscape
+                        }
+                        else if (documentType == "master")
+                        {
+                            // Master schedule - smaller, more centered
+                            logo.Height = Unit.FromInch(1.0);
+                            logo.Top = Unit.FromInch(0.15);
+                            logo.Left = Unit.FromInch(6.0);
+                        }
+                        else // roster (default)
+                        {
+                            // Class rosters - portrait, bottom right to avoid overlapping long workshop names
+                            // Page is 11" tall with 0.5" margins = 10" content area
+                            // Position at 10" - 1.0" logo - 0.2" margin = 8.8" from top
+                            logo.Height = Unit.FromInch(1.0);
+                            logo.Top = Unit.FromInch(8.8);
+                            logo.Left = Unit.FromInch(5.5);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail PDF generation
+                Console.WriteLine($"Error adding logo: {ex.Message}");
+            }
         }
     }
 }

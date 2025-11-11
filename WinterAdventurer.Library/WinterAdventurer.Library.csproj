@@ -16,6 +16,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources/Fonts/**/*.ttf" />
     <EmbeddedResource Include="EventSchemas/**/*.json" />
+    <EmbeddedResource Include="Resources/Images/**/*.png" />
   </ItemGroup>
 
 </Project>

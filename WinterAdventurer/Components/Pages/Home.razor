@@ -116,6 +116,13 @@
                     }
                 </MudPaper>
             </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Event Name" @bind-Value="eventName"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Event"
+                          HelperText="Name for the master schedule (e.g., Winter Adventure 2025)" />
+        </MudItem>
             @foreach (var workshop in workshops)
             {
                 <MudItem xs="6">
@@ -161,9 +168,11 @@
                     </MudCard>
                 </MudItem>
             }
-            <MudItem xs="12">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">
+            <MudItem xs="12" Class="d-flex gap-3">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
                     Create PDF</MudButton>
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Secondary" OnClick="BuildMasterSchedulePdf">
+                    Download Master Schedule</MudButton>
             </MudItem>
         </MudGrid>
     </EditForm>
@@ -187,6 +196,7 @@
     private List<string> availableLocations = new List<string>();
     private Dictionary<string, string> previousLocations = new Dictionary<string, string>();
     private int locationListVersion = 0; // Increment to force autocomplete recreation
+    private string eventName = $"Winter Adventure {DateTime.Now.Year}";
 
     public class TimeSlot
     {
@@ -519,6 +529,61 @@
             {
                 Console.WriteLine($"Error generating PDF: {ex.Message}");
                 errorMessage = $"Error generating PDF: {ex.Message}";
+                success = false;
+                isLoading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private async Task BuildMasterSchedulePdf()
+    {
+        if (_disposed || !_hasRendered) return;
+
+        try
+        {
+            errorMessage = null;
+            isLoading = true;
+
+            // Generate master schedule PDF document
+            var document = context.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
+
+            // Set up document styles (font resolver configured at startup)
+            document.Styles["Normal"].Font.Name = "NotoSans";
+
+            // Render the document
+            var renderer = new PdfDocumentRenderer();
+            renderer.Document = document;
+            renderer.RenderDocument();
+
+            // Save to memory stream
+            using (var stream = new MemoryStream())
+            {
+                renderer.PdfDocument.Save(stream, false);
+                stream.Position = 0;
+
+                // Convert to byte array for download
+                var bytes = stream.ToArray();
+                var base64 = Convert.ToBase64String(bytes);
+
+                // Trigger download in browser
+                await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "MasterSchedule.pdf", base64);
+            }
+
+            isLoading = false;
+
+            // Safe state update after async operation
+            if (!_disposed)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (!_disposed)
+            {
+                Console.WriteLine($"Error generating master schedule PDF: {ex.Message}");
+                errorMessage = $"Error generating master schedule PDF: {ex.Message}";
                 success = false;
                 isLoading = false;
                 await InvokeAsync(StateHasChanged);
