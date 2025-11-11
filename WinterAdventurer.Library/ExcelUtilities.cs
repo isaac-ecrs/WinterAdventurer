@@ -704,7 +704,7 @@ namespace WinterAdventurer.Library
 
                 // Header row with day numbers
                 var headerRow = table.AddRow();
-                headerRow.Shading.Color = Color.FromRgb(240, 240, 240);
+                headerRow.Shading.Color = Color.FromRgb(220, 220, 220);
                 headerRow.HeadingFormat = true;
 
                 var periodHeaderCell = headerRow.Cells[0];
@@ -863,7 +863,7 @@ namespace WinterAdventurer.Library
                                     leaderPara.Format.Font.Size = 12;
                                     leaderPara.Format.Font.Italic = true;
                                     leaderPara.Format.Alignment = ParagraphAlignment.Center;
-                                    leaderPara.AddText($"({workshop.Leader})");
+                                    leaderPara.AddText($"{workshop.Leader}");
                                 }
 
                                 // Add location info
@@ -902,7 +902,7 @@ namespace WinterAdventurer.Library
         private void AddMergedActivityRow(Table table, string activityName, int totalDays, string timeRange = "")
         {
             var row = table.AddRow();
-            row.Shading.Color = Color.FromRgb(250, 250, 250);
+            row.Shading.Color = Color.FromRgb(230, 230, 230);
 
             // First cell: time range (not merged)
             var timeCell = row.Cells[0];
@@ -1175,7 +1175,7 @@ namespace WinterAdventurer.Library
         private void AddActivityRow(Table table, Models.TimeSlot timeslot, int locationCount)
         {
             var row = table.AddRow();
-            row.Shading.Color = Color.FromRgb(240, 248, 255);
+            row.Shading.Color = Color.FromRgb(230, 230, 230);
 
             // Time cell
             var timeCell = row.Cells[0];
