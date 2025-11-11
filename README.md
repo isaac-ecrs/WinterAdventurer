@@ -2,18 +2,20 @@
 
 [![CI](https://github.com/isaac-ecrs/WinterAdventurer/workflows/CI/badge.svg)](https://github.com/isaac-ecrs/WinterAdventurer/actions)
 
-A workshop/class registration management system for multi-day events. Import Excel spreadsheets and generate professional PDFs for workshop leaders and participants.
+A workshop/class registration management system for [ECRS](https://ecrs.org) Winter Adventure events. Import Excel spreadsheets from Cognito Forms and generate professional PDFs for workshop leaders and participants.
+
+**Note:** This tool is specifically designed for ECRS Winter Adventure events and expects Excel data in the format exported from our Cognito Forms registration system. While the code is open source and contributions are welcome, it may require modification for other use cases.
 
 ## Features
 
-- 📊 **Excel Import** - Schema-driven parsing of workshop registration data
+- 📊 **Excel Import** - Schema-driven parsing of ECRS Cognito Forms registration data
 - 📄 **PDF Generation** - Three document types:
   - Class rosters for workshop leaders
   - Individual schedules for participants
   - Master schedule grid showing all workshops
-- ✏️ **Interactive Editing** - Reassign participants, manage locations and timeslots
+- ✏️ **Interactive Editing** - Edit workshop details (names, leaders), manage locations and timeslots
 - 💾 **Data Persistence** - Locations and custom timeslots saved between sessions
-- 🎨 **Professional Output** - Custom fonts, organization logo, optimized for B&W printing
+- 🎨 **Professional Output** - Custom fonts, ECRS logo, optimized for B&W printing
 - 🌙 **Dark Mode** - Toggle between light and dark themes
 
 ## Quick Start
@@ -53,13 +55,15 @@ dotnet run -- "/path/to/your/file.xlsx"
 
 ## Usage
 
-1. **Upload Excel File** - Click "Choose File" and select your workshop registration spreadsheet
+1. **Upload Excel File** - Click "Choose File" and select your ECRS Cognito Forms registration export
 2. **Review Workshops** - See all parsed workshops and participants
-3. **Edit Assignments** - Change participant workshop assignments, update locations
-4. **Customize Schedule** - Adjust timeslots and periods as needed
+3. **Edit Details** - Update workshop names, leaders, and locations as needed
+4. **Customize Schedule** - Adjust timeslots and periods for your event
 5. **Generate PDFs** - Download class rosters, individual schedules, or master schedule
 
 ## Excel Format Requirements
+
+**Important:** This tool expects Excel data in the specific format exported from ECRS Cognito Forms registration system for Winter Adventure events.
 
 The system uses a schema-driven parser. See `WinterAdventurer.Library/EventSchemas/WinterAdventureSchema.json` for the expected Excel structure.
 
@@ -128,6 +132,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Contributions welcome! Please open an issue or submit a pull request.
 
+**For Contributors:** This project was built with [Claude Code](https://claude.ai/code). See [CLAUDE.md](CLAUDE.md) for detailed architecture notes and development guidance that work well with AI-assisted development.
+
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/isaac-ecrs/WinterAdventurer/issues)
@@ -135,4 +141,4 @@ Contributions welcome! Please open an issue or submit a pull request.
 
 ---
 
-Built with ❤️ for workshop organizers everywhere
+Built for [ECRS](https://ecrs.org) Winter Adventure events using .NET 8, Blazor, and Claude Code.

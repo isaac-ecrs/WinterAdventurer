@@ -43,33 +43,36 @@ jobs:
       shell: bash
       run: |
         cat > publish/${{ matrix.artifact }}/README.txt << 'EOF'
-        WinterAdventurer - Workshop Registration Management System
-        ============================================================
+        WinterAdventurer - ECRS Winter Adventure Registration Manager
+        ==============================================================
+
+        Built for ECRS (ecrs.org) Winter Adventure events
 
         QUICK START:
         1. Run the WinterAdventurer executable
         2. Open your browser to: http://localhost:5001
-        3. Upload your Excel file
-        4. Edit workshop assignments as needed
+        3. Upload your ECRS Cognito Forms Excel export
+        4. Edit workshop details (names, leaders, locations) as needed
         5. Download your PDFs!
 
         FEATURES:
-        - Import Excel spreadsheets with workshop registrations
+        - Import Excel from ECRS Cognito Forms registration system
         - Generate class rosters for workshop leaders
         - Create individual schedules for participants
         - Generate master schedule grid
-        - Manage locations and timeslots
+        - Edit workshop metadata and manage locations/timeslots
         - Dark mode support
 
         REQUIREMENTS:
         - No .NET installation required (self-contained)
         - Modern web browser (Chrome, Firefox, Safari, Edge)
+        - Excel file in ECRS Cognito Forms export format
 
         SUPPORT:
         - GitHub: https://github.com/${{ github.repository }}
         - Issues: https://github.com/${{ github.repository }}/issues
 
-        Built with ❤️ using .NET 8 and Blazor
+        Built for ECRS Winter Adventure using .NET 8, Blazor, and Claude Code
         EOF
 
     - name: Package Release (Linux/macOS)
@@ -114,7 +117,7 @@ jobs:
         body: |
           ## WinterAdventurer ${{ steps.get_version.outputs.version }}
 
-          Workshop registration management system for multi-day events.
+          Workshop registration management system for ECRS Winter Adventure events.
 
           **Version Format:** Date-based (YYYY.MM.DD) - reflecting the once-a-year usage pattern
 
@@ -130,14 +133,14 @@ jobs:
              - **Windows**: Double-click `WinterAdventurer.exe`
              - **Linux/macOS**: Run `./WinterAdventurer` in terminal (may need `chmod +x` first)
           3. Open your browser to http://localhost:5001
-          4. Upload your Excel file, edit workshops, and generate PDFs!
+          4. Upload your ECRS Cognito Forms Excel export, edit workshop details, and generate PDFs!
 
           ### Features
-          - Import Excel spreadsheets with workshop registration data
+          - Import Excel from ECRS Cognito Forms registration system
           - Generate class rosters for workshop leaders
           - Create individual schedules for participants
           - Generate master schedule grid
-          - Edit workshop assignments and locations
+          - Edit workshop details (names, leaders) and manage locations/timeslots
           - Dark mode support
           - Optimized for black and white printing
 
