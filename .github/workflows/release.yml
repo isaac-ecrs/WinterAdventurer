@@ -1,0 +1,143 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+    - name: Get version from tag
+      id: get_version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: WinterAdventurer ${{ github.ref }}
+        draft: false
+        prerelease: false
+        body: |
+          ## WinterAdventurer ${{ steps.get_version.outputs.version }}
+
+          Workshop registration management system for multi-day events.
+
+          ### Downloads
+          Choose the appropriate version for your operating system:
+          - **Windows**: `WinterAdventurer-win-x64.zip`
+          - **Linux**: `WinterAdventurer-linux-x64.zip`
+          - **macOS**: `WinterAdventurer-osx-x64.zip`
+
+          ### Usage
+          1. Extract the zip file
+          2. Run the executable:
+             - Windows: Double-click `WinterAdventurer.exe`
+             - Linux/macOS: Run `./WinterAdventurer` in terminal
+          3. Open your browser to http://localhost:5001
+          4. Upload your Excel file and generate PDFs!
+
+          ### What's New
+          See commit history for changes in this release.
+
+  build-release:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            runtime: linux-x64
+            artifact: WinterAdventurer-linux-x64
+          - os: windows-latest
+            runtime: win-x64
+            artifact: WinterAdventurer-win-x64
+          - os: macos-latest
+            runtime: osx-x64
+            artifact: WinterAdventurer-osx-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build and Publish
+      run: |
+        dotnet publish WinterAdventurer/WinterAdventurer.csproj \
+          -c Release \
+          -r ${{ matrix.runtime }} \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=false \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          -o publish/${{ matrix.artifact }}
+
+    - name: Create README for release
+      shell: bash
+      run: |
+        cat > publish/${{ matrix.artifact }}/README.txt << 'EOF'
+        WinterAdventurer - Workshop Registration Management System
+        ============================================================
+
+        QUICK START:
+        1. Run the WinterAdventurer executable
+        2. Open your browser to: http://localhost:5001
+        3. Upload your Excel file
+        4. Edit workshop assignments as needed
+        5. Download your PDFs!
+
+        FEATURES:
+        - Import Excel spreadsheets with workshop registrations
+        - Generate class rosters for workshop leaders
+        - Create individual schedules for participants
+        - Generate master schedule grid
+        - Manage locations and timeslots
+        - Dark mode support
+
+        REQUIREMENTS:
+        - No .NET installation required (self-contained)
+        - Modern web browser (Chrome, Firefox, Safari, Edge)
+
+        SUPPORT:
+        - GitHub: https://github.com/${{ github.repository }}
+        - Issues: https://github.com/${{ github.repository }}/issues
+
+        Built with ❤️ using .NET 8 and Blazor
+        EOF
+
+    - name: Package Release (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        cd publish
+        zip -r ${{ matrix.artifact }}.zip ${{ matrix.artifact }}
+
+    - name: Package Release (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd publish
+        Compress-Archive -Path ${{ matrix.artifact }} -DestinationPath ${{ matrix.artifact }}.zip
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./publish/${{ matrix.artifact }}.zip
+        asset_name: ${{ matrix.artifact }}.zip
+        asset_content_type: application/zip
