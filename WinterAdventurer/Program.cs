@@ -57,6 +57,9 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 // Add theme service
 builder.Services.AddScoped<ThemeService>();
 
+// Add Excel utilities service
+builder.Services.AddScoped<ExcelUtilities>();
+
 // Configure PDF font resolver (must be set once at startup)
 GlobalFontSettings.FontResolver = new CustomFontResolver();
 

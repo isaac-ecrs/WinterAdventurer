@@ -13,6 +13,7 @@
 @inject IJSRuntime JSRuntime
 @inject ILocationService LocationService
 @inject ILogger<Home> Logger
+@inject ExcelUtilities ExcelUtils
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -184,7 +185,6 @@
 @code {
     private List<Workshop> workshops = new List<Library.Models.Workshop>();
     private bool isLoading;
-    private ExcelUtilities context = new ExcelUtilities();
     private bool success = false;
     private string? errorMessage;
     private List<Period> periods = new List<Period>();
@@ -428,6 +428,7 @@
         errorMessage = null;
         isLoading = true;
         workshops.Clear();
+        ExcelUtils.Workshops.Clear(); // Clear previous workshops from ExcelUtils
 
         try
         {
@@ -435,8 +436,8 @@
             {
                 await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(stream);
                 stream.Position = 0;
-                context.ImportExcel(stream);
-                workshops = context.Workshops;
+                ExcelUtils.ImportExcel(stream);
+                workshops = ExcelUtils.Workshops;
                 periods = workshops.Select(w => w.Period).Distinct().ToList();
 
                 // Restore locations from saved mappings
@@ -496,7 +497,7 @@
             {
                 try
                 {
-                    var document = context.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
+                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
                     if (document == null)
                     {
                         return (Array.Empty<byte>(), "No document generated (no workshops found)");
@@ -562,7 +563,7 @@
             {
                 try
                 {
-                    var document = context.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
+                    var document = ExcelUtils.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
                     if (document == null)
                     {
                         return (Array.Empty<byte>(), "No document generated (no workshops found)");
