@@ -9,6 +9,7 @@
 @using WinterAdventurer.Library.Models
 @using Microsoft.JSInterop
 @using WinterAdventurer.Services
+@using WinterAdventurer.Components.Shared
 @using Microsoft.Extensions.Logging
 @inject IJSRuntime JSRuntime
 @inject ILocationService LocationService
@@ -21,19 +22,7 @@
 
 <h1>Winter Adventurer Workshop Manager</h1>
 
-<MudFileUpload T="IBrowserFile" FilesChanged="UploadExcel" Accept=".xlsx">
-    <ActivatorContent>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
-            Upload Excel File
-        </MudButton>
-    </ActivatorContent>
-</MudFileUpload>
-
-@if (isLoading)
-{
-    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-    <MudText>Processing...</MudText>
-}
+<FileUploadSection OnFileUploaded="UploadExcel" IsLoading="isLoading" />
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -176,15 +165,8 @@
                     </MudCard>
                 </MudItem>
             }
-            <MudItem xs="12" Class="d-flex gap-3">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                           Disabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)">
-                    Create PDF</MudButton>
-                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Secondary"
-                           OnClick="BuildMasterSchedulePdf"
-                           Disabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)">
-                    Download Master Schedule</MudButton>
-            </MudItem>
+            <PdfGenerationButtons IsDisabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)"
+                                  OnCreateMasterSchedule="BuildMasterSchedulePdf" />
         </MudGrid>
     </EditForm>
 

@@ -30,26 +30,32 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 ### Large Effort, Long-term Value
 
 #### 3. Extract Components from Home.razor
-**Complexity**: Large
+**Complexity**: Large (Phased approach)
 **Impact**: Improves maintainability and reduces risk of breaking changes
-**Current Situation**: Home.razor is 795 lines handling multiple responsibilities (file upload, timeslot management, location autocomplete, workshop editing, PDF generation).
+**Status**: Phase 1 Complete (2025-11-15), Phases 2-3 Pending
 
-**Proposed Solution**:
-- Extract `WorkshopEditor` component (workshop cards, location dropdown logic)
-- Extract `TimeslotEditor` component (schedule time configuration UI)
-- Keep Home.razor as orchestrator only
-- Improves testability and reduces cognitive load for developers
+**Phase 1 Complete (Simple Components)**:
+- ✅ Extracted `FileUploadSection.razor` - file upload UI with loading state
+- ✅ Extracted `PdfGenerationButtons.razor` - PDF generation buttons with validation-based disabling
+- ✅ Reduced Home.razor from 826 to 813 lines
+- ✅ All 129 tests passing, 0 warnings
 
-**Benefits**:
-- Easier to test individual features
-- Reduced risk when making changes
-- Better separation of concerns
-- Easier onboarding for new developers
+**Phase 2 Planned (Medium Complexity)**:
+- Extract `TimeslotEditor.razor` - complete timeslot management UI
+- Extract `TimeSlotViewModel.cs` - move inner class to shared models
+- Estimated: 3-4 hours, ~200 lines extracted
 
-**Files**:
-- `WinterAdventurer/Components/Pages/Home.razor` (current: 795 lines)
-- New: `WinterAdventurer/Components/WorkshopEditor.razor`
-- New: `WinterAdventurer/Components/TimeslotEditor.razor`
+**Phase 3 Planned (High Complexity)**:
+- Extract `WorkshopGrid.razor` - workshop grid layout
+- Extract `WorkshopCard.razor` - individual workshop editing
+- Handle complex location autocomplete integration
+- Estimated: 4-6 hours, ~250 lines extracted
+
+**Target**: Reduce Home.razor to ~150 lines (orchestrator only)
+
+**Files Created**:
+- `WinterAdventurer/Components/Shared/FileUploadSection.razor`
+- `WinterAdventurer/Components/Shared/PdfGenerationButtons.razor`
 
 ---
 
