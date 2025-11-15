@@ -54,6 +54,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add location service
 builder.Services.AddScoped<ILocationService, LocationService>();
 
+// Add timeslot validation service
+builder.Services.AddScoped<ITimeslotValidationService, TimeslotValidationService>();
+
 // Add theme service
 builder.Services.AddScoped<ThemeService>();
 

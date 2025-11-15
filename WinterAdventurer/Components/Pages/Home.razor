@@ -14,6 +14,7 @@
 @inject ILocationService LocationService
 @inject ILogger<Home> Logger
 @inject ExcelUtilities ExcelUtils
+@inject ITimeslotValidationService TimeslotValidator
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -41,10 +42,16 @@
 
 <!-- Timeslot Configuration Section - Always rendered but hidden until file uploaded -->
 <div style="display: @(workshops.Count > 0 ? "block" : "none")">
-    @if (hasOverlappingTimeslots)
+    @if (hasUnconfiguredTimeslots)
     {
-        <MudAlert Severity="Severity.Warning" Class="mt-4 mb-4">
-            Warning: You have overlapping timeslots. Please adjust the times and click "Save Times" again.
+        <MudAlert Severity="Severity.Error" Class="mt-4 mb-4">
+            <strong>PDF generation is blocked:</strong> Some period timeslots are missing start or end times. Please configure all period times and click "Save Times".
+        </MudAlert>
+    }
+    else if (hasOverlappingTimeslots)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4 mb-4">
+            <strong>PDF generation is blocked:</strong> You have overlapping or duplicate timeslots (same start times). Please adjust the times and click "Save Times" again.
         </MudAlert>
     }
 
@@ -63,7 +70,7 @@
                                class="mud-input-slot mud-input-root mud-input-root-outlined"
                                style="padding: 10px; width: 100%;"
                                value="@FormatTimeSpan(timeslot.StartTime)"
-                               @onchange="@(e => timeslot.StartTime = ParseTimeString(e.Value?.ToString()))" />
+                               @onchange="@(e => OnTimeChanged(timeslot, e.Value?.ToString(), true))" />
                     </MudField>
                 </MudItem>
                 <MudItem xs="3">
@@ -72,7 +79,7 @@
                                class="mud-input-slot mud-input-root mud-input-root-outlined"
                                style="padding: 10px; width: 100%;"
                                value="@FormatTimeSpan(timeslot.EndTime)"
-                               @onchange="@(e => timeslot.EndTime = ParseTimeString(e.Value?.ToString()))" />
+                               @onchange="@(e => OnTimeChanged(timeslot, e.Value?.ToString(), false))" />
                     </MudField>
                 </MudItem>
                 <MudItem xs="2" Class="d-flex align-center">
@@ -170,9 +177,12 @@
                 </MudItem>
             }
             <MudItem xs="12" Class="d-flex gap-3">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                           Disabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)">
                     Create PDF</MudButton>
-                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Secondary" OnClick="BuildMasterSchedulePdf">
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Secondary"
+                           OnClick="BuildMasterSchedulePdf"
+                           Disabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)">
                     Download Master Schedule</MudButton>
             </MudItem>
         </MudGrid>
@@ -190,6 +200,7 @@
     private List<Period> periods = new List<Period>();
     private List<TimeSlot> timeslots = new List<TimeSlot>();
     private bool hasOverlappingTimeslots = false;
+    private bool hasUnconfiguredTimeslots = false;
     private bool _disposed = false;
     private CancellationTokenSource? _cts;
     private bool _hasRendered = false;
@@ -255,7 +266,7 @@
                 timeslots.Clear();
                 timeslots.AddRange(loaded);
                 SortTimeslots();
-                CheckForOverlaps();
+                ValidateTimeslots();
                 return;
             }
         }
@@ -274,9 +285,9 @@
 
         try
         {
-            // Sort and check overlaps before saving
+            // Sort and validate timeslots before saving
             SortTimeslots();
-            CheckForOverlaps();
+            ValidateTimeslots();
 
             Logger.LogInformation("SaveTimeslots: Saving {Count} timeslots to database", timeslots.Count);
 
@@ -323,28 +334,22 @@
         });
     }
 
-    private void CheckForOverlaps()
+    private void ValidateTimeslots()
     {
         if (_disposed) return;
 
-        hasOverlappingTimeslots = false;
-
-        for (int i = 0; i < timeslots.Count - 1; i++)
+        var timeslotDtos = timeslots.Select(t => new TimeSlotDto
         {
-            var current = timeslots[i];
-            var next = timeslots[i + 1];
+            Id = t.Id,
+            Label = t.Label,
+            StartTime = t.StartTime,
+            EndTime = t.EndTime,
+            IsPeriod = t.IsPeriod
+        });
 
-            if (current.StartTime.HasValue && current.EndTime.HasValue &&
-                next.StartTime.HasValue && next.EndTime.HasValue)
-            {
-                // Check if current end time is after next start time
-                if (current.EndTime > next.StartTime)
-                {
-                    hasOverlappingTimeslots = true;
-                    break;
-                }
-            }
-        }
+        var validationResult = TimeslotValidator.ValidateTimeslots(timeslotDtos);
+        hasOverlappingTimeslots = validationResult.HasOverlappingTimeslots;
+        hasUnconfiguredTimeslots = validationResult.HasUnconfiguredTimeslots;
     }
 
     private async Task AddTimeslot()
@@ -354,8 +359,9 @@
         var newSlot = new TimeSlot { IsPeriod = false };
         timeslots.Add(newSlot);
 
-        // Sort timeslots to maintain order
+        // Sort and validate timeslots
         SortTimeslots();
+        ValidateTimeslots();
 
         if (!_disposed)
         {
@@ -370,6 +376,9 @@
         if (!timeslot.IsPeriod)
         {
             timeslots.Remove(timeslot);
+
+            // Re-validate after removal
+            ValidateTimeslots();
 
             if (!_disposed)
             {
@@ -416,8 +425,9 @@
         // Re-add user slots
         timeslots.AddRange(userSlots);
 
-        // Sort timeslots by start time
+        // Sort timeslots by start time and validate
         SortTimeslots();
+        ValidateTimeslots();
     }
 
     private async Task UploadExcel(IBrowserFile file)
@@ -628,6 +638,26 @@
             return result;
 
         return null;
+    }
+
+    private void OnTimeChanged(TimeSlot timeslot, string? value, bool isStartTime)
+    {
+        if (_disposed) return;
+
+        var parsedTime = ParseTimeString(value);
+
+        if (isStartTime)
+        {
+            timeslot.StartTime = parsedTime;
+        }
+        else
+        {
+            timeslot.EndTime = parsedTime;
+        }
+
+        // Validate after time change
+        SortTimeslots();
+        ValidateTimeslots();
     }
 
     private List<WinterAdventurer.Library.Models.TimeSlot> ConvertToLibraryTimeSlots()

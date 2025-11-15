@@ -4,23 +4,6 @@ This document tracks potential improvements identified during code review that c
 
 ## Prioritized by Effort vs. Impact
 
-### Small Effort, High Impact
-
-#### 4. Block PDF Generation When Timeslots Overlap
-**Complexity**: Small
-**Impact**: Prevents users from generating incorrect PDFs
-**Current Behavior**: App shows an orange warning about overlapping timeslots but still allows PDF generation, potentially resulting in individual schedules with incorrect times.
-
-**Proposed Solution**:
-- Disable "Create PDF" button when `hasOverlappingTimeslots == true`
-- Change warning to blocking error message
-- Add validation to ensure all period timeslots have times configured
-
-**Files**:
-- `WinterAdventurer/Components/Pages/Home.razor` (lines 43-48, 172-173)
-
----
-
 ### Medium Effort, Moderate Impact
 
 #### 5. Add Timeslot Support to CLI
@@ -71,6 +54,24 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 ---
 
 ## Recently Implemented
+
+### ✓ Block PDF Generation When Timeslots Overlap (Completed 2025-11-15)
+**What was done**:
+- Added validation to detect unconfigured period timeslots (missing start/end times)
+- Changed orange warning to red blocking error message
+- Disabled "Create PDF" and "Download Master Schedule" buttons when timeslot issues exist
+- Added `CheckForUnconfiguredTimeslots()` method to validate all period timeslots have times configured
+- Error message now clearly states "PDF generation is blocked" with specific reason
+
+**Impact**:
+- Prevents users from generating incorrect PDFs with missing or overlapping schedule times
+- Clear feedback about what needs to be fixed before PDF generation is allowed
+- Ensures data quality by enforcing timeslot configuration before output
+
+**Files Modified**:
+- `WinterAdventurer/Components/Pages/Home.razor` (lines 44-55, 179-185, 193, 351-366)
+
+---
 
 ### ✓ Error Handling and Logging (Completed 2025-11-12)
 **What was done**:
