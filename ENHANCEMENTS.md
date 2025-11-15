@@ -32,7 +32,7 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 #### 3. Extract Components from Home.razor
 **Complexity**: Large (Phased approach)
 **Impact**: Improves maintainability and reduces risk of breaking changes
-**Status**: Phase 1 Complete (2025-11-15), Phases 2-3 Pending
+**Status**: Phases 1-2 Complete (2025-11-15), Phase 3 Pending
 
 **Phase 1 Complete (Simple Components)**:
 - ✅ Extracted `FileUploadSection.razor` - file upload UI with loading state
@@ -40,10 +40,13 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 - ✅ Reduced Home.razor from 826 to 813 lines
 - ✅ All 129 tests passing, 0 warnings
 
-**Phase 2 Planned (Medium Complexity)**:
-- Extract `TimeslotEditor.razor` - complete timeslot management UI
-- Extract `TimeSlotViewModel.cs` - move inner class to shared models
-- Estimated: 3-4 hours, ~200 lines extracted
+**Phase 2 Complete (Medium Complexity)**:
+- ✅ Extracted `TimeSlotViewModel.cs` - moved inner class to Models folder with full XML documentation
+- ✅ Extracted `TimeslotEditor.razor` - complete timeslot management UI (~140 lines)
+- ✅ Removed 5 methods from Home.razor (AddTimeslot, RemoveTimeslot, OnTimeChanged, FormatTimeSpan, ParseTimeString)
+- ✅ Added OnTimeslotsChanged callback for parent-child communication
+- ✅ Reduced Home.razor from 813 to ~670 lines
+- ✅ All 129 tests passing, 0 warnings, 0 errors
 
 **Phase 3 Planned (High Complexity)**:
 - Extract `WorkshopGrid.razor` - workshop grid layout
@@ -56,6 +59,8 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 **Files Created**:
 - `WinterAdventurer/Components/Shared/FileUploadSection.razor`
 - `WinterAdventurer/Components/Shared/PdfGenerationButtons.razor`
+- `WinterAdventurer/Models/TimeSlotViewModel.cs`
+- `WinterAdventurer/Components/Shared/TimeslotEditor.razor`
 
 ---
 

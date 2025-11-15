@@ -11,6 +11,7 @@
 @using WinterAdventurer.Services
 @using WinterAdventurer.Components.Shared
 @using Microsoft.Extensions.Logging
+@using WinterAdventurer.Models
 @inject IJSRuntime JSRuntime
 @inject ILocationService LocationService
 @inject ILogger<Home> Logger
@@ -44,56 +45,9 @@
         </MudAlert>
     }
 
-    <MudPaper Class="pa-4 mb-4">
-        <MudText Typo="Typo.h5" Class="mb-3">Configure Schedule Times</MudText>
-
-        @foreach (var timeslot in timeslots)
-        {
-            <MudGrid Class="mb-2" @key="@timeslot.Id">
-                <MudItem xs="4">
-                    <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
-                </MudItem>
-                <MudItem xs="3">
-                    <MudField Label="Start Time" Variant="Variant.Outlined">
-                        <input type="time"
-                               class="mud-input-slot mud-input-root mud-input-root-outlined"
-                               style="padding: 10px; width: 100%;"
-                               value="@FormatTimeSpan(timeslot.StartTime)"
-                               @onchange="@(e => OnTimeChanged(timeslot, e.Value?.ToString(), true))" />
-                    </MudField>
-                </MudItem>
-                <MudItem xs="3">
-                    <MudField Label="End Time" Variant="Variant.Outlined">
-                        <input type="time"
-                               class="mud-input-slot mud-input-root mud-input-root-outlined"
-                               style="padding: 10px; width: 100%;"
-                               value="@FormatTimeSpan(timeslot.EndTime)"
-                               @onchange="@(e => OnTimeChanged(timeslot, e.Value?.ToString(), false))" />
-                    </MudField>
-                </MudItem>
-                <MudItem xs="2" Class="d-flex align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                  Color="Color.Error"
-                                  Disabled="@timeslot.IsPeriod"
-                                  OnClick="() => RemoveTimeslot(timeslot)" />
-                </MudItem>
-            </MudGrid>
-        }
-
-        <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Text" OnClick="AddTimeslot">
-            Add Non-Period Time Slot (e.g., Lunch, Break)
-        </MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" Variant="Variant.Filled" OnClick="SaveTimeslots" Class="ml-2">
-            Save Times
-        </MudButton>
-
-        @if (timeslots.Count > 0)
-        {
-            <MudText Typo="Typo.caption" Class="mt-2">
-                Note: Period timeslots (from Excel) cannot be deleted or renamed. Add additional timeslots for lunch, breaks, etc.
-            </MudText>
-        }
-    </MudPaper>
+    <TimeslotEditor Timeslots="timeslots"
+                    OnTimeslotsChanged="OnTimeslotsChanged"
+                    OnSaveTimeslots="SaveTimeslots" />
 </div>
 
 @if (workshops != null && workshops.Count > 0)
@@ -180,7 +134,7 @@
     private bool success = false;
     private string? errorMessage;
     private List<Period> periods = new List<Period>();
-    private List<TimeSlot> timeslots = new List<TimeSlot>();
+    private List<TimeSlotViewModel> timeslots = new List<TimeSlotViewModel>();
     private bool hasOverlappingTimeslots = false;
     private bool hasUnconfiguredTimeslots = false;
     private bool _disposed = false;
@@ -190,15 +144,6 @@
     private Dictionary<string, string> previousLocations = new Dictionary<string, string>();
     private int locationListVersion = 0; // Increment to force autocomplete recreation
     private string eventName = $"Winter Adventure {DateTime.Now.Year}";
-
-    public class TimeSlot
-    {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string Label { get; set; } = string.Empty;
-        public TimeSpan? StartTime { get; set; }
-        public TimeSpan? EndTime { get; set; }
-        public bool IsPeriod { get; set; } = false; // True if from Excel periods, false if user-added
-    }
 
     protected override void OnInitialized()
     {
@@ -235,7 +180,7 @@
                 Logger.LogInformation("LoadTimeslots: Loaded {Count} timeslots from database", dbTimeSlots.Count);
 
                 // Convert database TimeSlots to UI TimeSlots
-                var loaded = dbTimeSlots.Select(t => new TimeSlot
+                var loaded = dbTimeSlots.Select(t => new TimeSlotViewModel
                 {
                     Id = t.Id,
                     Label = t.Label,
@@ -334,38 +279,17 @@
         hasUnconfiguredTimeslots = validationResult.HasUnconfiguredTimeslots;
     }
 
-    private async Task AddTimeslot()
+    private async Task OnTimeslotsChanged()
     {
         if (_disposed) return;
 
-        var newSlot = new TimeSlot { IsPeriod = false };
-        timeslots.Add(newSlot);
-
-        // Sort and validate timeslots
+        // Sort and validate timeslots whenever they change
         SortTimeslots();
         ValidateTimeslots();
 
         if (!_disposed)
         {
             await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task RemoveTimeslot(TimeSlot timeslot)
-    {
-        if (_disposed) return;
-
-        if (!timeslot.IsPeriod)
-        {
-            timeslots.Remove(timeslot);
-
-            // Re-validate after removal
-            ValidateTimeslots();
-
-            if (!_disposed)
-            {
-                await InvokeAsync(StateHasChanged);
-            }
         }
     }
 
@@ -394,7 +318,7 @@
             else
             {
                 // Create new slot for new periods
-                timeslots.Add(new TimeSlot
+                timeslots.Add(new TimeSlotViewModel
                 {
                     Label = period.DisplayName,
                     IsPeriod = true,
@@ -603,43 +527,6 @@
                 await InvokeAsync(StateHasChanged);
             }
         }
-    }
-
-    // Helper methods for native HTML5 time input conversion
-    private string FormatTimeSpan(TimeSpan? time)
-    {
-        return time?.ToString(@"hh\:mm") ?? "";
-    }
-
-    private TimeSpan? ParseTimeString(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return null;
-
-        if (TimeSpan.TryParse(value, out var result))
-            return result;
-
-        return null;
-    }
-
-    private void OnTimeChanged(TimeSlot timeslot, string? value, bool isStartTime)
-    {
-        if (_disposed) return;
-
-        var parsedTime = ParseTimeString(value);
-
-        if (isStartTime)
-        {
-            timeslot.StartTime = parsedTime;
-        }
-        else
-        {
-            timeslot.EndTime = parsedTime;
-        }
-
-        // Validate after time change
-        SortTimeslots();
-        ValidateTimeslots();
     }
 
     private List<WinterAdventurer.Library.Models.TimeSlot> ConvertToLibraryTimeSlots()
