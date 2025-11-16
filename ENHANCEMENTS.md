@@ -4,23 +4,6 @@ This document tracks potential improvements identified during code review that c
 
 ## Prioritized by Effort vs. Impact
 
-### Small Effort, High Impact
-
-#### 4. Block PDF Generation When Timeslots Overlap
-**Complexity**: Small
-**Impact**: Prevents users from generating incorrect PDFs
-**Current Behavior**: App shows an orange warning about overlapping timeslots but still allows PDF generation, potentially resulting in individual schedules with incorrect times.
-
-**Proposed Solution**:
-- Disable "Create PDF" button when `hasOverlappingTimeslots == true`
-- Change warning to blocking error message
-- Add validation to ensure all period timeslots have times configured
-
-**Files**:
-- `WinterAdventurer/Components/Pages/Home.razor` (lines 43-48, 172-173)
-
----
-
 ### Medium Effort, Moderate Impact
 
 #### 5. Add Timeslot Support to CLI
@@ -47,30 +30,59 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 ### Large Effort, Long-term Value
 
 #### 3. Extract Components from Home.razor
-**Complexity**: Large
+**Complexity**: Large (Phased approach)
 **Impact**: Improves maintainability and reduces risk of breaking changes
-**Current Situation**: Home.razor is 795 lines handling multiple responsibilities (file upload, timeslot management, location autocomplete, workshop editing, PDF generation).
+**Status**: Phases 1-2 Complete (2025-11-15), Phase 3 Pending
 
-**Proposed Solution**:
-- Extract `WorkshopEditor` component (workshop cards, location dropdown logic)
-- Extract `TimeslotEditor` component (schedule time configuration UI)
-- Keep Home.razor as orchestrator only
-- Improves testability and reduces cognitive load for developers
+**Phase 1 Complete (Simple Components)**:
+- ✅ Extracted `FileUploadSection.razor` - file upload UI with loading state
+- ✅ Extracted `PdfGenerationButtons.razor` - PDF generation buttons with validation-based disabling
+- ✅ Reduced Home.razor from 826 to 813 lines
+- ✅ All 129 tests passing, 0 warnings
 
-**Benefits**:
-- Easier to test individual features
-- Reduced risk when making changes
-- Better separation of concerns
-- Easier onboarding for new developers
+**Phase 2 Complete (Medium Complexity)**:
+- ✅ Extracted `TimeSlotViewModel.cs` - moved inner class to Models folder with full XML documentation
+- ✅ Extracted `TimeslotEditor.razor` - complete timeslot management UI (~140 lines)
+- ✅ Removed 5 methods from Home.razor (AddTimeslot, RemoveTimeslot, OnTimeChanged, FormatTimeSpan, ParseTimeString)
+- ✅ Added OnTimeslotsChanged callback for parent-child communication
+- ✅ Reduced Home.razor from 813 to ~670 lines
+- ✅ All 129 tests passing, 0 warnings, 0 errors
 
-**Files**:
-- `WinterAdventurer/Components/Pages/Home.razor` (current: 795 lines)
-- New: `WinterAdventurer/Components/WorkshopEditor.razor`
-- New: `WinterAdventurer/Components/TimeslotEditor.razor`
+**Phase 3 Planned (High Complexity)**:
+- Extract `WorkshopGrid.razor` - workshop grid layout
+- Extract `WorkshopCard.razor` - individual workshop editing
+- Handle complex location autocomplete integration
+- Estimated: 4-6 hours, ~250 lines extracted
+
+**Target**: Reduce Home.razor to ~150 lines (orchestrator only)
+
+**Files Created**:
+- `WinterAdventurer/Components/Shared/FileUploadSection.razor`
+- `WinterAdventurer/Components/Shared/PdfGenerationButtons.razor`
+- `WinterAdventurer/Models/TimeSlotViewModel.cs`
+- `WinterAdventurer/Components/Shared/TimeslotEditor.razor`
 
 ---
 
 ## Recently Implemented
+
+### ✓ Block PDF Generation When Timeslots Overlap (Completed 2025-11-15)
+**What was done**:
+- Added validation to detect unconfigured period timeslots (missing start/end times)
+- Changed orange warning to red blocking error message
+- Disabled "Create PDF" and "Download Master Schedule" buttons when timeslot issues exist
+- Added `CheckForUnconfiguredTimeslots()` method to validate all period timeslots have times configured
+- Error message now clearly states "PDF generation is blocked" with specific reason
+
+**Impact**:
+- Prevents users from generating incorrect PDFs with missing or overlapping schedule times
+- Clear feedback about what needs to be fixed before PDF generation is allowed
+- Ensures data quality by enforcing timeslot configuration before output
+
+**Files Modified**:
+- `WinterAdventurer/Components/Pages/Home.razor` (lines 44-55, 179-185, 193, 351-366)
+
+---
 
 ### ✓ Error Handling and Logging (Completed 2025-11-12)
 **What was done**:

@@ -1,0 +1,38 @@
+@using MudBlazor
+
+<MudItem xs="12" Class="d-flex gap-3">
+    <MudButton ButtonType="ButtonType.Submit"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               Disabled="@IsDisabled">
+        Create PDF
+    </MudButton>
+    <MudButton ButtonType="ButtonType.Button"
+               Variant="Variant.Filled"
+               Color="Color.Secondary"
+               OnClick="OnCreateMasterScheduleClicked"
+               Disabled="@IsDisabled">
+        Download Master Schedule
+    </MudButton>
+</MudItem>
+
+@code {
+    /// <summary>
+    /// Indicates whether the PDF generation buttons should be disabled
+    /// (e.g., due to validation errors)
+    /// </summary>
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    /// <summary>
+    /// Event callback invoked when the "Download Master Schedule" button is clicked
+    /// Note: "Create PDF" uses ButtonType.Submit and is handled by the parent form
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCreateMasterSchedule { get; set; }
+
+    private async Task OnCreateMasterScheduleClicked()
+    {
+        await OnCreateMasterSchedule.InvokeAsync();
+    }
+}

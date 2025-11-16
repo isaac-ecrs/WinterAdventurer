@@ -1,0 +1,145 @@
+@using MudBlazor
+@using WinterAdventurer.Models
+
+<MudPaper Class="pa-4 mb-4">
+    <MudText Typo="Typo.h5" Class="mb-3">Configure Schedule Times</MudText>
+
+    @foreach (var timeslot in Timeslots)
+    {
+        <MudGrid Class="mb-2" @key="@timeslot.Id">
+            <MudItem xs="4">
+                <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
+            </MudItem>
+            <MudItem xs="3">
+                <MudField Label="Start Time" Variant="Variant.Outlined">
+                    <input type="time"
+                           class="mud-input-slot mud-input-root mud-input-root-outlined"
+                           style="padding: 10px; width: 100%;"
+                           value="@FormatTimeSpan(timeslot.StartTime)"
+                           @onchange="@(e => OnTimeChanged(timeslot, e.Value?.ToString(), true))" />
+                </MudField>
+            </MudItem>
+            <MudItem xs="3">
+                <MudField Label="End Time" Variant="Variant.Outlined">
+                    <input type="time"
+                           class="mud-input-slot mud-input-root mud-input-root-outlined"
+                           style="padding: 10px; width: 100%;"
+                           value="@FormatTimeSpan(timeslot.EndTime)"
+                           @onchange="@(e => OnTimeChanged(timeslot, e.Value?.ToString(), false))" />
+                </MudField>
+            </MudItem>
+            <MudItem xs="2" Class="d-flex align-center">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                              Color="Color.Error"
+                              Disabled="@timeslot.IsPeriod"
+                              OnClick="() => RemoveTimeslot(timeslot)" />
+            </MudItem>
+        </MudGrid>
+    }
+
+    <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Text" OnClick="AddTimeslot">
+        Add Non-Period Time Slot (e.g., Lunch, Break)
+    </MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" Variant="Variant.Filled" OnClick="OnSaveClicked" Class="ml-2">
+        Save Times
+    </MudButton>
+
+    @if (Timeslots.Count > 0)
+    {
+        <MudText Typo="Typo.caption" Class="mt-2">
+            Note: Period timeslots (from Excel) cannot be deleted or renamed. Add additional timeslots for lunch, breaks, etc.
+        </MudText>
+    }
+</MudPaper>
+
+@code {
+    /// <summary>
+    /// List of timeslots to display and edit
+    /// </summary>
+    [Parameter]
+    public List<TimeSlotViewModel> Timeslots { get; set; } = new List<TimeSlotViewModel>();
+
+    /// <summary>
+    /// Event callback invoked when timeslots are modified (add, remove, or time changed).
+    /// The parent should handle sorting and validation.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnTimeslotsChanged { get; set; }
+
+    /// <summary>
+    /// Event callback invoked when the "Save Times" button is clicked
+    /// </summary>
+    [Parameter]
+    public EventCallback OnSaveTimeslots { get; set; }
+
+    /// <summary>
+    /// Adds a new custom (non-period) timeslot to the list
+    /// </summary>
+    private async Task AddTimeslot()
+    {
+        var newSlot = new TimeSlotViewModel { IsPeriod = false };
+        Timeslots.Add(newSlot);
+        await OnTimeslotsChanged.InvokeAsync();
+    }
+
+    /// <summary>
+    /// Removes a custom timeslot from the list (period timeslots cannot be removed)
+    /// </summary>
+    private async Task RemoveTimeslot(TimeSlotViewModel timeslot)
+    {
+        if (!timeslot.IsPeriod)
+        {
+            Timeslots.Remove(timeslot);
+            await OnTimeslotsChanged.InvokeAsync();
+        }
+    }
+
+    /// <summary>
+    /// Handles time input changes and updates the timeslot
+    /// </summary>
+    private async Task OnTimeChanged(TimeSlotViewModel timeslot, string? value, bool isStartTime)
+    {
+        var parsedTime = ParseTimeString(value);
+
+        if (isStartTime)
+        {
+            timeslot.StartTime = parsedTime;
+        }
+        else
+        {
+            timeslot.EndTime = parsedTime;
+        }
+
+        await OnTimeslotsChanged.InvokeAsync();
+    }
+
+    /// <summary>
+    /// Handles the "Save Times" button click
+    /// </summary>
+    private async Task OnSaveClicked()
+    {
+        await OnSaveTimeslots.InvokeAsync();
+    }
+
+    /// <summary>
+    /// Formats a TimeSpan for display in an HTML time input (HH:mm format)
+    /// </summary>
+    private string FormatTimeSpan(TimeSpan? time)
+    {
+        return time?.ToString(@"hh\:mm") ?? "";
+    }
+
+    /// <summary>
+    /// Parses a string from an HTML time input to a TimeSpan
+    /// </summary>
+    private TimeSpan? ParseTimeString(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (TimeSpan.TryParse(value, out var result))
+            return result;
+
+        return null;
+    }
+}
