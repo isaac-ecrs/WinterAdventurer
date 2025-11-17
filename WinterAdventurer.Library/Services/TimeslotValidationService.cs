@@ -1,4 +1,4 @@
-namespace WinterAdventurer.Services;
+namespace WinterAdventurer.Library.Services;
 
 public interface ITimeslotValidationService
 {

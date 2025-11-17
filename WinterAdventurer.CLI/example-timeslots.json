@@ -1,0 +1,53 @@
+{
+  "timeslots": [
+    {
+      "id": "period-morning-first",
+      "label": "Morning First Period",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "isPeriod": true
+    },
+    {
+      "id": "period-morning-second",
+      "label": "Morning Second Period",
+      "startTime": "10:45:00",
+      "endTime": "12:15:00",
+      "isPeriod": true
+    },
+    {
+      "id": "custom-lunch",
+      "label": "Lunch",
+      "startTime": "12:15:00",
+      "endTime": "13:15:00",
+      "isPeriod": false
+    },
+    {
+      "id": "period-afternoon",
+      "label": "Afternoon Period",
+      "startTime": "13:30:00",
+      "endTime": "15:00:00",
+      "isPeriod": true
+    },
+    {
+      "id": "custom-free-time",
+      "label": "Free Time",
+      "startTime": "15:00:00",
+      "endTime": "18:00:00",
+      "isPeriod": false
+    },
+    {
+      "id": "custom-dinner",
+      "label": "Dinner",
+      "startTime": "18:00:00",
+      "endTime": "19:00:00",
+      "isPeriod": false
+    },
+    {
+      "id": "custom-evening",
+      "label": "Evening Program",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00",
+      "isPeriod": false
+    }
+  ]
+}

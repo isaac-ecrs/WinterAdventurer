@@ -43,23 +43,148 @@ dotnet run
 # Navigate to https://localhost:5001
 ```
 
-### Run via CLI (Advanced)
+### Command-Line Interface (CLI)
+
+For automated/batch processing without the web UI.
+
+#### Usage
 
 ```bash
-# Process Excel file directly
 cd WinterAdventurer.CLI
-dotnet run -- "/path/to/your/file.xlsx"
-
-# PDFs generated in same directory as Excel file
+dotnet run -- <excel-file> [--timeslots <json-file>] [--no-merge-workshops]
 ```
+
+**Arguments:**
+- `<excel-file>` - Path to Excel registration file (required)
+
+**Options:**
+- `--timeslots <json-file>` - Path to JSON file with timeslot configuration (optional)
+- `--no-merge-workshops` - Disable cell merging in individual schedules (optional)
+
+#### Examples
+
+**Basic usage (uses default timeslots):**
+```bash
+dotnet run -- "/path/to/registrations.xlsx"
+```
+
+**With custom timeslots (recommended):**
+```bash
+dotnet run -- "/path/to/registrations.xlsx" --timeslots "example-timeslots.json"
+```
+
+**All options:**
+```bash
+dotnet run -- "/path/to/registrations.xlsx" --timeslots "timeslots.json" --no-merge-workshops
+```
+
+#### Timeslot Configuration
+
+The `--timeslots` option adds schedule times to your PDFs. Without it, PDFs show period names but no times.
+
+**Example JSON format** (see `WinterAdventurer.CLI/example-timeslots.json`):
+```json
+{
+  "timeslots": [
+    {
+      "id": "period-morning-first",
+      "label": "Morning First Period",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "isPeriod": true
+    },
+    {
+      "id": "custom-lunch",
+      "label": "Lunch",
+      "startTime": "12:15:00",
+      "endTime": "13:15:00",
+      "isPeriod": false
+    }
+  ]
+}
+```
+
+**Important:** `label` must exactly match period names from your Excel schema (e.g., "Morning First Period", "Afternoon Period").
+
+#### Output
+
+PDFs are generated in the same directory as the input Excel file:
+- `ClassRosters.pdf` - Workshop rosters for leaders
 
 ## Usage
 
+### Web App Workflow
+
+```mermaid
+flowchart TD
+    Start([User Opens Web App]) --> Upload[Upload Excel File]
+    Upload --> Parse{Parse Successfully?}
+
+    Parse -->|No| Error1[Show Error Message]
+    Error1 --> Upload
+
+    Parse -->|Yes| Display[Display Workshop Cards]
+    Display --> LoadData[Load Saved Locations<br/>& Timeslots from DB]
+    LoadData --> EditPhase{Want to Edit?}
+
+    EditPhase -->|Yes| Edit[Edit Workshop Details]
+    Edit --> EditOptions{What to Edit?}
+
+    EditOptions --> EditWorkshop[Edit Names/Leaders]
+    EditOptions --> EditLocation[Assign Locations<br/>with Autocomplete]
+    EditOptions --> EditTimeslot[Configure Timeslot Times]
+    EditOptions --> AddTimeslot[Add Custom Timeslots<br/>Lunch, Breaks, etc.]
+
+    EditWorkshop --> SaveEdit[Changes Auto-Save]
+    EditLocation --> SaveEdit
+    EditTimeslot --> SaveTimeslot[Click 'Save Times']
+    AddTimeslot --> SaveTimeslot
+
+    SaveEdit --> EditPhase
+    SaveTimeslot --> EditPhase
+
+    EditPhase -->|No, Ready to Generate| Validate{Validate Timeslots}
+
+    Validate -->|Overlaps Found| ErrorOverlap[❌ Show Error Alert<br/>PDF Buttons Disabled]
+    Validate -->|Unconfigured Periods| ErrorConfig[❌ Show Error Alert<br/>PDF Buttons Disabled]
+
+    ErrorOverlap --> FixTimeslots[Fix Overlapping Times]
+    ErrorConfig --> FixTimeslots
+    FixTimeslots --> SaveTimeslot
+
+    Validate -->|✅ All Valid| Generate[✅ PDF Buttons Enabled]
+
+    Generate --> ChoosePDF{Choose PDF Type}
+
+    ChoosePDF --> ClassRoster[Generate Class Rosters]
+    ChoosePDF --> MasterSchedule[Generate Master Schedule]
+
+    ClassRoster --> Download1[Download ClassRosters.pdf]
+    MasterSchedule --> Download2[Download MasterSchedule.pdf]
+
+    Download1 --> Done([Complete])
+    Download2 --> Done
+
+    %% Styling
+    classDef errorStyle fill:#ffcccc,stroke:#cc0000,stroke-width:2px
+    classDef successStyle fill:#ccffcc,stroke:#00cc00,stroke-width:2px
+    classDef editStyle fill:#cce5ff,stroke:#0066cc,stroke-width:2px
+    classDef validateStyle fill:#fff4cc,stroke:#ccaa00,stroke-width:2px
+
+    class Error1,ErrorOverlap,ErrorConfig errorStyle
+    class Generate,Download1,Download2,Done successStyle
+    class Edit,EditOptions,EditWorkshop,EditLocation,EditTimeslot,AddTimeslot,SaveEdit,SaveTimeslot editStyle
+    class Validate,FixTimeslots validateStyle
+```
+
+### Quick Steps
+
 1. **Upload Excel File** - Click "Choose File" and select your ECRS Cognito Forms registration export
 2. **Review Workshops** - See all parsed workshops and participants
-3. **Edit Details** - Update workshop names, leaders, and locations as needed
-4. **Customize Schedule** - Adjust timeslots and periods for your event
-5. **Generate PDFs** - Download class rosters, individual schedules, or master schedule
+3. **Edit Details** (Optional) - Update workshop names, leaders, and locations as needed
+4. **Customize Schedule** (Optional) - Adjust timeslot times and add custom activities
+5. **Validate** - System checks for overlapping or unconfigured timeslots
+6. **Generate PDFs** - Download class rosters or master schedule once validation passes
 
 ## Excel Format Requirements
 
