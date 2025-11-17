@@ -45,22 +45,29 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 - ✅ Extracted `TimeslotEditor.razor` - complete timeslot management UI (~140 lines)
 - ✅ Removed 5 methods from Home.razor (AddTimeslot, RemoveTimeslot, OnTimeChanged, FormatTimeSpan, ParseTimeString)
 - ✅ Added OnTimeslotsChanged callback for parent-child communication
-- ✅ Reduced Home.razor from 813 to ~670 lines
+- ✅ Reduced Home.razor from 813 to ~696 lines
 - ✅ All 129 tests passing, 0 warnings, 0 errors
 
-**Phase 3 Planned (High Complexity)**:
-- Extract `WorkshopGrid.razor` - workshop grid layout
-- Extract `WorkshopCard.razor` - individual workshop editing
-- Handle complex location autocomplete integration
-- Estimated: 4-6 hours, ~250 lines extracted
+**Phase 3 Complete (High Complexity)** (2025-11-16):
+- ✅ Extracted `WorkshopCard.razor` - individual workshop editing card with location autocomplete (189 lines)
+- ✅ Extracted `WorkshopGrid.razor` - workshop grid layout with EditForm wrapper (107 lines)
+- ✅ Moved 3 complex methods to WorkshopCard (SearchLocations, OnLocationBlur, OnDeleteLocation)
+- ✅ Removed `previousLocations` state variable from Home.razor
+- ✅ Added event handlers in Home.razor for location changes and deletion
+- ✅ Handled period-based location filtering in WorkshopCard component
+- ✅ Reduced Home.razor from 696 to 568 lines (18% reduction)
+- ✅ Total extracted: 296 lines into reusable components
+- ✅ All 129 tests passing, 0 warnings, 0 errors
 
-**Target**: Reduce Home.razor to ~150 lines (orchestrator only)
+**Result**: Home.razor reduced from **826 → 568 lines** (31% reduction across all phases)
 
 **Files Created**:
-- `WinterAdventurer/Components/Shared/FileUploadSection.razor`
-- `WinterAdventurer/Components/Shared/PdfGenerationButtons.razor`
-- `WinterAdventurer/Models/TimeSlotViewModel.cs`
-- `WinterAdventurer/Components/Shared/TimeslotEditor.razor`
+- `WinterAdventurer/Components/Shared/FileUploadSection.razor` (Phase 1)
+- `WinterAdventurer/Components/Shared/PdfGenerationButtons.razor` (Phase 1)
+- `WinterAdventurer/Models/TimeSlotViewModel.cs` (Phase 2)
+- `WinterAdventurer/Components/Shared/TimeslotEditor.razor` (Phase 2)
+- `WinterAdventurer/Components/Shared/WorkshopCard.razor` (Phase 3)
+- `WinterAdventurer/Components/Shared/WorkshopGrid.razor` (Phase 3)
 
 ---
 
