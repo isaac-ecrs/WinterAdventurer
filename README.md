@@ -166,10 +166,10 @@ flowchart TD
     Download2 --> Done
 
     %% Styling
-    classDef errorStyle fill:#ffcccc,stroke:#cc0000,stroke-width:2px
-    classDef successStyle fill:#ccffcc,stroke:#00cc00,stroke-width:2px
-    classDef editStyle fill:#cce5ff,stroke:#0066cc,stroke-width:2px
-    classDef validateStyle fill:#fff4cc,stroke:#ccaa00,stroke-width:2px
+    classDef errorStyle fill:#ffcccc,stroke:#cc0000,stroke-width:2px,color:#000
+    classDef successStyle fill:#ccffcc,stroke:#00cc00,stroke-width:2px,color:#000
+    classDef editStyle fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#000
+    classDef validateStyle fill:#fff4cc,stroke:#ccaa00,stroke-width:2px,color:#000
 
     class Error1,ErrorOverlap,ErrorConfig errorStyle
     class Generate,Download1,Download2,Done successStyle
