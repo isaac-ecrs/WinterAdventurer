@@ -1,0 +1,107 @@
+@using MudBlazor
+@using WinterAdventurer.Library.Models
+@using WinterAdventurer.Components.Shared
+
+<EditForm Model=Workshops OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper Class="pa-4 mud-height-full">
+                @if (!Success)
+                {
+                    <MudText Color="@Color.Error">
+                        <ValidationSummary />
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Event Name" @bind-Value="EventName"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Event"
+                          HelperText="Name for the master schedule (e.g., Winter Adventure 2025)" />
+        </MudItem>
+        @foreach (var workshop in Workshops)
+        {
+            <MudItem xs="6">
+                <WorkshopCard Workshop="workshop"
+                             AllWorkshops="Workshops"
+                             AvailableLocations="AvailableLocations"
+                             LocationListVersion="LocationListVersion"
+                             OnLocationChanged="OnWorkshopLocationChanged"
+                             OnDeleteLocationRequested="OnDeleteLocationRequested" />
+            </MudItem>
+        }
+        <PdfGenerationButtons IsDisabled="IsDisabled"
+                              OnCreateMasterSchedule="OnCreateMasterSchedule" />
+    </MudGrid>
+</EditForm>
+
+@code {
+    /// <summary>
+    /// List of all workshops to display in the grid
+    /// </summary>
+    [Parameter, EditorRequired]
+    public List<Workshop> Workshops { get; set; } = default!;
+
+    /// <summary>
+    /// Name of the event for the master schedule PDF
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string EventName { get; set; } = default!;
+
+    /// <summary>
+    /// Callback invoked when the event name changes
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> EventNameChanged { get; set; }
+
+    /// <summary>
+    /// Indicates whether form submission was successful
+    /// </summary>
+    [Parameter]
+    public bool Success { get; set; }
+
+    /// <summary>
+    /// Indicates whether PDF generation should be disabled (due to validation errors)
+    /// </summary>
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    /// <summary>
+    /// List of all available locations from the database
+    /// </summary>
+    [Parameter, EditorRequired]
+    public List<string> AvailableLocations { get; set; } = default!;
+
+    /// <summary>
+    /// Version number to force refresh of all workshop cards when locations change
+    /// </summary>
+    [Parameter, EditorRequired]
+    public int LocationListVersion { get; set; }
+
+    /// <summary>
+    /// Callback invoked when form is submitted (Build PDF button clicked)
+    /// </summary>
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    /// <summary>
+    /// Callback invoked when Create Master Schedule button clicked
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCreateMasterSchedule { get; set; }
+
+    /// <summary>
+    /// Callback invoked when a workshop's location changes
+    /// </summary>
+    [Parameter]
+    public EventCallback<Workshop> OnWorkshopLocationChanged { get; set; }
+
+    /// <summary>
+    /// Callback invoked when user requests to delete a location
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnDeleteLocationRequested { get; set; }
+}

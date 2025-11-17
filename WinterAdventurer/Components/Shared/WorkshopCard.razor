@@ -1,0 +1,189 @@
+@using MudBlazor
+@using WinterAdventurer.Library.Models
+@using WinterAdventurer.Services
+@using Microsoft.Extensions.Logging
+@inject ILocationService LocationService
+@inject ILogger<WorkshopCard> Logger
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudTextField Typo="Typo.h4" @bind-Value="Workshop.Name" />
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudText>@Workshop.Selections.Count().ToString() Participants</MudText>
+        <MudText>@Workshop.Period.DisplayName</MudText>
+        <div @onfocusout="OnLocationBlur" @key="@($"loc-{Workshop.Name}-{LocationListVersion}")">
+            <MudAutocomplete T="string"
+                           Label="Location"
+                           @bind-Value="@Workshop.Location"
+                           SearchFunc="@SearchLocations"
+                           CoerceText="true"
+                           CoerceValue="true"
+                           ResetValueOnEmptyText="true"
+                           AdornmentIcon="@Icons.Material.Filled.LocationOn"
+                           AdornmentColor="Color.Primary"
+                           MinCharacters="0"
+                           DebounceInterval="300"
+                           ShowProgressIndicator="false"
+                           Dense="true"
+                           Variant="Variant.Outlined"
+                           SelectValueOnTab="true">
+                <ItemTemplate Context="item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>@item</span>
+                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                     Size="Size.Small"
+                                     Color="Color.Error"
+                                     OnClick="@((e) => OnDeleteLocationClick(item, e))"
+                                     title="Delete this location" />
+                    </div>
+                </ItemTemplate>
+            </MudAutocomplete>
+        </div>
+        <MudTextField Label="Leader" @bind-Value="Workshop.Leader" />
+    </MudCardContent>
+</MudCard>
+
+@code {
+    /// <summary>
+    /// The workshop to display and edit
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Workshop Workshop { get; set; } = default!;
+
+    /// <summary>
+    /// All workshops in the current session, used for period-based location filtering
+    /// </summary>
+    [Parameter, EditorRequired]
+    public List<Workshop> AllWorkshops { get; set; } = default!;
+
+    /// <summary>
+    /// List of all available locations from the database
+    /// </summary>
+    [Parameter, EditorRequired]
+    public List<string> AvailableLocations { get; set; } = default!;
+
+    /// <summary>
+    /// Version number used to force component refresh when locations change globally.
+    /// Increment this value to recreate the autocomplete component.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public int LocationListVersion { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the workshop's location changes (on blur).
+    /// Parent should increment LocationListVersion to refresh all cards.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Workshop> OnLocationChanged { get; set; }
+
+    /// <summary>
+    /// Callback invoked when user clicks delete button for a location.
+    /// Parent should handle database deletion and update all affected workshops.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnDeleteLocationRequested { get; set; }
+
+    private string previousLocation = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        previousLocation = Workshop.Location ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Search function for location autocomplete with period-based filtering.
+    /// Filters out locations already used by other workshops in the same period.
+    /// </summary>
+    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token)
+    {
+        Logger.LogDebug("SearchLocations called for workshop '{Workshop}' in period '{Period}' with value: '{Value}'",
+            Workshop.Name, Workshop.Period.DisplayName, value ?? "NULL");
+
+        // Get locations already used by OTHER workshops in the SAME period
+        var usedLocations = AllWorkshops
+            .Where(w => w.Period.SheetName == Workshop.Period.SheetName &&
+                       w.Name != Workshop.Name &&
+                       !string.IsNullOrWhiteSpace(w.Location))
+            .Select(w => w.Location)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Logger.LogDebug("SearchLocations: {Count} locations already used in period '{Period}': {Locations}",
+            usedLocations.Count, Workshop.Period.DisplayName, string.Join(", ", usedLocations));
+
+        // Filter out used locations
+        var available = AvailableLocations
+            .Where(loc => !usedLocations.Contains(loc))
+            .ToList();
+
+        // If value is empty or null, return all available locations
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            Logger.LogDebug("SearchLocations: Returning {Count} available locations (empty search)", available.Count);
+            return available;
+        }
+
+        // Filter locations that contain the search value (case insensitive)
+        var filtered = available
+            .Where(loc => loc.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Logger.LogDebug("SearchLocations: Found {Count} matches for '{Value}'", filtered.Count, value);
+        return await Task.FromResult(filtered);
+    }
+
+    /// <summary>
+    /// Handles focus out event on location autocomplete.
+    /// Saves location to database and invokes parent callback if value changed.
+    /// </summary>
+    private async Task OnLocationBlur()
+    {
+        var currentLocation = Workshop.Location ?? string.Empty;
+
+        Logger.LogInformation("=== OnLocationBlur === Workshop: '{WorkshopName}', Current: '{Current}', Previous: '{Previous}'",
+            Workshop.Name, currentLocation, previousLocation);
+
+        // Only save if location actually changed
+        if (currentLocation == previousLocation)
+        {
+            Logger.LogDebug("OnLocationBlur: No change, skipping save");
+            return;
+        }
+
+        // Update tracking
+        previousLocation = currentLocation;
+
+        // Save to database if not empty
+        if (!string.IsNullOrWhiteSpace(currentLocation))
+        {
+            try
+            {
+                Logger.LogInformation("OnLocationBlur: Saving location '{Location}' for workshop '{Workshop}'",
+                    currentLocation, Workshop.Name);
+                await LocationService.AddOrGetLocationAsync(currentLocation);
+
+                // Save the workshop-to-location mapping
+                await LocationService.SaveWorkshopLocationMappingAsync(Workshop.Name, currentLocation);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "OnLocationBlur: ERROR saving location '{Location}'", currentLocation);
+            }
+        }
+
+        // Notify parent that location changed (parent will increment version and add to cache)
+        await OnLocationChanged.InvokeAsync(Workshop);
+    }
+
+    /// <summary>
+    /// Handles click event on delete button in location dropdown.
+    /// Invokes parent callback to handle database deletion.
+    /// </summary>
+    private async Task OnDeleteLocationClick(string locationName, MouseEventArgs e)
+    {
+        Logger.LogInformation("=== OnDeleteLocationClick === Location: '{Location}'", locationName);
+        await OnDeleteLocationRequested.InvokeAsync(locationName);
+    }
+}

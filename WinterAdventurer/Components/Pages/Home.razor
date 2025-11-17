@@ -54,76 +54,17 @@
 {
     <MudText Typo="Typo.h5" Class="mb-3">Workshop Details</MudText>
 
-    <EditForm Model=workshops OnValidSubmit="BuildPdf">
-    <DataAnnotationsValidator />
-    <MudGrid>
-        <MudItem xs="12">
-            <MudPaper Class="pa-4 mud-height-full">
-                @if (!success)
-                    {
-                        <MudText Color="@Color.Error">
-                            <ValidationSummary />
-                        </MudText>
-                    }
-                </MudPaper>
-            </MudItem>
-        <MudItem xs="12" md="6">
-            <MudTextField Label="Event Name" @bind-Value="eventName"
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Event"
-                          HelperText="Name for the master schedule (e.g., Winter Adventure 2025)" />
-        </MudItem>
-            @foreach (var workshop in workshops)
-            {
-                <MudItem xs="6">
-                    <MudCard>
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudTextField Typo="Typo.h4" @bind-Value="workshop.Name" />
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudText>@workshop.Selections.Count().ToString() Participants</MudText>
-                            <MudText>@workshop.Period.DisplayName</MudText>
-                            <div @onfocusout="@(() => OnLocationBlur(workshop))" @key="@($"loc-{workshop.Name}-{locationListVersion}")">
-                                <MudAutocomplete T="string"
-                                               Label="Location"
-                                               @bind-Value="@workshop.Location"
-                                               SearchFunc="@((value, token) => SearchLocations(value, token, workshop))"
-                                               CoerceText="true"
-                                               CoerceValue="true"
-                                               ResetValueOnEmptyText="true"
-                                               AdornmentIcon="@Icons.Material.Filled.LocationOn"
-                                               AdornmentColor="Color.Primary"
-                                               MinCharacters="0"
-                                               DebounceInterval="300"
-                                               ShowProgressIndicator="false"
-                                               Dense="true"
-                                               Variant="Variant.Outlined"
-                                               SelectValueOnTab="true">
-                                    <ItemTemplate Context="item">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                            <span>@item</span>
-                                            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                                         Size="Size.Small"
-                                                         Color="Color.Error"
-                                                         OnClick="@(async (e) => await OnDeleteLocation(item, e))"
-                                                         title="Delete this location" />
-                                        </div>
-                                    </ItemTemplate>
-                                </MudAutocomplete>
-                            </div>
-                            <MudTextField Label="Leader" @bind-Value="workshop.Leader" />
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-            }
-            <PdfGenerationButtons IsDisabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)"
-                                  OnCreateMasterSchedule="BuildMasterSchedulePdf" />
-        </MudGrid>
-    </EditForm>
-
+    <WorkshopGrid Workshops="workshops"
+                  EventName="eventName"
+                  EventNameChanged="EventCallback.Factory.Create<string>(this, value => eventName = value)"
+                  Success="success"
+                  IsDisabled="hasOverlappingTimeslots || hasUnconfiguredTimeslots"
+                  AvailableLocations="availableLocations"
+                  LocationListVersion="locationListVersion"
+                  OnValidSubmit="BuildPdf"
+                  OnCreateMasterSchedule="BuildMasterSchedulePdf"
+                  OnWorkshopLocationChanged="HandleWorkshopLocationChanged"
+                  OnDeleteLocationRequested="HandleDeleteLocationRequest" />
 }
 
 @implements IDisposable
@@ -141,7 +82,6 @@
     private CancellationTokenSource? _cts;
     private bool _hasRendered = false;
     private List<string> availableLocations = new List<string>();
-    private Dictionary<string, string> previousLocations = new Dictionary<string, string>();
     private int locationListVersion = 0; // Increment to force autocomplete recreation
     private string eventName = $"Winter Adventure {DateTime.Now.Year}";
 
@@ -371,13 +311,6 @@
                     }
                 }
 
-                // Initialize previous locations tracking
-                previousLocations.Clear();
-                foreach (var workshop in workshops)
-                {
-                    previousLocations[workshop.Name] = workshop.Location ?? string.Empty;
-                }
-
                 // Populate timeslots with periods from the Excel file
                 PopulateTimeslotsFromPeriods();
             }
@@ -558,97 +491,38 @@
         }
     }
 
-    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token, Workshop currentWorkshop)
+    /// <summary>
+    /// Event handler called when a workshop's location changes.
+    /// Updates the available locations cache and increments version to refresh all cards.
+    /// </summary>
+    private async Task HandleWorkshopLocationChanged(Workshop workshop)
     {
-        Logger.LogDebug("SearchLocations called for workshop '{Workshop}' in period '{Period}' with value: '{Value}'",
-            currentWorkshop.Name, currentWorkshop.Period.DisplayName, value ?? "NULL");
-
-        // Get locations already used by OTHER workshops in the SAME period
-        var usedLocations = workshops
-            .Where(w => w.Period.SheetName == currentWorkshop.Period.SheetName &&
-                       w.Name != currentWorkshop.Name &&
-                       !string.IsNullOrWhiteSpace(w.Location))
-            .Select(w => w.Location)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        Logger.LogDebug("SearchLocations: {Count} locations already used in period '{Period}': {Locations}",
-            usedLocations.Count, currentWorkshop.Period.DisplayName, string.Join(", ", usedLocations));
-
-        // Filter out used locations
-        var available = availableLocations
-            .Where(loc => !usedLocations.Contains(loc))
-            .ToList();
-
-        // If value is empty or null, return all available locations
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            Logger.LogDebug("SearchLocations: Returning {Count} available locations (empty search)", available.Count);
-            return available;
-        }
-
-        // Filter locations that contain the search value (case insensitive)
-        var filtered = available
-            .Where(loc => loc.Contains(value, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        Logger.LogDebug("SearchLocations: Found {Count} matches for '{Value}'", filtered.Count, value);
-        return await Task.FromResult(filtered);
-    }
-
-    private async Task OnLocationBlur(Workshop workshop)
-    {
-        var currentLocation = workshop.Location ?? string.Empty;
-        var previousLocation = previousLocations.TryGetValue(workshop.Name, out var prev) ? prev : string.Empty;
-
-        Logger.LogInformation("=== OnLocationBlur === Workshop: '{WorkshopName}', Current: '{Current}', Previous: '{Previous}'",
-            workshop.Name, currentLocation, previousLocation);
-
         if (_disposed) return;
 
-        // Only save if location actually changed
-        if (currentLocation == previousLocation)
+        var currentLocation = workshop.Location ?? string.Empty;
+
+        // Update cached list if new location added
+        if (!string.IsNullOrWhiteSpace(currentLocation) && !availableLocations.Contains(currentLocation))
         {
-            Logger.LogDebug("OnLocationBlur: No change, skipping save");
-            return;
+            availableLocations.Add(currentLocation);
+            availableLocations.Sort();
+            Logger.LogInformation("HandleWorkshopLocationChanged: Added '{Location}' to cached list", currentLocation);
         }
 
-        // Update tracking
-        previousLocations[workshop.Name] = currentLocation;
-
-        // Save to database if not empty
-        if (!string.IsNullOrWhiteSpace(currentLocation))
-        {
-            try
-            {
-                Logger.LogInformation("OnLocationBlur: Saving location '{Location}' for workshop '{Workshop}'",
-                    currentLocation, workshop.Name);
-                await LocationService.AddOrGetLocationAsync(currentLocation);
-
-                // Save the workshop-to-location mapping
-                await LocationService.SaveWorkshopLocationMappingAsync(workshop.Name, currentLocation);
-
-                // Update cached list if new
-                if (!availableLocations.Contains(currentLocation))
-                {
-                    availableLocations.Add(currentLocation);
-                    availableLocations.Sort();
-                    Logger.LogInformation("OnLocationBlur: Added '{Location}' to cached list", currentLocation);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "OnLocationBlur: ERROR saving location '{Location}'", currentLocation);
-            }
-        }
-
-        // Always increment version to refresh all dropdowns (for period-based filtering)
+        // Increment version to refresh all dropdowns (for period-based filtering)
         locationListVersion++;
-        Logger.LogDebug("OnLocationBlur: Incremented locationListVersion to {Version} to refresh all dropdowns", locationListVersion);
+        Logger.LogDebug("HandleWorkshopLocationChanged: Incremented locationListVersion to {Version}", locationListVersion);
+
+        await InvokeAsync(StateHasChanged);
     }
 
-    private async Task OnDeleteLocation(string locationName, MouseEventArgs e)
+    /// <summary>
+    /// Event handler called when user requests to delete a location.
+    /// Deletes from database and clears from all affected workshops.
+    /// </summary>
+    private async Task HandleDeleteLocationRequest(string locationName)
     {
-        Logger.LogInformation("=== OnDeleteLocation === Location: '{Location}'", locationName);
+        Logger.LogInformation("=== HandleDeleteLocationRequest === Location: '{Location}'", locationName);
 
         if (_disposed) return;
 
@@ -659,7 +533,7 @@
             {
                 // Create a new list instance to trigger change detection in MudAutocomplete
                 availableLocations = availableLocations.Where(l => l != locationName).ToList();
-                Logger.LogInformation("OnDeleteLocation: Removed '{Location}' from cached list", locationName);
+                Logger.LogInformation("HandleDeleteLocationRequest: Removed '{Location}' from cached list", locationName);
 
                 // Clear any workshops that were using this location
                 foreach (var workshop in workshops)
@@ -667,14 +541,13 @@
                     if (workshop.Location == locationName)
                     {
                         workshop.Location = string.Empty;
-                        previousLocations[workshop.Name] = string.Empty;
-                        Logger.LogInformation("OnDeleteLocation: Cleared location from workshop '{Workshop}'", workshop.Name);
+                        Logger.LogInformation("HandleDeleteLocationRequest: Cleared location from workshop '{Workshop}'", workshop.Name);
                     }
                 }
 
                 // Increment version to force autocomplete recreation (closes open dropdowns)
                 locationListVersion++;
-                Logger.LogDebug("OnDeleteLocation: Incremented locationListVersion to {Version}", locationListVersion);
+                Logger.LogDebug("HandleDeleteLocationRequest: Incremented locationListVersion to {Version}", locationListVersion);
 
                 // Refresh UI
                 await InvokeAsync(StateHasChanged);
@@ -682,7 +555,7 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "OnDeleteLocation: ERROR deleting location '{Location}'", locationName);
+            Logger.LogError(ex, "HandleDeleteLocationRequest: ERROR deleting location '{Location}'", locationName);
         }
     }
 
