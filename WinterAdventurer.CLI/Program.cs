@@ -2,7 +2,10 @@
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using System.Diagnostics;
+using System.Text.Json;
 using WinterAdventurer.Library;
+using WinterAdventurer.Library.Models;
+using WinterAdventurer.Library.Services;
 using Microsoft.Extensions.Logging;
 
 // Create logger factory for console logging
@@ -21,12 +24,32 @@ Console.WriteLine("=============================================\n");
 if (args.Length == 0)
 {
     Console.WriteLine("Please provide the path to the Excel file as an argument.");
-    Console.WriteLine("Usage: WinterAdventurer.CLI <excel-file> [--no-merge-workshops]");
+    Console.WriteLine("Usage: WinterAdventurer.CLI <excel-file> [--timeslots <json-file>] [--no-merge-workshops]");
+    Console.WriteLine("\nArguments:");
+    Console.WriteLine("  excel-file               Path to the Excel registration file");
+    Console.WriteLine("\nOptions:");
+    Console.WriteLine("  --timeslots <json-file>  Path to JSON file containing timeslot configuration");
+    Console.WriteLine("  --no-merge-workshops     Disable merging of workshop cells in individual schedules");
     return;
 }
 
 string filePath = args[0];
-bool mergeWorkshopCells = !args.Contains("--no-merge-workshops");
+string? timeslotsPath = null;
+bool mergeWorkshopCells = true;
+
+// Parse arguments
+for (int i = 1; i < args.Length; i++)
+{
+    if (args[i] == "--timeslots" && i + 1 < args.Length)
+    {
+        timeslotsPath = args[i + 1];
+        i++; // Skip next arg since we consumed it
+    }
+    else if (args[i] == "--no-merge-workshops")
+    {
+        mergeWorkshopCells = false;
+    }
+}
 
 if (!File.Exists(filePath))
 {
@@ -55,9 +78,17 @@ try
             Console.WriteLine($"    Backup choices: {workshop.Selections.Count(s => s.ChoiceNumber > 1)}");
         }
 
+        // Load timeslots if provided
+        List<TimeSlot>? timeslots = null;
+        if (!string.IsNullOrWhiteSpace(timeslotsPath))
+        {
+            timeslots = LoadTimeslots(timeslotsPath);
+        }
+
         Console.WriteLine($"\n=== GENERATING PDF ===");
         Console.WriteLine($"Merge workshop cells: {mergeWorkshopCells}");
-        var document = excelUtilities.CreatePdf(mergeWorkshopCells);
+        Console.WriteLine($"Timeslots: {(timeslots == null ? "Using defaults" : $"{timeslots.Count} configured")}");
+        var document = excelUtilities.CreatePdf(mergeWorkshopCells, timeslots);
 
         if (document == null)
         {
@@ -115,4 +146,104 @@ catch (Exception ex)
     }
     Console.WriteLine($"\nStack Trace:\n{ex.StackTrace}");
     Environment.Exit(1);
+}
+
+// Helper methods and DTOs
+
+static List<TimeSlot> LoadTimeslots(string timeslotsPath)
+{
+    Console.WriteLine($"\nLoading timeslots from: {timeslotsPath}");
+
+    if (!File.Exists(timeslotsPath))
+    {
+        Console.WriteLine($"✗ ERROR: Timeslots file '{timeslotsPath}' does not exist.");
+        Environment.Exit(1);
+    }
+
+    try
+    {
+        var json = File.ReadAllText(timeslotsPath);
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        var data = JsonSerializer.Deserialize<TimeslotFileFormat>(json, options);
+        if (data?.Timeslots == null || data.Timeslots.Count == 0)
+        {
+            Console.WriteLine("✗ ERROR: Invalid JSON structure - 'timeslots' array is empty or missing");
+            Environment.Exit(1);
+        }
+
+        // Convert DTOs to Library TimeSlot models
+        var timeslots = data.Timeslots.Select(t => new TimeSlot
+        {
+            Id = t.Id ?? Guid.NewGuid().ToString(),
+            Label = t.Label ?? string.Empty,
+            StartTime = t.StartTime,
+            EndTime = t.EndTime,
+            IsPeriod = t.IsPeriod
+        }).ToList();
+
+        // Validate timeslots
+        var validator = new TimeslotValidationService();
+        var timeslotDtos = timeslots.Select(t => new TimeSlotDto
+        {
+            Id = t.Id,
+            Label = t.Label,
+            StartTime = t.StartTime,
+            EndTime = t.EndTime,
+            IsPeriod = t.IsPeriod
+        });
+
+        var validationResult = validator.ValidateTimeslots(timeslotDtos);
+
+        if (validationResult.HasUnconfiguredTimeslots)
+        {
+            Console.WriteLine("✗ ERROR: Some period timeslots are missing start or end times");
+            Console.WriteLine("  Period timeslots must have both StartTime and EndTime configured");
+            Environment.Exit(1);
+        }
+
+        if (validationResult.HasOverlappingTimeslots)
+        {
+            Console.WriteLine("✗ ERROR: Timeslots have overlapping times or duplicate start times");
+            Console.WriteLine("  Please check your timeslot configuration and fix any conflicts");
+            Environment.Exit(1);
+        }
+
+        // Display loaded timeslots
+        Console.WriteLine($"Loaded {timeslots.Count} timeslots:");
+        foreach (var ts in timeslots.OrderBy(t => t.StartTime ?? TimeSpan.MaxValue))
+        {
+            var timeRange = ts.StartTime.HasValue && ts.EndTime.HasValue
+                ? $"({ts.TimeRange})"
+                : "(no times configured)";
+            var type = ts.IsPeriod ? "[Period]" : "[Activity]";
+            Console.WriteLine($"  - {ts.Label} {timeRange} {type}");
+        }
+
+        return timeslots;
+    }
+    catch (JsonException ex)
+    {
+        Console.WriteLine("✗ ERROR: Invalid JSON format in timeslots file");
+        Console.WriteLine($"  {ex.Message}");
+        Environment.Exit(1);
+        return null!; // Unreachable, but needed for compiler
+    }
+}
+
+class TimeslotFileFormat
+{
+    public List<TimeslotDto>? Timeslots { get; set; }
+}
+
+class TimeslotDto
+{
+    public string? Id { get; set; }
+    public string? Label { get; set; }
+    public TimeSpan? StartTime { get; set; }
+    public TimeSpan? EndTime { get; set; }
+    public bool IsPeriod { get; set; }
 }
