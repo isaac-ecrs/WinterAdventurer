@@ -786,10 +786,10 @@ namespace WinterAdventurer.Library
                 var header = section.AddParagraph();
                 header.Format.Font.Name = "Oswald";
                 header.Format.Font.Color = COLOR_BLACK;
-                header.Format.Font.Size = 30;
+                header.Format.Font.Size = 24;
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.AddFormattedText($"{attendee.FullName}'s Schedule", TextFormat.Bold);
-                header.Format.SpaceAfter = Unit.FromPoint(16);
+                header.Format.SpaceAfter = Unit.FromPoint(12);
 
                 // Create schedule table
                 var table = section.AddTable();
@@ -821,7 +821,7 @@ namespace WinterAdventurer.Library
                 var periodHeaderPara = periodHeaderCell.AddParagraph();
                 periodHeaderPara.Format.Font.Name = "NotoSans";
                 periodHeaderPara.Format.Font.Bold = true;
-                periodHeaderPara.Format.Font.Size = 18;
+                periodHeaderPara.Format.Font.Size = 14;
                 periodHeaderPara.Format.Alignment = ParagraphAlignment.Center;
                 periodHeaderPara.AddText("Time");
 
@@ -831,7 +831,7 @@ namespace WinterAdventurer.Library
                     var dayPara = dayCell.AddParagraph();
                     dayPara.Format.Font.Name = "NotoSans";
                     dayPara.Format.Font.Bold = true;
-                    dayPara.Format.Font.Size = 18;
+                    dayPara.Format.Font.Size = 14;
                     dayPara.Format.Alignment = ParagraphAlignment.Center;
                     dayPara.AddText($"Day {day}");
                 }
@@ -928,7 +928,7 @@ namespace WinterAdventurer.Library
 
                                 // Add workshop content
                                 var workshopPara = dayCell.AddParagraph();
-                                workshopPara.Format.Font.Size = 17;
+                                workshopPara.Format.Font.Size = 14;
                                 workshopPara.Format.Alignment = ParagraphAlignment.Center;
 
                                 if (isLeading)
@@ -1003,6 +1003,9 @@ namespace WinterAdventurer.Library
                     }
                 }
 
+                // Add facility map to the footer
+                AddFacilityMapToSection(section);
+
                 sections.Add(section);
             }
 
@@ -1031,7 +1034,7 @@ namespace WinterAdventurer.Library
 
             var para = activityCell.AddParagraph();
             para.Format.Font.Name = "Roboto";
-            para.Format.Font.Size = 20;
+            para.Format.Font.Size = 16;
             para.Format.Font.Italic = true;
             para.Format.Alignment = ParagraphAlignment.Center;
             para.AddFormattedText(activityName, TextFormat.Bold);
@@ -1400,6 +1403,44 @@ namespace WinterAdventurer.Library
             {
                 // Log error but don't fail PDF generation
                 _logger.LogWarning(ex, "Error adding logo to PDF section (type: {DocumentType})", documentType);
+            }
+        }
+
+        private void AddFacilityMapToSection(Section section)
+        {
+            try
+            {
+                // Load facility map from embedded resources
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = "WinterAdventurer.Library.Resources.Images.watson_map.png";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream != null)
+                    {
+                        // Save to temporary file (MigraDoc requires file path for images)
+                        var tempPath = Path.Combine(Path.GetTempPath(), "watson_map_temp.png");
+                        using (var fileStream = File.Create(tempPath))
+                        {
+                            stream.CopyTo(fileStream);
+                        }
+
+                        // Add spacing before map
+                        section.AddParagraph().Format.SpaceAfter = Unit.FromPoint(8);
+
+                        // Add facility map centered
+                        var mapParagraph = section.AddParagraph();
+                        mapParagraph.Format.Alignment = ParagraphAlignment.Center;
+                        var map = mapParagraph.AddImage(tempPath);
+                        map.LockAspectRatio = true;
+                        map.Width = Unit.FromInch(6.0); // Smaller map to fit on one page
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail PDF generation
+                _logger.LogWarning(ex, "Error adding facility map to PDF section");
             }
         }
     }
