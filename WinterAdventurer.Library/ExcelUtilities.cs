@@ -444,7 +444,7 @@ namespace WinterAdventurer.Library
             return document;
         }
 
-        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
+        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0)
         {
             if (Workshops != null)
             {
@@ -469,6 +469,24 @@ namespace WinterAdventurer.Library
                     section.PageSetup.BottomMargin = Unit.FromInch(.5);
 
                     document.Sections.Add(section);
+                }
+
+                // Add blank schedules
+                if (blankScheduleCount > 0)
+                {
+                    _logger.LogInformation($"Generating {blankScheduleCount} blank schedules");
+                    var blankSections = PrintBlankSchedules(blankScheduleCount, mergeWorkshopCells, timeslots);
+                    _logger.LogInformation($"Generated {blankSections.Count} blank schedule sections");
+
+                    foreach(var section in blankSections)
+                    {
+                        section.PageSetup.TopMargin = Unit.FromInch(.5);
+                        section.PageSetup.LeftMargin = Unit.FromInch(.5);
+                        section.PageSetup.RightMargin = Unit.FromInch(.5);
+                        section.PageSetup.BottomMargin = Unit.FromInch(.5);
+
+                        document.Sections.Add(section);
+                    }
                 }
 
                 return document;
@@ -1009,6 +1027,41 @@ namespace WinterAdventurer.Library
                 sections.Add(section);
             }
 
+            return sections;
+        }
+
+        private List<Section> PrintBlankSchedules(int count, bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
+        {
+            _logger.LogInformation($"PrintBlankSchedules called with count={count}");
+            var sections = new List<Section>();
+
+            // Generate multiple copies of the master schedule for blank schedules
+            for (int i = 0; i < count; i++)
+            {
+                // Get master schedule sections (typically just one section)
+                var masterSections = PrintMasterSchedule(eventName: "Workshop Schedule", timeslots: timeslots);
+
+                foreach (var section in masterSections)
+                {
+                    // Insert a name field at the very top of the section
+                    var nameField = new Paragraph();
+                    nameField.Format.Font.Name = "NotoSans";
+                    nameField.Format.Font.Size = 11;
+                    nameField.Format.Alignment = ParagraphAlignment.Left;
+                    nameField.Format.SpaceAfter = Unit.FromPoint(8);
+                    nameField.AddText("Name: _____________________________");
+
+                    // Insert at the beginning of the section
+                    section.Elements.InsertObject(0, nameField);
+
+                    // Add facility map to the footer
+                    AddFacilityMapToSection(section);
+
+                    sections.Add(section);
+                }
+            }
+
+            _logger.LogInformation($"Generated {sections.Count} blank schedule sections");
             return sections;
         }
 
