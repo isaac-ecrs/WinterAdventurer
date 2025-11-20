@@ -58,6 +58,8 @@
     <WorkshopGrid Workshops="workshops"
                   EventName="eventName"
                   EventNameChanged="EventCallback.Factory.Create<string>(this, value => eventName = value)"
+                  BlankScheduleCount="blankScheduleCount"
+                  BlankScheduleCountChanged="EventCallback.Factory.Create<int>(this, OnBlankScheduleCountChanged)"
                   Success="success"
                   IsDisabled="hasOverlappingTimeslots || hasUnconfiguredTimeslots"
                   AvailableLocations="availableLocations"
@@ -85,6 +87,13 @@
     private List<string> availableLocations = new List<string>();
     private int locationListVersion = 0; // Increment to force autocomplete recreation
     private string eventName = $"Winter Adventure {DateTime.Now.Year}";
+    private int blankScheduleCount = 0;
+
+    private void OnBlankScheduleCountChanged(int newValue)
+    {
+        Logger.LogInformation($"Blank schedule count changed: {blankScheduleCount} -> {newValue}");
+        blankScheduleCount = newValue;
+    }
 
     protected override void OnInitialized()
     {
@@ -334,59 +343,86 @@
 
     private async Task BuildPdf()
     {
-        if (_disposed || !_hasRendered) return;
+        Logger.LogInformation("========== BuildPdf method called ==========");
+        Logger.LogInformation($"BuildPdf: blankScheduleCount = {blankScheduleCount}");
+        Logger.LogInformation($"BuildPdf: _disposed = {_disposed}, _hasRendered = {_hasRendered}");
+
+        if (_disposed || !_hasRendered)
+        {
+            Logger.LogWarning("BuildPdf: Exiting early - disposed or not rendered yet");
+            return;
+        }
 
         try
         {
+            Logger.LogInformation("BuildPdf: Starting PDF generation");
             errorMessage = null;
             isLoading = true;
             await InvokeAsync(StateHasChanged); // Immediate UI update
+
+            // Capture variables before Task.Run to ensure proper closure
+            var localBlankScheduleCount = blankScheduleCount;
+            var localTimeslots = ConvertToLibraryTimeSlots();
+
+            Logger.LogInformation($"BuildPdf: Captured localBlankScheduleCount = {localBlankScheduleCount}");
+            Logger.LogInformation($"BuildPdf: Captured {localTimeslots?.Count ?? 0} timeslots");
 
             // Generate PDF in background thread to keep SignalR circuit alive
             var (pdfBytes, error) = await Task.Run(() =>
             {
                 try
                 {
-                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: ConvertToLibraryTimeSlots());
+                    Logger.LogInformation($"Task.Run: Calling CreatePdf with blankScheduleCount={localBlankScheduleCount}");
+                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: localTimeslots, blankScheduleCount: localBlankScheduleCount);
                     if (document == null)
                     {
+                        Logger.LogWarning("Task.Run: CreatePdf returned null document");
                         return (Array.Empty<byte>(), "No document generated (no workshops found)");
                     }
 
+                    Logger.LogInformation($"Task.Run: Document created with {document.Sections.Count} sections");
                     document!.Styles["Normal"]!.Font.Name = "NotoSans";
 
                     var renderer = new PdfDocumentRenderer();
                     renderer.Document = document;
+                    Logger.LogInformation("Task.Run: Rendering PDF document");
                     renderer.RenderDocument();
 
                     using (var stream = new MemoryStream())
                     {
                         renderer.PdfDocument.Save(stream, false);
+                        Logger.LogInformation($"Task.Run: PDF saved, size={stream.Length} bytes");
                         return (stream.ToArray(), (string?)null);
                     }
                 }
                 catch (Exception ex)
                 {
+                    Logger.LogError(ex, $"Task.Run: Exception during PDF generation: {ex.Message}");
                     return (Array.Empty<byte>(), ex.Message);
                 }
             });
 
             if (!string.IsNullOrEmpty(error))
             {
+                Logger.LogError($"BuildPdf: PDF generation failed: {error}");
                 errorMessage = $"Error generating PDF: {error}";
                 success = false;
             }
             else
             {
+                Logger.LogInformation($"BuildPdf: PDF generated successfully, downloading to browser");
                 var base64 = Convert.ToBase64String(pdfBytes);
                 await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "ClassRosters.pdf", base64);
+                Logger.LogInformation("BuildPdf: PDF download initiated");
             }
 
             isLoading = false;
             if (!_disposed) await InvokeAsync(StateHasChanged);
+            Logger.LogInformation("========== BuildPdf method completed ==========");
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, $"BuildPdf: Outer exception caught: {ex.Message}");
             if (!_disposed)
             {
                 Console.WriteLine($"Error generating PDF: {ex.Message}");

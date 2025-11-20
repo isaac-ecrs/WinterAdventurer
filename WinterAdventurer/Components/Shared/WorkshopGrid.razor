@@ -22,6 +22,16 @@
                           AdornmentIcon="@Icons.Material.Filled.Event"
                           HelperText="Name for the master schedule (e.g., Winter Adventure 2025)" />
         </MudItem>
+        <MudItem xs="12" md="6">
+            <MudNumericField Label="Blank Schedules"
+                          Value="@BlankScheduleCount"
+                          ValueChanged="@((int value) => BlankScheduleCountChanged.InvokeAsync(value))"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.PersonAddAlt"
+                          Min="0"
+                          HelperText="Number of blank schedules to generate (for attendees not in roster)" />
+        </MudItem>
         @foreach (var workshop in Workshops)
         {
             <MudItem xs="6">
@@ -56,6 +66,18 @@
     /// </summary>
     [Parameter]
     public EventCallback<string> EventNameChanged { get; set; }
+
+    /// <summary>
+    /// Number of blank schedules to generate (for attendees not in roster)
+    /// </summary>
+    [Parameter, EditorRequired]
+    public int BlankScheduleCount { get; set; } = 0;
+
+    /// <summary>
+    /// Callback invoked when the blank schedule count changes
+    /// </summary>
+    [Parameter]
+    public EventCallback<int> BlankScheduleCountChanged { get; set; }
 
     /// <summary>
     /// Indicates whether form submission was successful

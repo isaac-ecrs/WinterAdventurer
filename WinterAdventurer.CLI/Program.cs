@@ -24,18 +24,20 @@ Console.WriteLine("=============================================\n");
 if (args.Length == 0)
 {
     Console.WriteLine("Please provide the path to the Excel file as an argument.");
-    Console.WriteLine("Usage: WinterAdventurer.CLI <excel-file> [--timeslots <json-file>] [--no-merge-workshops]");
+    Console.WriteLine("Usage: WinterAdventurer.CLI <excel-file> [--timeslots <json-file>] [--no-merge-workshops] [--blank-schedules <count>]");
     Console.WriteLine("\nArguments:");
-    Console.WriteLine("  excel-file               Path to the Excel registration file");
+    Console.WriteLine("  excel-file                  Path to the Excel registration file");
     Console.WriteLine("\nOptions:");
-    Console.WriteLine("  --timeslots <json-file>  Path to JSON file containing timeslot configuration");
-    Console.WriteLine("  --no-merge-workshops     Disable merging of workshop cells in individual schedules");
+    Console.WriteLine("  --timeslots <json-file>     Path to JSON file containing timeslot configuration");
+    Console.WriteLine("  --no-merge-workshops        Disable merging of workshop cells in individual schedules");
+    Console.WriteLine("  --blank-schedules <count>   Number of blank schedules to generate (for attendees not in roster)");
     return;
 }
 
 string filePath = args[0];
 string? timeslotsPath = null;
 bool mergeWorkshopCells = true;
+int blankScheduleCount = 0;
 
 // Parse arguments
 for (int i = 1; i < args.Length; i++)
@@ -48,6 +50,19 @@ for (int i = 1; i < args.Length; i++)
     else if (args[i] == "--no-merge-workshops")
     {
         mergeWorkshopCells = false;
+    }
+    else if (args[i] == "--blank-schedules" && i + 1 < args.Length)
+    {
+        if (int.TryParse(args[i + 1], out int count) && count > 0)
+        {
+            blankScheduleCount = count;
+            i++; // Skip next arg since we consumed it
+        }
+        else
+        {
+            Console.WriteLine($"Error: Invalid value for --blank-schedules: '{args[i + 1]}'. Must be a positive integer.");
+            return;
+        }
     }
 }
 
@@ -88,7 +103,8 @@ try
         Console.WriteLine($"\n=== GENERATING PDF ===");
         Console.WriteLine($"Merge workshop cells: {mergeWorkshopCells}");
         Console.WriteLine($"Timeslots: {(timeslots == null ? "Using defaults" : $"{timeslots.Count} configured")}");
-        var document = excelUtilities.CreatePdf(mergeWorkshopCells, timeslots);
+        Console.WriteLine($"Blank schedules: {blankScheduleCount}");
+        var document = excelUtilities.CreatePdf(mergeWorkshopCells, timeslots, blankScheduleCount);
 
         if (document == null)
         {
