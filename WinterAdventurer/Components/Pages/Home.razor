@@ -373,7 +373,7 @@
                 try
                 {
                     Logger.LogInformation($"Task.Run: Calling CreatePdf with blankScheduleCount={localBlankScheduleCount}");
-                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: localTimeslots, blankScheduleCount: localBlankScheduleCount);
+                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: localTimeslots, blankScheduleCount: localBlankScheduleCount, eventName: eventName);
                     if (document == null)
                     {
                         Logger.LogWarning("Task.Run: CreatePdf returned null document");

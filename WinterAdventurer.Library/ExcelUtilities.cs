@@ -444,13 +444,13 @@ namespace WinterAdventurer.Library
             return document;
         }
 
-        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0)
+        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
         {
             if (Workshops != null)
             {
                 var document = new Document();
 
-                foreach(var section in PrintWorkshopParticipants(timeslots))
+                foreach(var section in PrintWorkshopParticipants(eventName, timeslots))
                 {
                     section.PageSetup.TopMargin = Unit.FromInch(.5);
                     section.PageSetup.LeftMargin = Unit.FromInch(.5);
@@ -461,7 +461,7 @@ namespace WinterAdventurer.Library
                 }
 
                 // Add individual schedules
-                foreach(var section in PrintIndividualSchedules(mergeWorkshopCells, timeslots))
+                foreach(var section in PrintIndividualSchedules(eventName, mergeWorkshopCells, timeslots))
                 {
                     section.PageSetup.TopMargin = Unit.FromInch(.5);
                     section.PageSetup.LeftMargin = Unit.FromInch(.5);
@@ -475,7 +475,7 @@ namespace WinterAdventurer.Library
                 if (blankScheduleCount > 0)
                 {
                     _logger.LogInformation($"Generating {blankScheduleCount} blank schedules");
-                    var blankSections = PrintBlankSchedules(blankScheduleCount, mergeWorkshopCells, timeslots);
+                    var blankSections = PrintBlankSchedules(eventName, blankScheduleCount, mergeWorkshopCells, timeslots);
                     _logger.LogInformation($"Generated {blankSections.Count} blank schedule sections");
 
                     foreach(var section in blankSections)
@@ -517,7 +517,7 @@ namespace WinterAdventurer.Library
             return null;
         }
 
-        private List<Section> PrintWorkshopParticipants(List<Models.TimeSlot>? timeslots = null)
+        private List<Section> PrintWorkshopParticipants(string eventName, List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
@@ -622,6 +622,9 @@ namespace WinterAdventurer.Library
 
                     AddTwoColumnParticipantList(section, backupAttendees, showChoiceNumber: true);
                 }
+
+                // Add event name footer
+                AddEventNameFooter(section, eventName);
 
                 sections.Add(section);
             }
@@ -749,7 +752,7 @@ namespace WinterAdventurer.Library
             }
         }
 
-        private List<Section> PrintIndividualSchedules(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
+        private List<Section> PrintIndividualSchedules(string eventName, bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
@@ -1024,13 +1027,16 @@ namespace WinterAdventurer.Library
                 // Add facility map to the footer
                 AddFacilityMapToSection(section);
 
+                // Add event name footer
+                AddEventNameFooter(section, eventName);
+
                 sections.Add(section);
             }
 
             return sections;
         }
 
-        private List<Section> PrintBlankSchedules(int count, bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
+        private List<Section> PrintBlankSchedules(string eventName, int count, bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             _logger.LogInformation($"PrintBlankSchedules called with count={count}");
             var sections = new List<Section>();
@@ -1056,6 +1062,9 @@ namespace WinterAdventurer.Library
 
                     // Add facility map to the footer
                     AddFacilityMapToSection(section);
+
+                    // Add event name footer
+                    AddEventNameFooter(section, eventName);
 
                     sections.Add(section);
                 }
@@ -1457,6 +1466,19 @@ namespace WinterAdventurer.Library
                 // Log error but don't fail PDF generation
                 _logger.LogWarning(ex, "Error adding logo to PDF section (type: {DocumentType})", documentType);
             }
+        }
+
+        /// <summary>
+        /// Adds a footer to the section with the event name centered at the bottom
+        /// </summary>
+        private void AddEventNameFooter(Section section, string eventName)
+        {
+            var footer = section.Footers.Primary;
+            var paragraph = footer.AddParagraph();
+            paragraph.Format.Font.Name = "NotoSans";
+            paragraph.Format.Font.Size = 9;
+            paragraph.Format.Alignment = ParagraphAlignment.Center;
+            paragraph.AddText(eventName);
         }
 
         private void AddFacilityMapToSection(Section section)
