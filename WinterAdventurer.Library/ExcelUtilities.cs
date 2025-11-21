@@ -391,59 +391,6 @@ namespace WinterAdventurer.Library
             }
         }
 
-        public Document TestFromDocs()
-        {
-            // Create a new MigraDoc document.
-            var document = new Document();
-
-            // Add a section to the document.
-            var section = document.AddSection();
-
-            // Add a paragraph to the section.
-            var paragraph = section.AddParagraph();
-
-            // Set font color.
-            paragraph.Format.Font.Color = Colors.DarkBlue;
-
-            // Add some text to the paragraph.
-            paragraph.AddFormattedText("Hello, World!", TextFormat.Bold);
-
-            // Create the primary footer.
-            var footer = section.Footers.Primary;
-
-            // Add content to footer.
-            paragraph = footer.AddParagraph();
-            paragraph.Format.Alignment = ParagraphAlignment.Center;
-
-            // Add MigraDoc logo.
-            document.LastSection.AddParagraph("blah");
-
-            return document;
-        }
-
-        public Document TestPdf()
-        {
-            // Create a new MigraDoc document.
-            var document = new Document();
-
-            // Add a section to the document.
-            var section = document.AddSection();
-
-            // Add a paragraph to the section.
-            var paragraph = section.AddParagraph();
-
-            // Set font color.
-            // paragraph.Format.Font.Color = Colors.DarkBlue;
-
-            // Add some text to the paragraph.
-            paragraph.AddFormattedText("Hello, World! No footer at all", TextFormat.Bold);
-
-            // Add MigraDoc logo.
-            // document.LastSection.AddParagraph("blah");
-
-            return document;
-        }
-
         public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
         {
             if (Workshops != null)
