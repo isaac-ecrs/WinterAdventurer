@@ -399,10 +399,10 @@ namespace WinterAdventurer.Library
 
                 foreach(var section in PrintWorkshopParticipants(eventName, timeslots))
                 {
-                    section.PageSetup.TopMargin = Unit.FromInch(.5);
-                    section.PageSetup.LeftMargin = Unit.FromInch(.5);
-                    section.PageSetup.RightMargin = Unit.FromInch(.5);
-                    section.PageSetup.BottomMargin = Unit.FromInch(.5);
+                    section.PageSetup.TopMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.LeftMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.RightMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.BottomMargin = PdfLayoutConstants.Margins.Standard;
 
                     document.Sections.Add(section);
                 }
@@ -410,10 +410,10 @@ namespace WinterAdventurer.Library
                 // Add individual schedules
                 foreach(var section in PrintIndividualSchedules(eventName, mergeWorkshopCells, timeslots))
                 {
-                    section.PageSetup.TopMargin = Unit.FromInch(.5);
-                    section.PageSetup.LeftMargin = Unit.FromInch(.5);
-                    section.PageSetup.RightMargin = Unit.FromInch(.5);
-                    section.PageSetup.BottomMargin = Unit.FromInch(.5);
+                    section.PageSetup.TopMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.LeftMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.RightMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.BottomMargin = PdfLayoutConstants.Margins.Standard;
 
                     document.Sections.Add(section);
                 }
@@ -427,10 +427,10 @@ namespace WinterAdventurer.Library
 
                     foreach(var section in blankSections)
                     {
-                        section.PageSetup.TopMargin = Unit.FromInch(.5);
-                        section.PageSetup.LeftMargin = Unit.FromInch(.5);
-                        section.PageSetup.RightMargin = Unit.FromInch(.5);
-                        section.PageSetup.BottomMargin = Unit.FromInch(.5);
+                        section.PageSetup.TopMargin = PdfLayoutConstants.Margins.Standard;
+                        section.PageSetup.LeftMargin = PdfLayoutConstants.Margins.Standard;
+                        section.PageSetup.RightMargin = PdfLayoutConstants.Margins.Standard;
+                        section.PageSetup.BottomMargin = PdfLayoutConstants.Margins.Standard;
 
                         document.Sections.Add(section);
                     }
@@ -450,10 +450,10 @@ namespace WinterAdventurer.Library
 
                 foreach(var section in PrintMasterSchedule(eventName, timeslots))
                 {
-                    section.PageSetup.TopMargin = Unit.FromInch(.5);
-                    section.PageSetup.LeftMargin = Unit.FromInch(.5);
-                    section.PageSetup.RightMargin = Unit.FromInch(.5);
-                    section.PageSetup.BottomMargin = Unit.FromInch(.5);
+                    section.PageSetup.TopMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.LeftMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.RightMargin = PdfLayoutConstants.Margins.Standard;
+                    section.PageSetup.BottomMargin = PdfLayoutConstants.Margins.Standard;
 
                     document.Sections.Add(section);
                 }
@@ -479,7 +479,7 @@ namespace WinterAdventurer.Library
                 var header = section.AddParagraph();
                 header.Format.Font.Name = "Oswald";
                 header.Format.Font.Color = COLOR_BLACK;
-                header.Format.Font.Size = 25;
+                header.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.WorkshopTitle;
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.AddFormattedText(workshopListing.Name, TextFormat.Bold);
 
@@ -487,7 +487,7 @@ namespace WinterAdventurer.Library
                 var leaderInfo = section.AddParagraph();
                 leaderInfo.Format.Font.Name = "NotoSans";
                 leaderInfo.Format.Font.Color = COLOR_BLACK;
-                leaderInfo.Format.Font.Size = 18;
+                leaderInfo.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.LeaderInfo;
                 leaderInfo.Format.Alignment = ParagraphAlignment.Center;
                 leaderInfo.AddFormattedText(workshopListing.Leader);
 
@@ -497,7 +497,7 @@ namespace WinterAdventurer.Library
                     var locationInfo = section.AddParagraph();
                     locationInfo.Format.Font.Name = "NotoSans";
                     locationInfo.Format.Font.Color = COLOR_BLACK;
-                    locationInfo.Format.Font.Size = 16;
+                    locationInfo.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.LocationInfo;
                     locationInfo.Format.Alignment = ParagraphAlignment.Center;
                     locationInfo.AddFormattedText($"Location: {workshopListing.Location}");
                 }
@@ -506,7 +506,7 @@ namespace WinterAdventurer.Library
                 var periodInfo = section.AddParagraph();
                 periodInfo.Format.Font.Name = "NotoSans";
                 periodInfo.Format.Font.Color = COLOR_BLACK;
-                periodInfo.Format.Font.Size = 14;
+                periodInfo.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.PeriodInfo;
                 periodInfo.Format.Alignment = ParagraphAlignment.Center;
 
                 // Find the timeslot for this period to get the time range
@@ -540,7 +540,7 @@ namespace WinterAdventurer.Library
                     var firstChoiceHeader = section.AddParagraph();
                     firstChoiceHeader.Format.Font.Name = "NotoSans";
                     firstChoiceHeader.Format.Font.Color = COLOR_BLACK;
-                    firstChoiceHeader.Format.Font.Size = 18;
+                    firstChoiceHeader.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.SectionHeader;
                     firstChoiceHeader.AddFormattedText($"Enrolled Participants ({firstChoiceAttendees.Count}):", TextFormat.Bold);
                     firstChoiceHeader.Format.SpaceAfter = Unit.FromPoint(8);
 
@@ -553,7 +553,7 @@ namespace WinterAdventurer.Library
                     var backupHeader = section.AddParagraph();
                     backupHeader.Format.Font.Name = "NotoSans";
                     backupHeader.Format.Font.Color = COLOR_BLACK;
-                    backupHeader.Format.Font.Size = 18;
+                    backupHeader.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.SectionHeader;
                     backupHeader.Format.SpaceAfter = Unit.FromPoint(8);
                     backupHeader.Format.SpaceBefore = Unit.FromPoint(16);
                     backupHeader.AddFormattedText($"Backup/Alternate Choices ({backupAttendees.Count}):", TextFormat.Bold);
@@ -561,7 +561,7 @@ namespace WinterAdventurer.Library
                     var backupNote = section.AddParagraph();
                     backupNote.Format.Font.Name = "Roboto";
                     backupNote.Format.Font.Color = COLOR_BLACK;
-                    backupNote.Format.Font.Size = 14;
+                    backupNote.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.BackupNote;
                     backupNote.Format.Font.Italic = true;
                     backupNote.Format.LeftIndent = Unit.FromPoint(12);
                     backupNote.Format.SpaceAfter = Unit.FromPoint(8);
@@ -603,7 +603,7 @@ namespace WinterAdventurer.Library
             table.Borders.Visible = false;
 
             // Define column widths (equal width)
-            var columnWidth = Unit.FromInch(3.25); // Roughly half of page width with margins
+            var columnWidth = PdfLayoutConstants.ColumnWidths.ParticipantColumn;
             table.AddColumn(columnWidth);
             table.AddColumn(columnWidth);
 
@@ -634,7 +634,7 @@ namespace WinterAdventurer.Library
                     showChoiceNumber,
                     leftColumn[i].ChoiceNumber);
 
-                leftPara.Format.Font.Size = 15; // Base size for number
+                leftPara.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.ParticipantName;
                 leftPara.Format.LeftIndent = Unit.FromPoint(6);
                 leftPara.Format.SpaceBefore = 0;
                 leftPara.Format.SpaceAfter = Unit.FromPoint(6);
@@ -673,7 +673,7 @@ namespace WinterAdventurer.Library
                         showChoiceNumber,
                         rightColumn[i].ChoiceNumber);
 
-                    rightPara.Format.Font.Size = 15; // Base size for number
+                    rightPara.Format.Font.Size = PdfLayoutConstants.FontSizes.WorkshopRoster.ParticipantName;
                     rightPara.Format.LeftIndent = Unit.FromPoint(6);
                     rightPara.Format.SpaceBefore = 0;
                     rightPara.Format.SpaceAfter = Unit.FromPoint(6);
@@ -742,10 +742,10 @@ namespace WinterAdventurer.Library
                 section.PageSetup.Orientation = Orientation.Landscape;
 
                 // Set margins for landscape pages
-                section.PageSetup.LeftMargin = Unit.FromInch(0.5);
-                section.PageSetup.RightMargin = Unit.FromInch(0.5);
-                section.PageSetup.TopMargin = Unit.FromInch(0.5);
-                section.PageSetup.BottomMargin = Unit.FromInch(0.5);
+                section.PageSetup.LeftMargin = PdfLayoutConstants.Margins.Standard;
+                section.PageSetup.RightMargin = PdfLayoutConstants.Margins.Standard;
+                section.PageSetup.TopMargin = PdfLayoutConstants.Margins.Standard;
+                section.PageSetup.BottomMargin = PdfLayoutConstants.Margins.Standard;
 
                 // Add logo to section
                 AddLogoToSection(section, "individual");
@@ -754,7 +754,7 @@ namespace WinterAdventurer.Library
                 var header = section.AddParagraph();
                 header.Format.Font.Name = "Oswald";
                 header.Format.Font.Color = COLOR_BLACK;
-                header.Format.Font.Size = 24;
+                header.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.ParticipantName;
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.AddFormattedText($"{attendee.FullName}'s Schedule", TextFormat.Bold);
                 header.Format.SpaceAfter = Unit.FromPoint(12);
@@ -765,19 +765,18 @@ namespace WinterAdventurer.Library
 
                 // Column widths: 11" page - 1" margins = 10" usable width
                 // Make table narrower (9.2") and center it with left indent
-                var timeColumnWidth = 1.8;
-                var dayColumnWidth = 1.85;
+                var timeColumnWidth = PdfLayoutConstants.ColumnWidths.IndividualSchedule.Time;
+                var dayColumnWidth = PdfLayoutConstants.ColumnWidths.IndividualSchedule.Day;
                 var tableWidth = timeColumnWidth + (_schema.TotalDays * dayColumnWidth); // 1.8 + 7.4 = 9.2
-                var leftIndent = 0.7; // Push table more to the right for better centering
 
-                table.Rows.LeftIndent = Unit.FromInch(leftIndent);
+                table.Rows.LeftIndent = Unit.FromInch(PdfLayoutConstants.Table.IndividualScheduleLeftIndent);
 
-                table.AddColumn(Unit.FromInch(timeColumnWidth));
+                table.AddColumn(Unit.FromInch(PdfLayoutConstants.ColumnWidths.IndividualSchedule.Time));
 
                 // Columns 1-4: Days
                 for (int i = 0; i < _schema.TotalDays; i++)
                 {
-                    table.AddColumn(Unit.FromInch(dayColumnWidth));
+                    table.AddColumn(Unit.FromInch(PdfLayoutConstants.ColumnWidths.IndividualSchedule.Day));
                 }
 
                 // Header row with day numbers
@@ -789,7 +788,7 @@ namespace WinterAdventurer.Library
                 var periodHeaderPara = periodHeaderCell.AddParagraph();
                 periodHeaderPara.Format.Font.Name = "NotoSans";
                 periodHeaderPara.Format.Font.Bold = true;
-                periodHeaderPara.Format.Font.Size = 14;
+                periodHeaderPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.PeriodHeader;
                 periodHeaderPara.Format.Alignment = ParagraphAlignment.Center;
                 periodHeaderPara.AddText("Time");
 
@@ -799,7 +798,7 @@ namespace WinterAdventurer.Library
                     var dayPara = dayCell.AddParagraph();
                     dayPara.Format.Font.Name = "NotoSans";
                     dayPara.Format.Font.Bold = true;
-                    dayPara.Format.Font.Size = 14;
+                    dayPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.DayIndicator;
                     dayPara.Format.Alignment = ParagraphAlignment.Center;
                     dayPara.AddText($"Day {day}");
                 }
@@ -828,7 +827,7 @@ namespace WinterAdventurer.Library
                         {
                             var timePara = timeCell.AddParagraph();
                             timePara.Format.Font.Name = "Roboto";
-                            timePara.Format.Font.Size = 12;
+                            timePara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.TimeSlot;
                             timePara.Format.Alignment = ParagraphAlignment.Center;
                             timePara.AddText(timeslot.TimeRange);
                         }
@@ -896,7 +895,7 @@ namespace WinterAdventurer.Library
 
                                 // Add workshop content
                                 var workshopPara = dayCell.AddParagraph();
-                                workshopPara.Format.Font.Size = 14;
+                                workshopPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.WorkshopName;
                                 workshopPara.Format.Alignment = ParagraphAlignment.Center;
 
                                 if (isLeading)
@@ -925,7 +924,7 @@ namespace WinterAdventurer.Library
                                         {
                                             var leaderPara = dayCell.AddParagraph();
                                             leaderPara.Format.Font.Name = "Roboto";
-                                            leaderPara.Format.Font.Size = 12;
+                                            leaderPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.LeaderName;
                                             leaderPara.Format.Font.Italic = true;
                                             leaderPara.Format.Alignment = ParagraphAlignment.Center;
                                             leaderPara.AddText($"with {otherLeader}");
@@ -938,7 +937,7 @@ namespace WinterAdventurer.Library
                                     // Not leading, show full leader info
                                     var leaderPara = dayCell.AddParagraph();
                                     leaderPara.Format.Font.Name = "Roboto";
-                                    leaderPara.Format.Font.Size = 12;
+                                    leaderPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.LeaderName;
                                     leaderPara.Format.Font.Italic = true;
                                     leaderPara.Format.Alignment = ParagraphAlignment.Center;
                                     leaderPara.AddText($"{workshop.Leader}");
@@ -949,7 +948,7 @@ namespace WinterAdventurer.Library
                                 {
                                     var locationPara = dayCell.AddParagraph();
                                     locationPara.Format.Font.Name = "Roboto";
-                                    locationPara.Format.Font.Size = 12;
+                                    locationPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.LocationName;
                                     locationPara.Format.Font.Bold = true;
                                     locationPara.Format.Alignment = ParagraphAlignment.Center;
                                     locationPara.AddText(workshop.Location);
@@ -999,7 +998,7 @@ namespace WinterAdventurer.Library
                     // Insert a name field at the very top of the section
                     var nameField = new Paragraph();
                     nameField.Format.Font.Name = "NotoSans";
-                    nameField.Format.Font.Size = 11;
+                    nameField.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.NameFieldLabel;
                     nameField.Format.Alignment = ParagraphAlignment.Left;
                     nameField.Format.SpaceAfter = Unit.FromPoint(8);
                     nameField.AddText("Name: _____________________________");
@@ -1032,7 +1031,7 @@ namespace WinterAdventurer.Library
             {
                 var timePara = timeCell.AddParagraph();
                 timePara.Format.Font.Name = "Roboto";
-                timePara.Format.Font.Size = 12;
+                timePara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.TimeSlot;
                 timePara.Format.Alignment = ParagraphAlignment.Center;
                 timePara.AddText(timeRange);
             }
@@ -1043,7 +1042,7 @@ namespace WinterAdventurer.Library
 
             var para = activityCell.AddParagraph();
             para.Format.Font.Name = "Roboto";
-            para.Format.Font.Size = 16;
+            para.Format.Font.Size = PdfLayoutConstants.FontSizes.BlankSchedule.Title;
             para.Format.Font.Italic = true;
             para.Format.Alignment = ParagraphAlignment.Center;
             para.AddFormattedText(activityName, TextFormat.Bold);
@@ -1126,7 +1125,7 @@ namespace WinterAdventurer.Library
             var title = section.AddParagraph();
             title.Format.Font.Name = "Oswald";
             title.Format.Font.Color = COLOR_BLACK;
-            title.Format.Font.Size = 28;
+            title.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.Title;
             title.Format.Alignment = ParagraphAlignment.Center;
             title.AddFormattedText(eventName, TextFormat.Bold);
             title.Format.SpaceAfter = Unit.FromPoint(20);
@@ -1142,7 +1141,7 @@ namespace WinterAdventurer.Library
             var locationColumnWidth = (totalUsableWidth - timeColumnWidth - daysColumnWidth) / locations.Count;
 
             // Add columns
-            table.AddColumn(Unit.FromInch(timeColumnWidth));  // Time
+            table.AddColumn(Unit.FromInch(PdfLayoutConstants.ColumnWidths.IndividualSchedule.Time));  // Time
             table.AddColumn(Unit.FromInch(daysColumnWidth));  // Days indicator
             foreach (var location in locations)
             {
@@ -1159,7 +1158,7 @@ namespace WinterAdventurer.Library
             var timeHeaderPara = timeHeader.AddParagraph();
             timeHeaderPara.Format.Font.Name = "NotoSans";
             timeHeaderPara.Format.Font.Bold = true;
-            timeHeaderPara.Format.Font.Size = 12;
+            timeHeaderPara.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.ColumnHeader;
             timeHeaderPara.Format.Alignment = ParagraphAlignment.Center;
             timeHeaderPara.AddText("Time");
 
@@ -1168,7 +1167,7 @@ namespace WinterAdventurer.Library
             var daysHeaderPara = daysHeader.AddParagraph();
             daysHeaderPara.Format.Font.Name = "NotoSans";
             daysHeaderPara.Format.Font.Bold = true;
-            daysHeaderPara.Format.Font.Size = 12;
+            daysHeaderPara.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.ColumnHeader;
             daysHeaderPara.Format.Alignment = ParagraphAlignment.Center;
             daysHeaderPara.AddText("Days");
 
@@ -1179,7 +1178,7 @@ namespace WinterAdventurer.Library
                 var locationHeaderPara = locationHeader.AddParagraph();
                 locationHeaderPara.Format.Font.Name = "NotoSans";
                 locationHeaderPara.Format.Font.Bold = true;
-                locationHeaderPara.Format.Font.Size = 11;
+                locationHeaderPara.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.LocationHeader;
                 locationHeaderPara.Format.Alignment = ParagraphAlignment.Center;
                 locationHeaderPara.AddText(locations[i]);
             }
@@ -1215,7 +1214,7 @@ namespace WinterAdventurer.Library
             timeCell.VerticalAlignment = VerticalAlignment.Center;
             var timePara = timeCell.AddParagraph();
             timePara.Format.Font.Name = "NotoSans";
-            timePara.Format.Font.Size = 10;
+            timePara.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.TimeCell;
             timePara.Format.Alignment = ParagraphAlignment.Center;
 
             if (!string.IsNullOrEmpty(timeslot.TimeRange))
@@ -1232,7 +1231,7 @@ namespace WinterAdventurer.Library
             days12Cell.VerticalAlignment = VerticalAlignment.Center;
             var days12Para = days12Cell.AddParagraph();
             days12Para.Format.Font.Name = "NotoSans";
-            days12Para.Format.Font.Size = 9;
+            days12Para.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.DayIndicator;
             days12Para.Format.Alignment = ParagraphAlignment.Center;
             days12Para.AddText("Days\n1-2");
 
@@ -1241,7 +1240,7 @@ namespace WinterAdventurer.Library
             days34Cell.VerticalAlignment = VerticalAlignment.Center;
             var days34Para = days34Cell.AddParagraph();
             days34Para.Format.Font.Name = "NotoSans";
-            days34Para.Format.Font.Size = 9;
+            days34Para.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.DayIndicator;
             days34Para.Format.Alignment = ParagraphAlignment.Center;
             days34Para.AddText("Days\n3-4");
 
@@ -1303,7 +1302,7 @@ namespace WinterAdventurer.Library
             var timeCell = row.Cells[0];
             var timePara = timeCell.AddParagraph();
             timePara.Format.Font.Name = "NotoSans";
-            timePara.Format.Font.Size = 10;
+            timePara.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.TimeCell;
             timePara.Format.Alignment = ParagraphAlignment.Center;
 
             if (!string.IsNullOrEmpty(timeslot.TimeRange))
@@ -1321,7 +1320,7 @@ namespace WinterAdventurer.Library
             activityCell.VerticalAlignment = VerticalAlignment.Center;
             var activityPara = activityCell.AddParagraph();
             activityPara.Format.Font.Name = "Roboto";
-            activityPara.Format.Font.Size = 14;
+            activityPara.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.ActivityName;
             activityPara.Format.Font.Italic = true;
             activityPara.Format.Alignment = ParagraphAlignment.Center;
             activityPara.AddFormattedText(timeslot.Label, TextFormat.Bold);
@@ -1332,7 +1331,7 @@ namespace WinterAdventurer.Library
             cell.VerticalAlignment = VerticalAlignment.Center;
             var para = cell.AddParagraph();
             para.Format.Font.Name = "NotoSans";
-            para.Format.Font.Size = 10;
+            para.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.WorkshopInfo;
             para.Format.Alignment = ParagraphAlignment.Center;
 
             // Workshop name
@@ -1341,7 +1340,7 @@ namespace WinterAdventurer.Library
 
             // Leader in parentheses
             var leaderText = para.AddFormattedText($"({workshop.Leader})");
-            leaderText.Font.Size = 9;
+            leaderText.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.LeaderName;
             leaderText.Font.Italic = true;
         }
 
@@ -1385,25 +1384,25 @@ namespace WinterAdventurer.Library
                         if (documentType == "individual")
                         {
                             // Individual schedules are landscape - logo on far right
-                            logo.Height = Unit.FromInch(1.0);
-                            logo.Top = Unit.FromInch(0.2);
-                            logo.Left = Unit.FromInch(8.5); // Far right for landscape
+                            logo.Height = PdfLayoutConstants.Logo.Height;
+                            logo.Top = PdfLayoutConstants.Logo.MasterScheduleLandscape.Top;
+                            logo.Left = PdfLayoutConstants.Logo.MasterScheduleLandscape.Left; // Far right for landscape
                         }
                         else if (documentType == "master")
                         {
                             // Master schedule - smaller, more centered
-                            logo.Height = Unit.FromInch(1.0);
-                            logo.Top = Unit.FromInch(0.15);
-                            logo.Left = Unit.FromInch(6.0);
+                            logo.Height = PdfLayoutConstants.Logo.Height;
+                            logo.Top = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Top;
+                            logo.Left = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Left;
                         }
                         else // roster (default)
                         {
                             // Class rosters - portrait, bottom right to avoid overlapping long workshop names
                             // Page is 11" tall with 0.5" margins = 10" content area
                             // Position at 10" - 1.0" logo - 0.2" margin = 8.8" from top
-                            logo.Height = Unit.FromInch(1.0);
-                            logo.Top = Unit.FromInch(8.8);
-                            logo.Left = Unit.FromInch(5.5);
+                            logo.Height = PdfLayoutConstants.Logo.Height;
+                            logo.Top = PdfLayoutConstants.Logo.IndividualScheduleBottom.Top;
+                            logo.Left = PdfLayoutConstants.Logo.IndividualScheduleBottom.Left;
                         }
                     }
                 }
@@ -1423,7 +1422,7 @@ namespace WinterAdventurer.Library
             var footer = section.Footers.Primary;
             var paragraph = footer.AddParagraph();
             paragraph.Format.Font.Name = "NotoSans";
-            paragraph.Format.Font.Size = 9;
+            paragraph.Format.Font.Size = PdfLayoutConstants.FontSizes.EventFooter;
             paragraph.Format.Alignment = ParagraphAlignment.Center;
             paragraph.AddText(eventName);
         }
@@ -1455,7 +1454,7 @@ namespace WinterAdventurer.Library
                         mapParagraph.Format.Alignment = ParagraphAlignment.Center;
                         var map = mapParagraph.AddImage(tempPath);
                         map.LockAspectRatio = true;
-                        map.Width = Unit.FromInch(6.0); // Smaller map to fit on one page
+                        map.Width = PdfLayoutConstants.FacilityMap.Width; // Smaller map to fit on one page
                     }
                 }
             }
