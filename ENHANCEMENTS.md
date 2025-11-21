@@ -4,26 +4,7 @@ This document tracks potential improvements identified during code review that c
 
 ## Prioritized by Effort vs. Impact
 
-### Medium Effort, Moderate Impact
-
-#### 5. Add Timeslot Support to CLI
-**Complexity**: Medium
-**Impact**: Brings CLI feature parity with web app
-**Current Behavior**: CLI passes `null` for timeslots, generating PDFs without schedule times. Web app users get richer output with time information.
-
-**Proposed Solution**:
-- Add `--timeslots` CLI flag accepting JSON file path
-- Load timeslots from JSON (reuse web app TimeSlot format)
-- Document in CLI usage and README
-
-**Example Usage**:
-```bash
-WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
-```
-
-**Files**:
-- `WinterAdventurer.CLI/Program.cs` (lines 46-64)
-- `README.md` (CLI section)
+*All planned enhancements have been completed! See "Recently Implemented" section below.*
 
 ---
 
@@ -72,6 +53,33 @@ WinterAdventurer.CLI input.xlsx --timeslots timeslots.json
 ---
 
 ## Recently Implemented
+
+### ✓ Add Timeslot Support to CLI (Completed 2025-11-21)
+**What was done**:
+- Added `--timeslots <json-file>` CLI flag for loading timeslot configuration from JSON
+- Implemented JSON deserialization with `TimeslotFileFormat` and `TimeslotDto` classes
+- Added comprehensive validation using `TimeslotValidationService`:
+  - Checks for unconfigured period timeslots (missing start/end times)
+  - Validates no overlapping timeslots or duplicate start times
+  - Displays clear error messages and exits with error code if validation fails
+- Created `LoadTimeslots()` method that reads, parses, validates, and displays loaded timeslots
+- Integrated timeslots into PDF generation pipeline (passed to `CreatePdf()`)
+- Created `example-timeslots.json` with complete sample data showing periods and custom activities
+- Updated README.md with full documentation including JSON format and usage examples
+- Updated CLI help text with timeslots option
+
+**Impact**:
+- CLI now has feature parity with web app for timeslot support
+- Users can generate PDFs with accurate schedule times via CLI
+- Batch processing workflows now support full schedule generation
+- JSON format matches web app's TimeSlot model for consistency
+
+**Files Modified/Created**:
+- `WinterAdventurer.CLI/Program.cs` (lines 27-34, 39-50, 103-108, 177-273)
+- `WinterAdventurer.CLI/example-timeslots.json` (new file)
+- `README.md` (lines 54, 61-108)
+
+---
 
 ### ✓ Block PDF Generation When Timeslots Overlap (Completed 2025-11-15)
 **What was done**:
