@@ -54,6 +54,73 @@ This document tracks potential improvements identified during code review that c
 
 ## Recently Implemented
 
+### ✓ Add Facility Maps to Individual Schedules (Completed 2025-11-21)
+**What was done**:
+- Integrated facility map PNG image into all individual participant schedules
+- Added facility map to blank schedules for walk-in attendees
+- Embedded `FacilityMap.png` as resource in WinterAdventurer.Library
+- Map appears at bottom of each schedule page above ECRS logo
+- Maintained professional layout and print optimization
+
+**Impact**:
+- Participants can easily find workshop locations using embedded map
+- Reduces need for separate printed maps
+- Improves attendee experience and reduces confusion
+- Walk-in attendees get same quality schedules as registered participants
+
+**Files Modified/Created**:
+- `WinterAdventurer.Library/Resources/Images/FacilityMap.png` (new file)
+- `WinterAdventurer.Library/ExcelUtilities.cs` (AddFacilityMapToSection method, integrated into PrintIndividualSchedules and PrintBlankSchedules)
+- `WinterAdventurer.Library/WinterAdventurer.Library.csproj` (embedded resource configuration)
+
+---
+
+### ✓ Add Event Name Footer to All PDFs (Completed 2025-11-21)
+**What was done**:
+- Added customizable event name footer to all PDF documents
+- Appears on every page of class rosters, individual schedules, blank schedules, and master schedule
+- Event name defaults to "Winter Adventure {current year}"
+- Web app provides input field for custom event names
+- CLI supports `--event-name` flag for customization
+- Footer positioned at bottom-right of each page
+
+**Impact**:
+- PDFs are clearly branded with event information
+- Multi-year archival becomes easier with dated documents
+- Professional appearance for all generated documents
+- Flexibility for different event names or years
+
+**Files Modified**:
+- `WinterAdventurer.Library/ExcelUtilities.cs` (AddEventNameFooter method, integrated into all PDF generation methods)
+- `WinterAdventurer/Components/Pages/Home.razor` (event name input field and state management)
+- `WinterAdventurer/Components/Shared/WorkshopGrid.razor` (event name parameter and binding)
+- `WinterAdventurer.CLI/Program.cs` (--event-name CLI argument parsing)
+
+---
+
+### ✓ Add Blank Schedules Generation (Completed 2025-11-21)
+**What was done**:
+- Added ability to generate blank schedules for walk-in attendees not in roster
+- Web app provides numeric input field to specify count (0-100)
+- CLI supports `--blank-schedules <count>` flag
+- Blank schedules include all timeslots, facility map, and event footer
+- Maintains same professional format as registered participant schedules
+- Name field shows "________________" for manual writing
+
+**Impact**:
+- Event organizers can accommodate walk-in attendees seamlessly
+- No need to manually create blank schedules
+- Consistent formatting between registered and walk-in schedules
+- Reduces last-minute preparation stress
+
+**Files Modified**:
+- `WinterAdventurer.Library/ExcelUtilities.cs` (PrintBlankSchedules method)
+- `WinterAdventurer/Components/Pages/Home.razor` (blank schedule count state)
+- `WinterAdventurer/Components/Shared/WorkshopGrid.razor` (blank schedule input field)
+- `WinterAdventurer.CLI/Program.cs` (--blank-schedules CLI argument parsing)
+
+---
+
 ### ✓ Add Timeslot Support to CLI (Completed 2025-11-21)
 **What was done**:
 - Added `--timeslots <json-file>` CLI flag for loading timeslot configuration from JSON

@@ -51,7 +51,7 @@ For automated/batch processing without the web UI.
 
 ```bash
 cd WinterAdventurer.CLI
-dotnet run -- <excel-file> [--timeslots <json-file>] [--no-merge-workshops]
+dotnet run -- <excel-file> [--timeslots <json-file>] [--no-merge-workshops] [--blank-schedules <count>] [--event-name <name>]
 ```
 
 **Arguments:**
@@ -60,6 +60,8 @@ dotnet run -- <excel-file> [--timeslots <json-file>] [--no-merge-workshops]
 **Options:**
 - `--timeslots <json-file>` - Path to JSON file with timeslot configuration (optional)
 - `--no-merge-workshops` - Disable cell merging in individual schedules (optional)
+- `--blank-schedules <count>` - Number of blank schedules to generate for walk-in attendees (optional)
+- `--event-name <name>` - Event name to display in PDF footer (optional, defaults to "Winter Adventure {current year}")
 
 #### Examples
 
@@ -73,9 +75,19 @@ dotnet run -- "/path/to/registrations.xlsx"
 dotnet run -- "/path/to/registrations.xlsx" --timeslots "example-timeslots.json"
 ```
 
+**With blank schedules for walk-in attendees:**
+```bash
+dotnet run -- "/path/to/registrations.xlsx" --timeslots "timeslots.json" --blank-schedules 10
+```
+
+**With custom event name:**
+```bash
+dotnet run -- "/path/to/registrations.xlsx" --timeslots "timeslots.json" --event-name "Winter Adventure 2025"
+```
+
 **All options:**
 ```bash
-dotnet run -- "/path/to/registrations.xlsx" --timeslots "timeslots.json" --no-merge-workshops
+dotnet run -- "/path/to/registrations.xlsx" --timeslots "timeslots.json" --no-merge-workshops --blank-schedules 10 --event-name "Winter Adventure 2025"
 ```
 
 #### Timeslot Configuration
