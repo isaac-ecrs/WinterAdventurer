@@ -13,6 +13,11 @@ namespace WinterAdventurer.Library.Models
         public string Email { get; set; } = string.Empty;
         public string Age { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Serializes attendee data to JSON for debugging and logging purposes.
+        /// Enables quick inspection of attendee state during Excel parsing and PDF generation.
+        /// </summary>
+        /// <returns>JSON representation of attendee with all properties.</returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

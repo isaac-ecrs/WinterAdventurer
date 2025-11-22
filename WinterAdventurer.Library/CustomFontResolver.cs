@@ -8,7 +8,15 @@ namespace WinterAdventurer.Library
 {
     public class CustomFontResolver : IFontResolver
     {
-        // Resolve font family names to embedded resource names
+        /// <summary>
+        /// Resolves font family names to embedded font resource identifiers for PDF generation.
+        /// Maps high-level font names (NotoSans, Oswald, Roboto) to specific font file variants (Regular/Bold).
+        /// Falls back to NotoSans for unknown fonts to ensure PDFs always render properly.
+        /// </summary>
+        /// <param name="familyName">Font family name requested by PDF generation (e.g., "NotoSans", "Oswald", "Arial").</param>
+        /// <param name="isBold">True to use bold variant of the font.</param>
+        /// <param name="isItalic">True to use italic variant (currently ignored, only bold is supported).</param>
+        /// <returns>FontResolverInfo containing the font face name to load from embedded resources.</returns>
         public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
             var name = familyName.ToLower();
@@ -37,7 +45,13 @@ namespace WinterAdventurer.Library
             }
         }
 
-        // Get the font from embedded resources
+        /// <summary>
+        /// Loads font file data from embedded resources as byte array for PDF rendering.
+        /// Fonts are embedded in the assembly to ensure PDFs render consistently on any system.
+        /// </summary>
+        /// <param name="faceName">Font face name (e.g., "NotoSans-Regular", "Oswald-Bold") to load.</param>
+        /// <returns>Byte array containing the TTF font file data.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if font resource is not found in assembly.</exception>
         public byte[] GetFont(string faceName)
         {
             string? resourceName = GetFontResourceName(faceName);
@@ -47,7 +61,12 @@ namespace WinterAdventurer.Library
             return LoadFontFromResource(resourceName);
         }
 
-        // Map font family name to the corresponding embedded resource name
+        /// <summary>
+        /// Maps font face names to their corresponding embedded resource paths in the assembly.
+        /// Resource names follow .NET embedded resource naming convention (folders become dots).
+        /// </summary>
+        /// <param name="faceName">Font face name (e.g., "NotoSans-Regular") to look up.</param>
+        /// <returns>Full embedded resource name, or null if face name is not recognized.</returns>
         private string? GetFontResourceName(string faceName)
         {
             switch (faceName.ToLower())
@@ -69,7 +88,13 @@ namespace WinterAdventurer.Library
             }
         }
 
-        // Load the font from the embedded resource stream
+        /// <summary>
+        /// Loads font file from embedded assembly resource into byte array.
+        /// Reads the entire TTF file into memory for PDF generation engine to use.
+        /// </summary>
+        /// <param name="resourceName">Full embedded resource name (e.g., "WinterAdventurer.Library.Resources.Fonts...").</param>
+        /// <returns>Byte array containing the complete TTF font file.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if resource stream cannot be opened.</exception>
         private byte[] LoadFontFromResource(string resourceName)
         {
             var assembly = Assembly.GetExecutingAssembly();

@@ -85,6 +85,72 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Hello World", result);
         }
 
+        [TestMethod]
+        public void ToProper_WithEmptyString_ReturnsEmptyString()
+        {
+            // Arrange
+            string input = "";
+
+            // Act
+            string result = input.ToProper();
+
+            // Assert
+            Assert.AreEqual("", result);
+        }
+
+        [TestMethod]
+        public void ToProper_WithSingleCharacter_CapitalizesCharacter()
+        {
+            // Arrange
+            string input = "a";
+
+            // Act
+            string result = input.ToProper();
+
+            // Assert
+            Assert.AreEqual("A", result);
+        }
+
+        [TestMethod]
+        public void ToProper_WithUnicodeCharacters_HandlesCorrectly()
+        {
+            // Arrange
+            string input = "josé garcía müller";
+
+            // Act
+            string result = input.ToProper();
+
+            // Assert
+            Assert.AreEqual("José García Müller", result);
+        }
+
+        [TestMethod]
+        public void ToProper_WithAccentedName_PreservesAccents()
+        {
+            // Arrange
+            string input = "françois rené";
+
+            // Act
+            string result = input.ToProper();
+
+            // Assert
+            Assert.AreEqual("François René", result);
+        }
+
+        [TestMethod]
+        public void ToProper_WithHyphenatedName_CapitalizesFirstPartOnly()
+        {
+            // Arrange
+            string input = "mary-jane watson";
+
+            // Act
+            string result = input.ToProper();
+
+            // Assert
+            // Note: Current implementation only capitalizes after spaces, not hyphens
+            Assert.AreEqual("Mary-jane Watson", result);
+        }
+
         #endregion
 
         #region ExtractFromParentheses Tests

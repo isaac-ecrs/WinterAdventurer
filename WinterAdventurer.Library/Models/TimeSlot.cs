@@ -8,20 +8,22 @@ namespace WinterAdventurer.Library.Models
         public TimeSpan? EndTime { get; set; }
         public bool IsPeriod { get; set; } = false;
 
+        /// <summary>
+        /// Formats time slot as readable 12-hour time range for display in schedules.
+        /// Supports both fixed-duration activities and open-ended time slots (displays "?" for unknown end time).
+        /// </summary>
         public string TimeRange
         {
             get
             {
                 if (StartTime.HasValue && EndTime.HasValue)
                 {
-                    // Convert TimeSpan to formatted time string (12-hour format with AM/PM)
                     var startDateTime = DateTime.Today.Add(StartTime.Value);
                     var endDateTime = DateTime.Today.Add(EndTime.Value);
                     return $"{startDateTime:h:mm tt} - {endDateTime:h:mm tt}";
                 }
                 else if (StartTime.HasValue && !EndTime.HasValue)
                 {
-                    // Open-ended timeslot (e.g., "Late Night Activities")
                     var startDateTime = DateTime.Today.Add(StartTime.Value);
                     return $"{startDateTime:h:mm tt} - ?";
                 }

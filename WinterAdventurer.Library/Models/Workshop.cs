@@ -28,6 +28,11 @@ namespace WinterAdventurer.Library.Models
         // Unique key for this workshop offering
         public string Key => $"{Period.SheetName}|{Name}|{Leader}|{Duration.StartDay}-{Duration.EndDay}";
 
+        /// <summary>
+        /// Serializes workshop data to JSON for debugging and logging purposes.
+        /// Enables quick inspection of workshop state including all participant selections during aggregation and PDF generation.
+        /// </summary>
+        /// <returns>JSON representation of workshop with all properties and nested selections.</returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

@@ -115,14 +115,14 @@ namespace WinterAdventurer.Library
             public static class MasterSchedule
             {
                 /// <summary>
-                /// Time column width (1.3 inches)
+                /// Time column width (1.5 inches)
                 /// </summary>
-                public const double Time = 1.3;
+                public const double Time = 1.5;
 
                 /// <summary>
-                /// Days indicator column width (0.4 inches)
+                /// Days indicator column width (0.8 inches)
                 /// </summary>
-                public const double Days = 0.4;
+                public const double Days = 0.8;
 
                 /// <summary>
                 /// Location column width (2.0 inches)
@@ -189,6 +189,87 @@ namespace WinterAdventurer.Library
             /// Left indent for individual schedule tables (0.3 inches)
             /// </summary>
             public const double IndividualScheduleLeftIndent = 0.3;
+
+            /// <summary>
+            /// Standard table border width (0.5 points)
+            /// </summary>
+            public const double BorderWidth = 0.5;
+
+            /// <summary>
+            /// Line spacing multiplier for participant lists (110% of font size)
+            /// Provides extra room for text wrapping without excessive vertical space
+            /// </summary>
+            public const double ParticipantListLineSpacing = 1.1;
+
+            /// <summary>
+            /// Number of columns for two-column participant layouts
+            /// </summary>
+            public const int TwoColumnCount = 2;
+        }
+
+        /// <summary>
+        /// Spacing constants for various PDF elements
+        /// </summary>
+        public static class Spacing
+        {
+            /// <summary>
+            /// Space after period/section information (16 points)
+            /// </summary>
+            public static readonly Unit SectionSpacing = Unit.FromPoint(16);
+
+            /// <summary>
+            /// Space after attendee header in individual schedules (12 points)
+            /// </summary>
+            public static readonly Unit HeaderSpacing = Unit.FromPoint(12);
+
+            /// <summary>
+            /// Left indent for backup/alternate notes (12 points)
+            /// </summary>
+            public static readonly Unit BackupNoteIndent = Unit.FromPoint(12);
+        }
+
+        /// <summary>
+        /// Adaptive font sizing for participant names
+        /// Automatically reduces font size for longer names to prevent wrapping
+        /// </summary>
+        public static class AdaptiveFontSizing
+        {
+            /// <summary>
+            /// Text length thresholds for adaptive sizing
+            /// </summary>
+            public static class TextLengthThresholds
+            {
+                public const int VeryLong = 45;
+                public const int Long = 35;
+                public const int Medium = 28;
+            }
+
+            /// <summary>
+            /// Corresponding font sizes for each threshold
+            /// </summary>
+            public static class ParticipantFontSizes
+            {
+                public const int VeryLong = 10;
+                public const int Long = 11;
+                public const int Medium = 13;
+                public const int Default = 15;
+            }
+        }
+
+        /// <summary>
+        /// Page dimensions and usable widths
+        /// </summary>
+        public static class PageDimensions
+        {
+            /// <summary>
+            /// Usable page width for landscape orientation (after margins)
+            /// </summary>
+            public const double LandscapeUsableWidth = 10.0;
+
+            /// <summary>
+            /// Usable page width for portrait orientation (after margins)
+            /// </summary>
+            public const double PortraitUsableWidth = 7.5;
         }
     }
 }

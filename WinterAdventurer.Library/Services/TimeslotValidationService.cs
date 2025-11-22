@@ -2,11 +2,23 @@ namespace WinterAdventurer.Library.Services;
 
 public interface ITimeslotValidationService
 {
+    /// <summary>
+    /// Validates event schedule time slots to ensure no overlaps and all required periods are configured.
+    /// Prevents schedule conflicts that would make it impossible to assign workshops to time periods.
+    /// </summary>
+    /// <param name="timeslots">Collection of time slots to validate (periods and custom activities).</param>
+    /// <returns>Validation result indicating whether schedule is usable for workshop assignment.</returns>
     ValidationResult ValidateTimeslots(IEnumerable<TimeSlotDto> timeslots);
 }
 
 public class TimeslotValidationService : ITimeslotValidationService
 {
+    /// <summary>
+    /// Validates event schedule time slots to ensure no overlaps and all required periods are configured.
+    /// Prevents schedule conflicts that would make it impossible to assign workshops to time periods.
+    /// </summary>
+    /// <param name="timeslots">Collection of time slots to validate (periods and custom activities).</param>
+    /// <returns>Validation result indicating whether schedule is usable for workshop assignment.</returns>
     public ValidationResult ValidateTimeslots(IEnumerable<TimeSlotDto> timeslots)
     {
         var result = new ValidationResult();

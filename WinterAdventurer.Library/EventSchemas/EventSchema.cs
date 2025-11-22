@@ -29,6 +29,12 @@ namespace WinterAdventurer.Library.EventSchemas
         [JsonProperty("columns")]
         public Dictionary<string, object> Columns { get; set; } = new();
 
+        /// <summary>
+        /// Retrieves column name from schema configuration, supporting both exact string values and pattern objects.
+        /// Enables flexible Excel column mapping where columns may be named consistently or vary by year/event.
+        /// </summary>
+        /// <param name="key">Configuration key (e.g., "firstName", "registrationId") to look up.</param>
+        /// <returns>Column name string (exact or pattern), or empty string if key not found or value is invalid.</returns>
         public string GetColumnName(string key)
         {
             if (!Columns.ContainsKey(key)) return string.Empty;
@@ -62,6 +68,12 @@ namespace WinterAdventurer.Library.EventSchemas
         [JsonProperty("workshopColumns")]
         public List<WorkshopColumnConfig> WorkshopColumns { get; set; } = new();
 
+        /// <summary>
+        /// Retrieves column name from period sheet schema configuration, supporting both exact string values and pattern objects.
+        /// Enables flexible Excel column mapping where columns may be named consistently or vary by year/event.
+        /// </summary>
+        /// <param name="key">Configuration key (e.g., "selectionId", "choiceNumber") to look up.</param>
+        /// <returns>Column name string (exact or pattern), or empty string if key not found or value is invalid.</returns>
         public string GetColumnName(string key)
         {
             if (!Columns.ContainsKey(key)) return string.Empty;
