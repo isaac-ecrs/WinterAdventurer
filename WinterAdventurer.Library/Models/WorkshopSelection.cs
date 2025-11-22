@@ -18,6 +18,11 @@ namespace WinterAdventurer.Library.Models
         public WorkshopDuration Duration { get; set; } = new WorkshopDuration(1, 1);
         public int RegistrationId { get; set; }  // For chronological sorting
 
+        /// <summary>
+        /// Serializes workshop selection to JSON for debugging and logging purposes.
+        /// Enables quick inspection of selection state during Excel parsing and workshop aggregation.
+        /// </summary>
+        /// <returns>JSON representation of workshop selection with all properties.</returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

@@ -35,6 +35,11 @@ namespace WinterAdventurer.Library
             GlobalFontSettings.FontResolver = new CustomFontResolver();
         }
 
+        /// <summary>
+        /// Loads the event schema configuration from embedded JSON resource.
+        /// The schema defines Excel column mappings and workshop parsing rules for the event.
+        /// </summary>
+        /// <returns>Deserialized EventSchema object containing parsing configuration.</returns>
         private EventSchema LoadEventSchema()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -60,6 +65,11 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Imports workshop registration data from an Excel file stream.
+        /// Parses attendee information and workshop selections, populating the Workshops collection.
+        /// </summary>
+        /// <param name="stream">Excel file stream to import. Stream will be reset to position 0.</param>
         public void ImportExcel(Stream stream)
         {
             try
@@ -95,6 +105,12 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Exports Excel file structure to JSON for debugging and schema development.
+        /// Useful for understanding new Excel file formats before creating event schemas.
+        /// </summary>
+        /// <param name="stream">Excel file stream to analyze. Stream will be reset to position 0.</param>
+        /// <param name="outputPath">File path where JSON schema dump will be written.</param>
         public void DumpExcelSchema(Stream stream, string outputPath)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -139,6 +155,12 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Parses all workshops from Excel package using event schema configuration.
+        /// Loads attendees from ClassSelection sheet and processes each period sheet to build workshop roster.
+        /// </summary>
+        /// <param name="package">EPPlus ExcelPackage containing workshop registration data.</param>
+        /// <returns>List of Workshop objects with associated participant selections.</returns>
         public List<Workshop> ParseWorkshops(ExcelPackage package)
         {
             try
@@ -182,6 +204,13 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Loads all attendees from the ClassSelection sheet into a dictionary keyed by registration ID.
+        /// Generates fallback IDs (FirstName+LastName) when ClassSelectionId is missing to ensure all attendees can be referenced.
+        /// </summary>
+        /// <param name="package">EPPlus ExcelPackage containing the ClassSelection sheet.</param>
+        /// <param name="schema">Event schema defining ClassSelection sheet column mappings.</param>
+        /// <returns>Dictionary mapping ClassSelectionId (or fallback ID) to Attendee objects.</returns>
         private Dictionary<string, Attendee> LoadAttendees(ExcelPackage package, EventSchema schema)
         {
             var attendees = new Dictionary<string, Attendee>();
@@ -255,6 +284,14 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Collects workshops from a single period sheet by processing workshop columns and participant rows.
+        /// Creates Workshop objects aggregated by unique workshop name, leader, period, and duration combination.
+        /// </summary>
+        /// <param name="sheet">Excel worksheet for a specific period (e.g., "MorningFirstPeriod").</param>
+        /// <param name="periodConfig">Schema configuration defining period sheet structure and workshop columns.</param>
+        /// <param name="attendees">Dictionary of attendees to link workshop selections to participant information.</param>
+        /// <returns>List of Workshop objects with associated WorkshopSelection records.</returns>
         private List<Workshop> CollectWorkshops(ExcelWorksheet sheet, PeriodSheetConfig periodConfig, Dictionary<string, Attendee> attendees)
         {
             if (sheet.Dimension == null)
@@ -379,6 +416,15 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Creates a comprehensive PDF document containing workshop rosters and individual participant schedules.
+        /// Optionally includes blank schedules for walk-in participants.
+        /// </summary>
+        /// <param name="mergeWorkshopCells">Whether to merge cells for multi-day workshops in individual schedules.</param>
+        /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
+        /// <param name="blankScheduleCount">Number of blank schedule pages to append for walk-in participants.</param>
+        /// <param name="eventName">Name of the event displayed in PDF headers and footers.</param>
+        /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
         public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
         {
             if (Workshops != null)
@@ -418,6 +464,13 @@ namespace WinterAdventurer.Library
             return null;
         }
 
+        /// <summary>
+        /// Creates a master schedule PDF showing all workshops organized by location, time, and days.
+        /// Useful for event staff to see the complete workshop schedule at a glance.
+        /// </summary>
+        /// <param name="eventName">Name of the event displayed in PDF title.</param>
+        /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
+        /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
         public Document? CreateMasterSchedulePdf(string eventName = "Master Schedule", List<Models.TimeSlot>? timeslots = null)
         {
             if (Workshops != null)
@@ -436,6 +489,13 @@ namespace WinterAdventurer.Library
             return null;
         }
 
+        /// <summary>
+        /// Generates PDF sections for workshop rosters, one section per workshop.
+        /// Each roster lists enrolled participants (choice #1) and backup/alternate choices (choice #2+) for workshop leaders.
+        /// </summary>
+        /// <param name="eventName">Name of the event displayed in section footers.</param>
+        /// <param name="timeslots">Timeslots to find period time ranges. If null, time ranges are omitted from rosters.</param>
+        /// <returns>List of MigraDoc Section objects, one per workshop.</returns>
         private List<Section> PrintWorkshopParticipants(string eventName, List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
@@ -551,6 +611,15 @@ namespace WinterAdventurer.Library
             return sections;
         }
 
+        /// <summary>
+        /// Calculates adaptive font size for participant names to prevent text wrapping in roster columns.
+        /// Uses progressively smaller fonts for longer names based on total text length including number and checkbox.
+        /// </summary>
+        /// <param name="fullName">Participant's full name.</param>
+        /// <param name="counter">Numbered position in the list.</param>
+        /// <param name="showChoiceNumber">Whether to include choice number in length calculation.</param>
+        /// <param name="choiceNumber">Choice number (1=first choice, 2+=backup) if applicable.</param>
+        /// <returns>Font size in points (10, 11, 13, or 15) based on calculated text length.</returns>
         private int GetParticipantFontSize(string fullName, int counter, bool showChoiceNumber, int? choiceNumber = null)
         {
             // Calculate full text length including number, name, choice indicator, and checkbox
@@ -583,6 +652,13 @@ namespace WinterAdventurer.Library
             section.PageSetup.BottomMargin = PdfLayoutConstants.Margins.Standard;
         }
 
+        /// <summary>
+        /// Adds a two-column participant list table to maximize roster space efficiency.
+        /// Applies adaptive font sizing and includes optional choice numbers for backup participants.
+        /// </summary>
+        /// <param name="section">MigraDoc section to add the table to.</param>
+        /// <param name="participants">Workshop selections to display in the list.</param>
+        /// <param name="showChoiceNumber">Whether to display choice numbers (e.g., "Choice #2") after participant names.</param>
         private void AddTwoColumnParticipantList(Section section, List<WorkshopSelection> participants, bool showChoiceNumber)
         {
             // Create a table with 2 columns
@@ -686,6 +762,14 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Generates landscape-oriented individual schedule pages for each registered participant.
+        /// Shows participant's workshops across all days and periods in a visual calendar format.
+        /// </summary>
+        /// <param name="eventName">Name of the event displayed in section footers.</param>
+        /// <param name="mergeWorkshopCells">Whether to merge table cells for multi-day workshops to show continuity.</param>
+        /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
+        /// <returns>List of MigraDoc Section objects, one per participant.</returns>
         private List<Section> PrintIndividualSchedules(string eventName, bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
@@ -966,6 +1050,15 @@ namespace WinterAdventurer.Library
             return sections;
         }
 
+        /// <summary>
+        /// Generates blank schedule templates for walk-in participants who register on-site.
+        /// Each schedule includes a name field and empty master schedule grid to be filled in manually.
+        /// </summary>
+        /// <param name="eventName">Name of the event displayed in section footers.</param>
+        /// <param name="count">Number of blank schedule copies to generate.</param>
+        /// <param name="mergeWorkshopCells">Whether to merge cells for multi-day workshops (currently unused for blank schedules).</param>
+        /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
+        /// <returns>List of MigraDoc Section objects containing blank schedules.</returns>
         private List<Section> PrintBlankSchedules(string eventName, int count, bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null)
         {
             _logger.LogInformation($"PrintBlankSchedules called with count={count}");
@@ -1004,6 +1097,14 @@ namespace WinterAdventurer.Library
             return sections;
         }
 
+        /// <summary>
+        /// Adds a merged row to schedule table for non-period activities that span all days.
+        /// Used for activities like Breakfast, Lunch, or Evening Program that don't vary by day.
+        /// </summary>
+        /// <param name="table">MigraDoc table to add the row to.</param>
+        /// <param name="activityName">Name of the activity (e.g., "Breakfast", "Lunch").</param>
+        /// <param name="totalDays">Number of days to merge across (typically 4 for WinterAdventure).</param>
+        /// <param name="timeRange">Optional time range to display (e.g., "8:00 AM - 9:00 AM"). Empty if time is not fixed.</param>
         private void AddMergedActivityRow(Table table, string activityName, int totalDays, string timeRange = "")
         {
             var row = table.AddRow();
@@ -1032,6 +1133,11 @@ namespace WinterAdventurer.Library
             para.AddFormattedText(activityName, TextFormat.Bold);
         }
 
+        /// <summary>
+        /// Creates default timeslots for schedule structure when custom timeslots are not provided.
+        /// Includes Breakfast, all period sheets from schema, Lunch, and Evening Program.
+        /// </summary>
+        /// <returns>List of TimeSlot objects representing the event's daily schedule structure.</returns>
         private List<Models.TimeSlot> CreateDefaultTimeslots()
         {
             var timeslots = new List<Models.TimeSlot>();
@@ -1071,6 +1177,13 @@ namespace WinterAdventurer.Library
             return timeslots;
         }
 
+        /// <summary>
+        /// Generates master schedule grid showing all workshops organized by location, time, and days.
+        /// Automatically selects landscape or portrait orientation based on number of locations.
+        /// </summary>
+        /// <param name="eventName">Name of the event displayed in PDF title.</param>
+        /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
+        /// <returns>List containing a single MigraDoc Section with the master schedule table.</returns>
         private List<Section> PrintMasterSchedule(string eventName, List<Models.TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
@@ -1188,6 +1301,13 @@ namespace WinterAdventurer.Library
             return sections;
         }
 
+        /// <summary>
+        /// Adds period workshop rows to master schedule table, split by day ranges (Days 1-2 and Days 3-4).
+        /// Each row shows workshops assigned to each location for that time period and day range.
+        /// </summary>
+        /// <param name="table">MigraDoc table to add rows to.</param>
+        /// <param name="timeslot">Period timeslot containing workshop assignments.</param>
+        /// <param name="locations">Ordered list of locations defining table columns.</param>
         private void AddPeriodRows(Table table, Models.TimeSlot timeslot, List<string> locations)
         {
             // Create two rows: Days 1-2 and Days 3-4
@@ -1279,6 +1399,13 @@ namespace WinterAdventurer.Library
             }
         }
 
+        /// <summary>
+        /// Adds a single merged row to master schedule for non-period activities.
+        /// Used for activities like Breakfast or Lunch that span all locations uniformly.
+        /// </summary>
+        /// <param name="table">MigraDoc table to add the row to.</param>
+        /// <param name="timeslot">Activity timeslot containing label and time information.</param>
+        /// <param name="locationCount">Number of location columns to merge across.</param>
         private void AddActivityRow(Table table, Models.TimeSlot timeslot, int locationCount)
         {
             var row = table.AddRow();
@@ -1312,6 +1439,12 @@ namespace WinterAdventurer.Library
             activityPara.AddFormattedText(timeslot.Label, TextFormat.Bold);
         }
 
+        /// <summary>
+        /// Populates a master schedule table cell with workshop name and leader information.
+        /// Formats the cell with appropriate font sizing and styling for schedule readability.
+        /// </summary>
+        /// <param name="cell">MigraDoc table cell to populate.</param>
+        /// <param name="workshop">Workshop object containing name and leader information to display.</param>
         private void AddWorkshopToCell(Cell cell, Workshop workshop)
         {
             cell.VerticalAlignment = VerticalAlignment.Center;
@@ -1330,6 +1463,11 @@ namespace WinterAdventurer.Library
             leaderText.Font.Italic = true;
         }
 
+        /// <summary>
+        /// Extracts unique workshop locations from Workshops collection for master schedule organization.
+        /// Filters out empty locations and returns sorted list for consistent column ordering.
+        /// </summary>
+        /// <returns>Sorted list of unique, non-empty location strings.</returns>
         private List<string> GetUniqueLocations()
         {
             return Workshops
@@ -1340,6 +1478,12 @@ namespace WinterAdventurer.Library
                 .ToList();
         }
 
+        /// <summary>
+        /// Adds ECRS logo to PDF section with positioning and sizing based on document type.
+        /// Different document types (roster, individual, master) have different logo placements for optimal layout.
+        /// </summary>
+        /// <param name="section">MigraDoc section to add logo to.</param>
+        /// <param name="documentType">Type of document ("roster", "individual", or "master") determining logo position.</param>
         private void AddLogoToSection(Section section, string documentType = "roster")
         {
             try
@@ -1413,6 +1557,11 @@ namespace WinterAdventurer.Library
             paragraph.AddText(eventName);
         }
 
+        /// <summary>
+        /// Adds Watson facility map image to PDF section to help participants navigate the venue.
+        /// Map is centered and sized appropriately for the page layout.
+        /// </summary>
+        /// <param name="section">MigraDoc section to add the map to.</param>
         private void AddFacilityMapToSection(Section section)
         {
             try
