@@ -17,7 +17,8 @@ namespace WinterAdventurer.Library.Extensions
 
             foreach (var word in splitInput)
             {
-                if (!string.IsNullOrWhiteSpace(word))
+                // Check for null, whitespace, or empty strings before accessing word[0]
+                if (!string.IsNullOrWhiteSpace(word) && word.Length > 0)
                 {
                     combinedInput = combinedInput + " " + word[0].ToString().ToUpper() + word.Substring(1).ToLower();
                 }
