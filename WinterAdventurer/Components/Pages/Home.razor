@@ -18,13 +18,16 @@
 @inject ILogger<Home> Logger
 @inject ExcelUtilities ExcelUtils
 @inject ITimeslotValidationService TimeslotValidator
+@inject TourService TourService
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Winter Adventurer Workshop Manager</h1>
 
-<FileUploadSection OnFileUploaded="UploadExcel" IsLoading="isLoading" />
+<div id="file-upload-section">
+    <FileUploadSection OnFileUploaded="UploadExcel" IsLoading="isLoading" />
+</div>
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -32,7 +35,7 @@
 }
 
 <!-- Timeslot Configuration Section - Always rendered but hidden until file uploaded -->
-<div style="display: @(workshops.Count > 0 ? "block" : "none")">
+<div id="timeslot-editor" style="display: @(workshops.Count > 0 ? "block" : "none")">
     @if (hasUnconfiguredTimeslots)
     {
         <MudAlert Severity="Severity.Error" Class="mt-4 mb-4">
@@ -53,9 +56,10 @@
 
 @if (workshops != null && workshops.Count > 0)
 {
-    <MudText Typo="Typo.h5" Class="mb-3">Workshop Details</MudText>
+    <div id="workshop-grid">
+        <MudText Typo="Typo.h5" Class="mb-3">Workshop Details</MudText>
 
-    <WorkshopGrid Workshops="workshops"
+        <WorkshopGrid Workshops="workshops"
                   EventName="eventName"
                   EventNameChanged="EventCallback.Factory.Create<string>(this, value => eventName = value)"
                   BlankScheduleCount="blankScheduleCount"
@@ -68,6 +72,7 @@
                   OnCreateMasterSchedule="BuildMasterSchedulePdf"
                   OnWorkshopLocationChanged="HandleWorkshopLocationChanged"
                   OnDeleteLocationRequested="HandleDeleteLocationRequest" />
+    </div>
 }
 
 @implements IDisposable
@@ -107,6 +112,21 @@
             _hasRendered = true;
             await LoadTimeslots();
             await LoadLocations();
+
+            // Check if user needs the guided tour
+            var tourCompleted = await TourService.HasCompletedTourAsync("home");
+            Console.WriteLine($"Home.OnAfterRenderAsync: Tour completed = {tourCompleted}");
+            if (!tourCompleted)
+            {
+                Console.WriteLine("Home.OnAfterRenderAsync: Starting tour...");
+                // Brief delay to allow UI to fully render before starting tour
+                await Task.Delay(500);
+                await TourService.StartHomeTourAsync();
+            }
+            else
+            {
+                Console.WriteLine("Home.OnAfterRenderAsync: Tour already completed, skipping");
+            }
 
             // Safe state change after async operation
             if (!_disposed)
@@ -323,6 +343,16 @@
 
                 // Populate timeslots with periods from the Excel file
                 PopulateTimeslotsFromPeriods();
+
+                // Notify the tour that file upload is complete
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("notifyTourFileUploaded");
+                }
+                catch (Exception jsEx)
+                {
+                    Logger.LogWarning(jsEx, "Failed to notify tour of file upload (JS interop)");
+                }
             }
         }
         catch (Exception ex)

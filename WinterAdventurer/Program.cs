@@ -61,6 +61,9 @@ builder.Services.AddScoped<ITimeslotValidationService, TimeslotValidationService
 // Add theme service
 builder.Services.AddScoped<ThemeService>();
 
+// Add tour service
+builder.Services.AddScoped<TourService>();
+
 // Add Excel utilities service
 builder.Services.AddScoped<ExcelUtilities>();
 
