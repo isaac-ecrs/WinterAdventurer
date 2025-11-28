@@ -1,0 +1,103 @@
+/* Custom styling for Driver.js guided tour */
+/* Matches MudBlazor theme colors and styling */
+
+.winter-adventurer-tour .driver-popover {
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    padding-right: 3rem !important;
+}
+
+.winter-adventurer-tour .driver-popover-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--mud-palette-primary);
+    margin-bottom: 0.75rem;
+    padding-right: 2rem;
+}
+
+.winter-adventurer-tour .driver-popover-description {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    padding-right: 1rem;
+}
+
+.winter-adventurer-tour .driver-popover-progress-text {
+    font-size: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.winter-adventurer-tour .driver-popover-footer {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.winter-adventurer-tour .driver-popover-navigation-btns button {
+    background: var(--mud-palette-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.winter-adventurer-tour .driver-popover-navigation-btns button:hover {
+    background: var(--mud-palette-primary-darken);
+}
+
+.winter-adventurer-tour .driver-popover-prev-btn {
+    background: var(--mud-palette-secondary) !important;
+}
+
+.winter-adventurer-tour .driver-popover-prev-btn:hover {
+    background: var(--mud-palette-secondary-darken) !important;
+}
+
+/* Close button - make it very visible */
+.driver-popover-close-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #f44336 !important;
+    color: white !important;
+    font-size: 1.25rem;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.driver-popover-close-btn:hover {
+    background: #d32f2f !important;
+    color: white !important;
+}
+
+/* Highlighted element styling */
+.driver-active-element {
+    outline: 2px solid var(--mud-palette-primary) !important;
+    outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .winter-adventurer-tour .driver-popover {
+        background: #1e1e1e;
+        color: #e0e0e0;
+    }
+
+    .winter-adventurer-tour .driver-popover-title {
+        color: #90caf9;
+    }
+}
