@@ -1,0 +1,55 @@
+@using MudBlazor
+@using WinterAdventurer.Services
+@using Microsoft.AspNetCore.Components
+@inject ThemeService ThemeService
+@inject TourService TourService
+@inject NavigationManager Navigation
+
+<div style="position: fixed; top: 16px; right: 16px; display: flex; gap: 16px; z-index: 1000;">
+    @if (ShowReloadButton)
+    {
+        <MudTooltip Text="Upload new file">
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Primary"
+                           OnClick="@ReloadPage"
+                           Style="background-color: var(--mud-palette-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+        </MudTooltip>
+    }
+
+    <MudTooltip Text="@(ThemeService.IsDarkMode ? "Switch to light mode" : "Switch to dark mode")">
+        <MudIconButton Icon="@(ThemeService.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                       Color="Color.Primary"
+                       OnClick="@ToggleTheme"
+                       Style="background-color: var(--mud-palette-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+    </MudTooltip>
+
+    <MudTooltip Text="Show tutorial">
+        <MudIconButton Icon="@Icons.Material.Filled.Help"
+                       Color="Color.Primary"
+                       OnClick="@StartTour"
+                       Style="background-color: var(--mud-palette-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+    </MudTooltip>
+</div>
+
+@code {
+    /// <summary>
+    /// Whether to show the reload button (only shown after file upload)
+    /// </summary>
+    [Parameter]
+    public bool ShowReloadButton { get; set; }
+
+    private void ReloadPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleThemeAsync();
+    }
+
+    private async Task StartTour()
+    {
+        await TourService.ResetAndStartTourAsync("home");
+    }
+}
