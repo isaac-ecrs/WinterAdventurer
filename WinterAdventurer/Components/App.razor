@@ -5,6 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    <script>
+        // Set tour theme immediately, before CSS loads
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const isDarkMode = savedTheme !== 'light';
+            document.documentElement.setAttribute('data-tour-theme', isDarkMode ? 'dark' : 'light');
+        })();
+    </script>
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="WinterAdventurer.styles.css" />

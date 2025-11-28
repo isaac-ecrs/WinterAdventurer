@@ -1,62 +1,109 @@
 /* Custom styling for Driver.js guided tour */
 /* Matches MudBlazor theme colors and styling */
 
+/* Tour color variables */
+[data-tour-theme="light"] {
+    --tour-primary: #594ae2;           /* Primary purple */
+    --tour-primary-light: #7e6de6;     /* Lighter purple for buttons */
+    --tour-primary-hover: #6b5ce5;     /* Button hover state */
+    --tour-button-text: #2c2c2c;       /* Dark text for buttons */
+    --tour-bg: #ffffff;                /* Popover background */
+    --tour-text: #424242;              /* Main text color */
+    --tour-text-muted: #757575;        /* Secondary text */
+    --tour-secondary: #757575;         /* Secondary buttons (prev/skip) */
+    --tour-secondary-hover: #616161;   /* Secondary button hover */
+}
+
+[data-tour-theme="dark"] {
+    --tour-primary: #b39ddb;           /* Primary light purple */
+    --tour-primary-dark: #6a4ea8;      /* Darker purple for buttons */
+    --tour-primary-hover: #7e5bb8;     /* Button hover state */
+    --tour-button-text: #ffffff;       /* White text for buttons */
+    --tour-bg: #1e1e1e;                /* Popover background */
+    --tour-text: #e0e0e0;              /* Main text color */
+    --tour-text-muted: #b0b0b0;        /* Secondary text */
+    --tour-secondary: #757575;         /* Secondary buttons (prev/skip) */
+    --tour-secondary-hover: #616161;   /* Secondary button hover */
+}
+
 /* Light mode (default) */
-[data-tour-theme="light"] .winter-adventurer-tour .driver-popover {
-    background: #ffffff;
-    color: #424242;
+[data-tour-theme="light"] .driver-popover.winter-adventurer-tour {
+    background: var(--tour-bg);
+    color: var(--tour-text);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     padding-right: 3rem !important;
 }
 
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-title {
+    font-family: 'Roboto', sans-serif;
     font-size: 1.25rem;
-    font-weight: 600;
-    color: #594ae2;
+    font-weight: 500;
+    color: var(--tour-primary);
     margin-bottom: 0.75rem;
     padding-right: 2rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-description {
+    font-family: 'Roboto', sans-serif;
     font-size: 1rem;
+    font-weight: 400;
     line-height: 1.5;
     margin-bottom: 1rem;
     padding-right: 1rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-progress-text {
+    font-family: 'Roboto', sans-serif;
     font-size: 0.875rem;
-    color: #757575;
+    font-weight: 400;
+    color: var(--tour-text-muted);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Dark mode */
-[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover {
-    background: #1e1e1e;
-    color: #e0e0e0;
+[data-tour-theme="dark"] .driver-popover.winter-adventurer-tour {
+    background: var(--tour-bg);
+    color: var(--tour-text);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
     padding-right: 3rem !important;
 }
 
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-title {
+    font-family: 'Roboto', sans-serif;
     font-size: 1.25rem;
-    font-weight: 600;
-    color: #b39ddb;
+    font-weight: 500;
+    color: var(--tour-primary);
     margin-bottom: 0.75rem;
     padding-right: 2rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-description {
+    font-family: 'Roboto', sans-serif;
     font-size: 1rem;
+    font-weight: 400;
     line-height: 1.5;
     margin-bottom: 1rem;
     padding-right: 1rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-progress-text {
+    font-family: 'Roboto', sans-serif;
     font-size: 0.875rem;
-    color: #b0b0b0;
+    font-weight: 400;
+    color: var(--tour-text-muted);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .winter-adventurer-tour .driver-popover-footer {
@@ -67,50 +114,62 @@
 
 /* Light mode buttons */
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-navigation-btns button {
-    background: #594ae2;
-    color: white;
+    background: var(--tour-primary-light);
+    color: var(--tour-button-text);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
     font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.02857em;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-navigation-btns button:hover {
-    background: #4c3fc7;
+    background: var(--tour-primary-hover);
 }
 
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-prev-btn {
-    background: #757575 !important;
+    background: var(--tour-secondary) !important;
 }
 
 [data-tour-theme="light"] .winter-adventurer-tour .driver-popover-prev-btn:hover {
-    background: #616161 !important;
+    background: var(--tour-secondary-hover) !important;
 }
 
 /* Dark mode buttons */
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-navigation-btns button {
-    background: #7e57c2;
-    color: white;
+    background: var(--tour-primary-dark);
+    color: var(--tour-button-text);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
     font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.02857em;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-navigation-btns button:hover {
-    background: #9575cd;
+    background: var(--tour-primary-hover);
 }
 
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-prev-btn {
-    background: #757575 !important;
+    background: var(--tour-secondary) !important;
 }
 
 [data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-prev-btn:hover {
-    background: #616161 !important;
+    background: var(--tour-secondary-hover) !important;
 }
 
 /* Close button - make it very visible */

@@ -6,6 +6,14 @@ function downloadFile(filename, base64Content) {
     downloadLink.click();
 }
 
+// Initialize tour theme on page load from localStorage
+(function() {
+    const savedTheme = localStorage.getItem('theme');
+    const isDarkMode = savedTheme !== 'light'; // Default to dark if no preference
+    document.documentElement.setAttribute('data-tour-theme', isDarkMode ? 'dark' : 'light');
+    console.log('Tour theme initialized to:', isDarkMode ? 'dark' : 'light');
+})();
+
 // Update tour theme based on current app theme
 window.updateTourTheme = function(isDarkMode) {
     document.documentElement.setAttribute('data-tour-theme', isDarkMode ? 'dark' : 'light');
