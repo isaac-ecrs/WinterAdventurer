@@ -1,32 +1,62 @@
 /* Custom styling for Driver.js guided tour */
 /* Matches MudBlazor theme colors and styling */
 
-.winter-adventurer-tour .driver-popover {
-    background: var(--mud-palette-surface);
-    color: var(--mud-palette-text-primary);
+/* Light mode (default) */
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover {
+    background: #ffffff;
+    color: #424242;
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     padding-right: 3rem !important;
 }
 
-.winter-adventurer-tour .driver-popover-title {
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--mud-palette-primary);
+    color: #594ae2;
     margin-bottom: 0.75rem;
     padding-right: 2rem;
 }
 
-.winter-adventurer-tour .driver-popover-description {
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-description {
     font-size: 1rem;
     line-height: 1.5;
     margin-bottom: 1rem;
     padding-right: 1rem;
 }
 
-.winter-adventurer-tour .driver-popover-progress-text {
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-progress-text {
     font-size: 0.875rem;
-    color: var(--mud-palette-text-secondary);
+    color: #757575;
+}
+
+/* Dark mode */
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    padding-right: 3rem !important;
+}
+
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #b39ddb;
+    margin-bottom: 0.75rem;
+    padding-right: 2rem;
+}
+
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-description {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    padding-right: 1rem;
+}
+
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-progress-text {
+    font-size: 0.875rem;
+    color: #b0b0b0;
 }
 
 .winter-adventurer-tour .driver-popover-footer {
@@ -35,8 +65,9 @@
     justify-content: flex-end;
 }
 
-.winter-adventurer-tour .driver-popover-navigation-btns button {
-    background: var(--mud-palette-primary);
+/* Light mode buttons */
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-navigation-btns button {
+    background: #594ae2;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -46,16 +77,40 @@
     transition: background-color 0.2s ease;
 }
 
-.winter-adventurer-tour .driver-popover-navigation-btns button:hover {
-    background: var(--mud-palette-primary-darken);
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-navigation-btns button:hover {
+    background: #4c3fc7;
 }
 
-.winter-adventurer-tour .driver-popover-prev-btn {
-    background: var(--mud-palette-secondary) !important;
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-prev-btn {
+    background: #757575 !important;
 }
 
-.winter-adventurer-tour .driver-popover-prev-btn:hover {
-    background: var(--mud-palette-secondary-darken) !important;
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-prev-btn:hover {
+    background: #616161 !important;
+}
+
+/* Dark mode buttons */
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-navigation-btns button {
+    background: #7e57c2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-navigation-btns button:hover {
+    background: #9575cd;
+}
+
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-prev-btn {
+    background: #757575 !important;
+}
+
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-prev-btn:hover {
+    background: #616161 !important;
 }
 
 /* Close button - make it very visible */
@@ -85,19 +140,12 @@
 }
 
 /* Highlighted element styling */
-.driver-active-element {
-    outline: 2px solid var(--mud-palette-primary) !important;
+[data-tour-theme="light"] .driver-active-element {
+    outline: 2px solid #594ae2 !important;
     outline-offset: 2px;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .winter-adventurer-tour .driver-popover {
-        background: #1e1e1e;
-        color: #e0e0e0;
-    }
-
-    .winter-adventurer-tour .driver-popover-title {
-        color: #90caf9;
-    }
+[data-tour-theme="dark"] .driver-active-element {
+    outline: 2px solid #b39ddb !important;
+    outline-offset: 2px;
 }

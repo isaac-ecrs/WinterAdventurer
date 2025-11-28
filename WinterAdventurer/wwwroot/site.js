@@ -6,13 +6,25 @@ function downloadFile(filename, base64Content) {
     downloadLink.click();
 }
 
+// Update tour theme based on current app theme
+window.updateTourTheme = function(isDarkMode) {
+    document.documentElement.setAttribute('data-tour-theme', isDarkMode ? 'dark' : 'light');
+    console.log('Tour theme updated to:', isDarkMode ? 'dark' : 'light');
+};
+
 // Tour state tracking
 let tourFileUploaded = false;
 
 // Called from Blazor when a file is successfully uploaded
 window.notifyTourFileUploaded = function() {
-    console.log('notifyTourFileUploaded: File uploaded, setting tourFileUploaded = true');
+    console.log('notifyTourFileUploaded: File uploaded, auto-advancing tour');
     tourFileUploaded = true;
+
+    // Auto-advance the tour if it's active and on the file upload step
+    if (window.tourDriver && window.tourDriver.isActive()) {
+        console.log('Tour is active, advancing to next step');
+        window.tourDriver.moveNext();
+    }
 };
 
 // Guided tour using Driver.js
@@ -39,25 +51,25 @@ window.startHomeTour = function() {
                     title: 'Welcome to Winter Adventurer! 🎿',
                     description: 'This quick tour will guide you through the process of managing workshop registrations and creating schedules. Let\'s get started!',
                     side: 'center',
-                    align: 'center'
+                    align: 'center',
+                    showButtons: ['next', 'previous'],
+                    nextBtnText: 'Start tour',
+                    prevBtnText: 'Skip',
+                    disableButtons: [],  // Don't disable any buttons
+                    onPrevClick: () => {
+                        if (window.tourDriver) {
+                            window.tourDriver.destroy();
+                        }
+                    }
                 }
             },
             {
                 element: '#file-upload-section',
                 popover: {
                     title: 'Step 1: Upload Excel File',
-                    description: 'Start by uploading your workshop registration Excel file. The file should contain a ClassSelection sheet and period sheets with participant choices. Once uploaded, click Next to continue.',
+                    description: 'Start by uploading your workshop registration Excel file. The file should contain a ClassSelection sheet and period sheets with participant choices. The tour will automatically continue once your file is uploaded.',
                     side: 'bottom',
-                    onNextClick: (element, step, options) => {
-                        console.log('onNextClick: tourFileUploaded =', tourFileUploaded);
-                        if (!tourFileUploaded) {
-                            alert('Please upload an Excel file before continuing the tour.');
-                            // Don't call moveNext(), tour stays on this step
-                        } else {
-                            // File uploaded, allow advancing to next step
-                            driver.moveNext();
-                        }
-                    }
+                    showButtons: ['previous', 'close']
                 }
             },
             {
@@ -119,6 +131,7 @@ window.startHomeTour = function() {
     ];
 
     let driver;
+    window.tourDriver = null;  // Global reference for auto-advance
     try {
         driver = window.driver.js.driver({
             showProgress: true,
@@ -128,9 +141,11 @@ window.startHomeTour = function() {
                 console.log('Tour destroyed, marking as completed and resetting state');
                 localStorage.setItem('tour_home_completed', 'true');
                 tourFileUploaded = false; // Reset for next tour run
+                window.tourDriver = null;  // Clean up global reference
             },
             steps: allSteps
         });
+        window.tourDriver = driver;  // Store globally for auto-advance
         console.log('Driver instance created:', driver);
     } catch (error) {
         console.error('Error creating driver instance:', error);

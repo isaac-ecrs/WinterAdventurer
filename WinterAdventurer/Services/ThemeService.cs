@@ -22,6 +22,9 @@ public class ThemeService
         {
             var savedTheme = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "theme");
             _isDarkMode = savedTheme != "light"; // Default to dark if no preference saved
+
+            // Update tour theme to match app theme
+            await _jsRuntime.InvokeVoidAsync("updateTourTheme", _isDarkMode);
         }
         catch
         {
@@ -34,6 +37,17 @@ public class ThemeService
     {
         _isDarkMode = !_isDarkMode;
         await SaveThemeAsync();
+
+        // Update tour theme to match new app theme
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("updateTourTheme", _isDarkMode);
+        }
+        catch
+        {
+            // Ignore if JavaScript is not available
+        }
+
         OnThemeChanged?.Invoke();
     }
 
