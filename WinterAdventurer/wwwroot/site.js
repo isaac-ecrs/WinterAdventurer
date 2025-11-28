@@ -20,6 +20,102 @@ window.updateTourTheme = function(isDarkMode) {
     console.log('Tour theme updated to:', isDarkMode ? 'dark' : 'light');
 };
 
+// Set theme from welcome screen buttons
+window.setTourTheme = function(theme) {
+    const isDarkMode = theme === 'dark';
+
+    // Update localStorage
+    localStorage.setItem('theme', theme);
+    console.log('Theme set to:', theme);
+
+    // Update tour theme immediately
+    updateTourTheme(isDarkMode);
+
+    // Update button active states
+    document.querySelectorAll('.tour-theme-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
+
+    // Trigger page reload to sync with Blazor (simple but effective)
+    // The Blazor app will read the theme from localStorage on next load
+    setTimeout(() => {
+        location.reload();
+    }, 300); // Small delay to show the button feedback
+};
+
+// Show error in tour popover
+window.showTourError = function(errorMessage) {
+    if (!window.tourDriver || !window.tourDriver.isActive()) {
+        console.log('Tour not active, skipping tour error display');
+        return; // Tour not active, use normal error display
+    }
+
+    console.log('Showing error in tour:', errorMessage);
+
+    // Get current step
+    const activeElement = document.querySelector('.driver-popover');
+    if (!activeElement) {
+        console.log('No active popover found');
+        return;
+    }
+
+    // Find description element
+    const descriptionEl = activeElement.querySelector('.driver-popover-description');
+    if (!descriptionEl) {
+        console.log('No description element found');
+        return;
+    }
+
+    // Store original description if not already stored
+    if (!descriptionEl.dataset.originalContent) {
+        descriptionEl.dataset.originalContent = descriptionEl.innerHTML;
+    }
+
+    // Update with error message - keep it compact
+    descriptionEl.innerHTML = `
+        <div class="tour-error-message">
+            <div class="tour-error-icon">⚠️</div>
+            <div class="tour-error-content">
+                <strong>Upload Failed</strong>
+                <p><small>${errorMessage}</small></p>
+            </div>
+        </div>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Try uploading a valid Excel file (.xlsx) or skip this step.</p>
+    `;
+
+    console.log('Error displayed in tour popover');
+
+    // Refresh the driver overlay to reposition highlight after content change
+    try {
+        window.tourDriver.refresh();
+    } catch (e) {
+        console.log('Could not refresh tour overlay:', e);
+    }
+};
+
+// Clear error from tour popover
+window.clearTourError = function() {
+    const descriptionEl = document.querySelector('.driver-popover-description');
+    if (!descriptionEl || !descriptionEl.dataset.originalContent) {
+        return;
+    }
+
+    console.log('Clearing tour error, restoring original content');
+
+    // Restore original content
+    descriptionEl.innerHTML = descriptionEl.dataset.originalContent;
+    delete descriptionEl.dataset.originalContent;
+
+    // Refresh the driver overlay to reposition highlight after content change
+    if (window.tourDriver) {
+        try {
+            window.tourDriver.refresh();
+        } catch (e) {
+            console.log('Could not refresh tour overlay:', e);
+        }
+    }
+};
+
 // Tour state tracking
 let tourFileUploaded = false;
 
@@ -57,7 +153,21 @@ window.startHomeTour = function() {
             {
                 popover: {
                     title: 'Welcome to Winter Adventurer! 🎿',
-                    description: 'This quick tour will guide you through the process of managing workshop registrations and creating schedules. Let\'s get started!',
+                    description: `
+                        <p>This quick tour will guide you through the process of managing workshop registrations and creating schedules.</p>
+                        <div class="tour-theme-selector">
+                            <p><strong>Choose your theme:</strong></p>
+                            <div class="tour-theme-buttons">
+                                <button onclick="setTourTheme('light')" class="tour-theme-button" data-theme="light">
+                                    ☀️ Light
+                                </button>
+                                <button onclick="setTourTheme('dark')" class="tour-theme-button" data-theme="dark">
+                                    🌙 Dark
+                                </button>
+                            </div>
+                        </div>
+                        <p>Let's get started!</p>
+                    `,
                     side: 'center',
                     align: 'center',
                     showButtons: ['next', 'previous'],
@@ -105,19 +215,19 @@ window.startHomeTour = function() {
                 }
             },
             {
-                element: '#workshop-grid',
+                element: '#first-workshop-location',
                 popover: {
-                    title: 'Step 5: Review & Edit Workshops',
-                    description: 'After uploading, you\'ll see workshop cards here. Each card shows the workshop name, leader, period, and participants. You can click on any workshop name or leader to edit them before generating PDFs.',
-                    side: 'top'
+                    title: 'Step 5: Assign Locations',
+                    description: 'After uploading your file, workshop cards will appear. Click the Location field on any workshop to assign a room or area. The autocomplete filters out locations already used by other workshops in the same time period, and you can type new locations to add them on the fly.',
+                    side: 'bottom'
                 }
             },
             {
-                element: '#workshop-grid',
+                element: '#first-workshop-leader',
                 popover: {
-                    title: 'Step 6: Assign Locations',
-                    description: 'Click on the location field in any workshop card to assign a location. The location autocomplete will filter to show relevant locations for that period, and you can add new locations on the fly.',
-                    side: 'top'
+                    title: 'Step 6: Edit Leader Names',
+                    description: 'You can click on any workshop leader\'s name to edit it. This is useful for correcting typos or updating facilitator information before generating PDFs.',
+                    side: 'bottom'
                 }
             },
             {
@@ -145,6 +255,17 @@ window.startHomeTour = function() {
             showProgress: true,
             showButtons: ['next', 'previous', 'close'],
             popoverClass: 'winter-adventurer-tour',
+            onPopoverRender: (popover, { config, state }) => {
+                // Initialize theme button active states on welcome screen
+                if (state.activeIndex === 0) {
+                    setTimeout(() => {
+                        const currentTheme = localStorage.getItem('theme') || 'dark';
+                        document.querySelectorAll('.tour-theme-button').forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+                        });
+                    }, 0);
+                }
+            },
             onDestroyed: () => {
                 console.log('Tour destroyed, marking as completed and resetting state');
                 localStorage.setItem('tour_home_completed', 'true');

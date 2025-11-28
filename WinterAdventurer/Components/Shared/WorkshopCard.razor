@@ -14,7 +14,9 @@
     <MudCardContent>
         <MudText>@Workshop.Selections.Count().ToString() Participants</MudText>
         <MudText>@Workshop.Period.DisplayName</MudText>
-        <div @onfocusout="OnLocationBlur" @key="@($"loc-{Workshop.Name}-{LocationListVersion}")">
+        <div @onfocusout="OnLocationBlur"
+             @key="@($"loc-{Workshop.Name}-{LocationListVersion}")"
+             id="@(CardIndex == 0 ? "first-workshop-location" : null)">
             <MudAutocomplete T="string"
                            Label="Location"
                            @bind-Value="@Workshop.Location"
@@ -42,7 +44,10 @@
                 </ItemTemplate>
             </MudAutocomplete>
         </div>
-        <MudTextField Label="Leader" @bind-Value="Workshop.Leader" />
+        <div id="@(CardIndex == 0 ? "first-workshop-leader" : null)">
+            <MudTextField Label="Leader"
+                          @bind-Value="Workshop.Leader" />
+        </div>
     </MudCardContent>
 </MudCard>
 
@@ -58,6 +63,12 @@
     /// </summary>
     [Parameter, EditorRequired]
     public List<Workshop> AllWorkshops { get; set; } = default!;
+
+    /// <summary>
+    /// Index of this card in the grid (0-based). Used to add IDs to the first card for tour guidance.
+    /// </summary>
+    [Parameter]
+    public int CardIndex { get; set; } = -1;
 
     /// <summary>
     /// List of all available locations from the database

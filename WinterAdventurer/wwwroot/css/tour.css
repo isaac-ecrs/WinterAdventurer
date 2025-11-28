@@ -6,7 +6,7 @@
     --tour-primary: #594ae2;           /* Primary purple */
     --tour-primary-light: #7e6de6;     /* Lighter purple for buttons */
     --tour-primary-hover: #6b5ce5;     /* Button hover state */
-    --tour-button-text: #2c2c2c;       /* Dark text for buttons */
+    --tour-button-text: #ffffff;       /* White text for buttons */
     --tour-bg: #ffffff;                /* Popover background */
     --tour-text: #424242;              /* Main text color */
     --tour-text-muted: #757575;        /* Secondary text */
@@ -62,6 +62,7 @@
     font-size: 0.875rem;
     font-weight: 400;
     color: var(--tour-text-muted);
+    white-space: nowrap;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -102,6 +103,7 @@
     font-size: 0.875rem;
     font-weight: 400;
     color: var(--tour-text-muted);
+    white-space: nowrap;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -125,6 +127,8 @@
     letter-spacing: 0.02857em;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    text-shadow: none !important;
+    white-space: nowrap;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -155,6 +159,8 @@
     letter-spacing: 0.02857em;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    text-shadow: none !important;
+    white-space: nowrap;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -207,4 +213,104 @@
 [data-tour-theme="dark"] .driver-active-element {
     outline: 2px solid #b39ddb !important;
     outline-offset: 2px;
+}
+
+/* Theme selector in welcome screen */
+.tour-theme-selector {
+    margin: 1.5rem auto;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    text-align: center;
+    max-width: 280px;
+}
+
+[data-tour-theme="dark"] .tour-theme-selector {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tour-theme-selector p {
+    margin: 0 auto 0.75rem auto;
+    text-align: center;
+}
+
+.tour-theme-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.tour-theme-button {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--tour-primary);
+    background: transparent;
+    color: var(--tour-text);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-shadow: none !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.tour-theme-button:hover {
+    background: var(--tour-primary-hover);
+    color: white;
+    border-color: var(--tour-primary-hover);
+}
+
+.tour-theme-button.active {
+    background: var(--tour-primary);
+    color: white;
+}
+
+/* Error message within tour popover */
+.tour-error-message {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(244, 67, 54, 0.1);
+    border: 2px solid #f44336;
+    border-radius: 4px;
+    margin: 0.25rem 0;
+}
+
+[data-tour-theme="dark"] .tour-error-message {
+    background: rgba(244, 67, 54, 0.15);
+    border-color: #e53935;
+}
+
+.tour-error-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.tour-error-content {
+    flex: 1;
+}
+
+.tour-error-content strong {
+    display: block;
+    color: #d32f2f;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+[data-tour-theme="dark"] .tour-error-content strong {
+    color: #ef5350;
+}
+
+.tour-error-content p {
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+    color: var(--tour-text);
+}
+
+.tour-error-content small {
+    opacity: 0.8;
 }
