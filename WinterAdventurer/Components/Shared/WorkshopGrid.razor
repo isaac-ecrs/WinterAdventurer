@@ -5,16 +5,16 @@
 <EditForm Model=Workshops OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
     <MudGrid>
-        <MudItem xs="12">
-            <MudPaper Class="pa-4 mud-height-full">
-                @if (!Success)
-                {
+        @if (!Success)
+        {
+            <MudItem xs="12">
+                <MudPaper Class="pa-4 mud-height-full">
                     <MudText Color="@Color.Error">
                         <ValidationSummary />
                     </MudText>
-                }
-            </MudPaper>
-        </MudItem>
+                </MudPaper>
+            </MudItem>
+        }
         <MudItem xs="12" md="6" id="event-name-field">
             <MudTextField Label="Event Name" @bind-Value="EventName"
                           Variant="Variant.Outlined"
