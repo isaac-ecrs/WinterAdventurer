@@ -20,7 +20,8 @@
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Event"
-                          HelperText="Name for the master schedule (e.g., Winter Adventure 2025)" />
+                          Placeholder="@DefaultEventName"
+                          HelperText="Name for the master schedule" />
         </MudItem>
         <MudItem xs="12" md="6" id="blank-schedules-field">
             <MudNumericField Label="Blank Schedules"
@@ -66,6 +67,12 @@
     /// </summary>
     [Parameter]
     public EventCallback<string> EventNameChanged { get; set; }
+
+    /// <summary>
+    /// Default event name to show as placeholder
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string DefaultEventName { get; set; } = default!;
 
     /// <summary>
     /// Number of blank schedules to generate (for attendees not in roster)

@@ -23,15 +23,27 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Winter Adventurer Workshop Manager</h1>
+<FloatingActionButtons ShowReloadButton="@(workshops.Count > 0)" />
 
-<div id="file-upload-section">
-    <FileUploadSection OnFileUploaded="UploadExcel" IsLoading="isLoading" />
-</div>
-
-@if (!string.IsNullOrEmpty(errorMessage))
+@if (workshops.Count == 0)
 {
-    <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+    <!-- Centered upload section when no file is uploaded -->
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center;">
+        <MudText Typo="Typo.h4" Class="mb-4">Upload your Excel file to get started</MudText>
+        <div id="file-upload-section">
+            <FileUploadSection OnFileUploaded="UploadExcel" IsLoading="isLoading" />
+        </div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+        }
+    </div>
+}
+
+<!-- Error messages after file upload -->
+@if (workshops.Count > 0 && !string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
 }
 
 <!-- Timeslot Configuration Section - Always rendered but hidden until file uploaded -->
@@ -60,14 +72,15 @@
         <MudText Typo="Typo.h5" Class="mb-3">Workshop Details</MudText>
 
         <WorkshopGrid Workshops="workshops"
-                  EventName="eventName"
+                  EventName="@eventName"
                   EventNameChanged="EventCallback.Factory.Create<string>(this, value => eventName = value)"
-                  BlankScheduleCount="blankScheduleCount"
+                  DefaultEventName="@defaultEventName"
+                  BlankScheduleCount="@blankScheduleCount"
                   BlankScheduleCountChanged="EventCallback.Factory.Create<int>(this, OnBlankScheduleCountChanged)"
-                  Success="success"
-                  IsDisabled="hasOverlappingTimeslots || hasUnconfiguredTimeslots"
-                  AvailableLocations="availableLocations"
-                  LocationListVersion="locationListVersion"
+                  Success="@success"
+                  IsDisabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)"
+                  AvailableLocations="@availableLocations"
+                  LocationListVersion="@locationListVersion"
                   OnValidSubmit="BuildPdf"
                   OnCreateMasterSchedule="BuildMasterSchedulePdf"
                   OnWorkshopLocationChanged="HandleWorkshopLocationChanged"
@@ -91,7 +104,8 @@
     private bool _hasRendered = false;
     private List<string> availableLocations = new List<string>();
     private int locationListVersion = 0; // Increment to force autocomplete recreation
-    private string eventName = $"Winter Adventure {DateTime.Now.Year}";
+    private string eventName = "";
+    private string defaultEventName = $"Winter Adventure {DateTime.Now.Year}";
     private int blankScheduleCount = 0;
 
     private void OnBlankScheduleCountChanged(int newValue)
@@ -403,7 +417,8 @@
                 try
                 {
                     Logger.LogInformation($"Task.Run: Calling CreatePdf with blankScheduleCount={localBlankScheduleCount}");
-                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: localTimeslots, blankScheduleCount: localBlankScheduleCount, eventName: eventName);
+                    var finalEventName = string.IsNullOrWhiteSpace(eventName) ? defaultEventName : eventName;
+                    var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: localTimeslots, blankScheduleCount: localBlankScheduleCount, eventName: finalEventName);
                     if (document == null)
                     {
                         Logger.LogWarning("Task.Run: CreatePdf returned null document");
@@ -479,7 +494,8 @@
             {
                 try
                 {
-                    var document = ExcelUtils.CreateMasterSchedulePdf(eventName: eventName, timeslots: ConvertToLibraryTimeSlots());
+                    var finalEventName = string.IsNullOrWhiteSpace(eventName) ? defaultEventName : eventName;
+                    var document = ExcelUtils.CreateMasterSchedulePdf(eventName: finalEventName, timeslots: ConvertToLibraryTimeSlots());
                     if (document == null)
                     {
                         return (Array.Empty<byte>(), "No document generated (no workshops found)");

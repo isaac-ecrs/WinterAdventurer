@@ -1,40 +1,10 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor;
-@using WinterAdventurer.Services
-@inject ThemeService ThemeService
 
 <MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        Winter Adventurer
-        <MudSpacer />
-        <MudTooltip Text="@(ThemeService.IsDarkMode ? "Switch to light mode" : "Switch to dark mode")">
-            <MudIconButton Icon="@(ThemeService.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                           Color="Color.Inherit"
-                           OnClick="@ToggleTheme" />
-        </MudTooltip>
-    </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen">
-        <NavMenu/>
-    </MudDrawer>
     <MudMainContent>
-        <MudContainer>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pa-4">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
-@code {
-    bool _drawerOpen = true;
-
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-
-    async Task ToggleTheme()
-    {
-        await ThemeService.ToggleThemeAsync();
-        StateHasChanged();
-    }
-}
