@@ -16,7 +16,9 @@
         <MudText>@Workshop.Period.DisplayName</MudText>
         <div @onfocusout="OnLocationBlur"
              @key="@($"loc-{Workshop.Name}-{LocationListVersion}")"
-             id="@(CardIndex == 0 ? "first-workshop-location" : null)">
+             id="@(CardIndex == 0 ? "first-workshop-location" : null)"
+             data-card-index="@CardIndex"
+             style="position: relative;">
             <MudAutocomplete T="string"
                            Label="Location"
                            @bind-Value="@Workshop.Location"
@@ -44,7 +46,9 @@
                 </ItemTemplate>
             </MudAutocomplete>
         </div>
-        <div id="@(CardIndex == 0 ? "first-workshop-leader" : null)">
+        <div id="@(CardIndex == 0 ? "first-workshop-leader" : null)"
+             data-card-index="@CardIndex"
+             style="position: relative;">
             <MudTextField Label="Leader"
                           @bind-Value="Workshop.Leader" />
         </div>

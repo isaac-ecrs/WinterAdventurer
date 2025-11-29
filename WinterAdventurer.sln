@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinterAdventurer.Test", "Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinterAdventurer.CLI", "WinterAdventurer.CLI\WinterAdventurer.CLI.csproj", "{DBD6EF59-ECB1-401A-814D-C9805ACE124E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinterAdventurer.E2ETests", "WinterAdventurer.E2ETests\WinterAdventurer.E2ETests.csproj", "{81EEF5C3-6E9B-4A06-8415-CDED8AB05C67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{DBD6EF59-ECB1-401A-814D-C9805ACE124E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBD6EF59-ECB1-401A-814D-C9805ACE124E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBD6EF59-ECB1-401A-814D-C9805ACE124E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81EEF5C3-6E9B-4A06-8415-CDED8AB05C67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81EEF5C3-6E9B-4A06-8415-CDED8AB05C67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81EEF5C3-6E9B-4A06-8415-CDED8AB05C67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81EEF5C3-6E9B-4A06-8415-CDED8AB05C67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
