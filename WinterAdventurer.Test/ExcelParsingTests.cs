@@ -31,7 +31,7 @@ namespace WinterAdventurer.Test
             Stream? nullStream = null;
 
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 _excelUtilities.ImportExcel(nullStream!);
             });
@@ -44,7 +44,7 @@ namespace WinterAdventurer.Test
             using var emptyStream = new MemoryStream();
 
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 _excelUtilities.ImportExcel(emptyStream);
             });

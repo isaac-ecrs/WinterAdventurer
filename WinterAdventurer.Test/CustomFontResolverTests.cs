@@ -259,7 +259,7 @@ namespace WinterAdventurer.Test
         public void GetFont_UnknownFontName_ThrowsInvalidOperationException()
         {
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 _resolver.GetFont("NonExistentFont");
             });

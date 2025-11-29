@@ -154,7 +154,7 @@ namespace WinterAdventurer.Test
             var service = new LocationService(context, logger);
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentException>(
+            await Assert.ThrowsExactlyAsync<ArgumentException>(
                 async () => await service.AddOrGetLocationAsync("")
             );
         }
@@ -168,7 +168,7 @@ namespace WinterAdventurer.Test
             var service = new LocationService(context, logger);
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentException>(
+            await Assert.ThrowsExactlyAsync<ArgumentException>(
                 async () => await service.AddOrGetLocationAsync(null!)
             );
         }
