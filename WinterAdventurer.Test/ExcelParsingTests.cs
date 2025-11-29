@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using WinterAdventurer.Library;
 using WinterAdventurer.Library.Models;
@@ -24,29 +25,29 @@ namespace WinterAdventurer.Test
         #region ImportExcel Tests
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ImportExcel_WithNullStream_ThrowsInvalidOperationException()
         {
             // Arrange
             Stream? nullStream = null;
 
-            // Act
-            _excelUtilities.ImportExcel(nullStream!);
-
-            // Assert - Exception expected (ArgumentException wrapped in InvalidOperationException)
+            // Act & Assert
+            Assert.ThrowsException<InvalidOperationException>(() =>
+            {
+                _excelUtilities.ImportExcel(nullStream!);
+            });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ImportExcel_WithEmptyStream_ThrowsInvalidOperationException()
         {
             // Arrange
             using var emptyStream = new MemoryStream();
 
-            // Act
-            _excelUtilities.ImportExcel(emptyStream);
-
-            // Assert - Exception expected (ArgumentException wrapped in InvalidOperationException)
+            // Act & Assert
+            Assert.ThrowsException<InvalidOperationException>(() =>
+            {
+                _excelUtilities.ImportExcel(emptyStream);
+            });
         }
 
         // NOTE: This test is commented out because EPPlus does not allow saving a workbook with zero worksheets.
