@@ -60,7 +60,7 @@ jobs:
     - name: Start Web Application
       run: |
         cd WinterAdventurer
-        dotnet run --no-build --configuration Release &
+        dotnet run --no-build --configuration Release --no-launch-profile --urls "http://localhost:5000" &
         echo $! > ../webapp.pid
         # Wait for app to start
         timeout 60 bash -c 'until curl -s http://localhost:5000 > /dev/null; do sleep 2; done' || exit 1
