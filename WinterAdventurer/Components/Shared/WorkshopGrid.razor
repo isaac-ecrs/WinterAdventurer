@@ -33,16 +33,21 @@
                           Min="0"
                           HelperText="Number of blank schedules to generate (for attendees not in roster)" />
         </MudItem>
+        @{
+            var workshopIndex = 0;
+        }
         @foreach (var workshop in Workshops)
         {
             <MudItem xs="6">
                 <WorkshopCard Workshop="workshop"
+                             CardIndex="@workshopIndex"
                              AllWorkshops="Workshops"
                              AvailableLocations="AvailableLocations"
                              LocationListVersion="LocationListVersion"
                              OnLocationChanged="OnWorkshopLocationChanged"
                              OnDeleteLocationRequested="OnDeleteLocationRequested" />
             </MudItem>
+            workshopIndex++;
         }
         <PdfGenerationButtons IsDisabled="IsDisabled"
                               OnCreateMasterSchedule="OnCreateMasterSchedule" />

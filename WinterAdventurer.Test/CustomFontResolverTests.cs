@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Library;
 using PdfSharp.Fonts;
 
@@ -258,7 +259,7 @@ namespace WinterAdventurer.Test
         public void GetFont_UnknownFontName_ThrowsInvalidOperationException()
         {
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 _resolver.GetFont("NonExistentFont");
             });

@@ -40,8 +40,11 @@ namespace WinterAdventurer.Library
 
                 default:
                     // Fall back to NotoSans for unknown fonts
-                    return PlatformFontResolver.ResolveTypeface(familyName, isBold, isItalic)
-                        ?? new FontResolverInfo("NotoSans-Regular");
+                    // Note: PDFsharp 6.2+ no longer allows calling PlatformFontResolver.ResolveTypeface()
+                    // directly from custom font resolvers, so we use NotoSans as the fallback
+                    if (isBold)
+                        return new FontResolverInfo("NotoSans-Bold");
+                    return new FontResolverInfo("NotoSans-Regular");
             }
         }
 

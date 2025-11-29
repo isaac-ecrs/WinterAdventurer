@@ -330,6 +330,16 @@
         workshops.Clear();
         ExcelUtils.Workshops.Clear(); // Clear previous workshops from ExcelUtils
 
+        // Clear any previous tour errors
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("clearTourError");
+        }
+        catch (Exception jsEx)
+        {
+            Logger.LogWarning(jsEx, "Failed to clear tour error (JS interop)");
+        }
+
         try
         {
             using (var stream = new MemoryStream())
@@ -374,6 +384,16 @@
             Console.WriteLine($"Error uploading file: {ex.Message}");
             errorMessage = $"Error uploading file: {ex.Message}";
             success = false;
+
+            // Show error in tour if active
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("showTourError", errorMessage);
+            }
+            catch (Exception jsEx)
+            {
+                Logger.LogWarning(jsEx, "Failed to show tour error (JS interop)");
+            }
         }
 
         isLoading = false;
