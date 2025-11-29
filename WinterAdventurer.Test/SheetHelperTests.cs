@@ -10,7 +10,7 @@ namespace WinterAdventurer.Test
         public void TestInitialize()
         {
             // Required for EPPlus
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
         }
 
         private ExcelWorksheet CreateTestSheet(Action<ExcelWorksheet>? setupAction = null)

@@ -19,7 +19,7 @@ namespace WinterAdventurer.Test
         public void Setup()
         {
             _excelUtilities = new ExcelUtilities(NullLogger<ExcelUtilities>.Instance);
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
         }
 
         #region ImportExcel Tests

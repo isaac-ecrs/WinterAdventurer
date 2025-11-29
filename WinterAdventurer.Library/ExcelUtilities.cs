@@ -74,7 +74,7 @@ namespace WinterAdventurer.Library
         {
             try
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
 
                 if (stream == null || stream.Length == 0)
                 {
@@ -113,7 +113,7 @@ namespace WinterAdventurer.Library
         /// <param name="outputPath">File path where JSON schema dump will be written.</param>
         public void DumpExcelSchema(Stream stream, string outputPath)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
             stream.Position = 0;
 
             using (var package = new ExcelPackage(stream))
