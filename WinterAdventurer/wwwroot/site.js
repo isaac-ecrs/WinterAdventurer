@@ -131,6 +131,42 @@ window.notifyTourFileUploaded = function() {
     }
 };
 
+// Debug helper - call from console to inspect tour elements
+window.debugTourElements = function() {
+    console.log('=== Tour Elements Debug ===');
+    console.log('Looking for #first-workshop-location:', document.querySelector('#first-workshop-location'));
+    console.log('Looking for #first-workshop-leader:', document.querySelector('#first-workshop-leader'));
+
+    console.log('\n=== CardIndex Debug ===');
+    console.log('All elements with data-card-index attribute:');
+    document.querySelectorAll('[data-card-index]').forEach(el => {
+        const index = el.getAttribute('data-card-index');
+        const id = el.id || '(no id)';
+        console.log(`  CardIndex ${index}: ID="${id}", Tag=${el.tagName}, HasAutocomplete=${el.querySelector('.mud-autocomplete') !== null}`);
+    });
+
+    console.log('\nAll elements with IDs containing "first":');
+    document.querySelectorAll('[id*="first"]').forEach(el => {
+        console.log(`  - ${el.id} (${el.tagName}):`, el);
+    });
+    console.log('\nAll elements with IDs containing "workshop":');
+    document.querySelectorAll('[id*="workshop"]').forEach(el => {
+        console.log(`  - ${el.id} (${el.tagName}):`, el);
+    });
+    console.log('\nAll elements with IDs containing "location":');
+    document.querySelectorAll('[id*="location"]').forEach(el => {
+        console.log(`  - ${el.id} (${el.tagName}):`, el);
+    });
+    console.log('\nAll MudAutocomplete elements:');
+    document.querySelectorAll('.mud-autocomplete').forEach((el, i) => {
+        console.log(`  Autocomplete ${i}:`, el, 'ID:', el.id, 'Parent ID:', el.parentElement?.id);
+    });
+    console.log('\nAll MudTextField elements:');
+    document.querySelectorAll('.mud-input-control').forEach((el, i) => {
+        console.log(`  TextField ${i}:`, el, 'ID:', el.id, 'Parent ID:', el.parentElement?.id);
+    });
+};
+
 // Guided tour using Driver.js
 window.startHomeTour = function() {
     console.log('startHomeTour called');
@@ -265,6 +301,35 @@ window.startHomeTour = function() {
                         });
                     }, 0);
                 }
+            },
+            onHighlightStarted: (element, step, options) => {
+                console.log('=== Tour Highlight Started ===');
+                console.log('Step index:', options.state.activeIndex);
+                console.log('Step element selector:', step.element);
+                console.log('Element found:', element);
+                console.log('Element ID:', element?.id);
+                console.log('Element classes:', element?.className);
+
+                // If element not found, log what's actually in the DOM
+                if (!element && step.element) {
+                    const searched = document.querySelector(step.element);
+                    console.log('Manual search result:', searched);
+                    console.log('All elements with "workshop" in ID:',
+                        Array.from(document.querySelectorAll('[id*="workshop"]')).map(el => el.id));
+                    console.log('All elements with "location" in ID:',
+                        Array.from(document.querySelectorAll('[id*="location"]')).map(el => el.id));
+                    console.log('All elements with "first" in ID:',
+                        Array.from(document.querySelectorAll('[id*="first"]')).map(el => el.id));
+                }
+            },
+            onHighlighted: (element, step, options) => {
+                console.log('=== Tour Highlighted ===');
+                console.log('Step index:', options.state.activeIndex);
+                console.log('Successfully highlighted element:', element);
+            },
+            onDeselected: (element, step, options) => {
+                console.log('=== Tour Deselected ===');
+                console.log('Step index:', options.state.activeIndex);
             },
             onDestroyed: () => {
                 console.log('Tour destroyed, marking as completed and resetting state');

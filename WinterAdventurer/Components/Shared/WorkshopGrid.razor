@@ -33,21 +33,19 @@
                           Min="0"
                           HelperText="Number of blank schedules to generate (for attendees not in roster)" />
         </MudItem>
-        @{
-            var workshopIndex = 0;
-        }
-        @foreach (var workshop in Workshops)
+        @for (int i = 0; i < Workshops.Count; i++)
         {
+            var workshop = Workshops[i];
+            var currentIndex = i; // Capture index for this iteration
             <MudItem xs="6">
                 <WorkshopCard Workshop="workshop"
-                             CardIndex="@workshopIndex"
+                             CardIndex="@currentIndex"
                              AllWorkshops="Workshops"
                              AvailableLocations="AvailableLocations"
                              LocationListVersion="LocationListVersion"
                              OnLocationChanged="OnWorkshopLocationChanged"
                              OnDeleteLocationRequested="OnDeleteLocationRequested" />
             </MudItem>
-            workshopIndex++;
         }
         <PdfGenerationButtons IsDisabled="IsDisabled"
                               OnCreateMasterSchedule="OnCreateMasterSchedule" />
