@@ -247,10 +247,10 @@ Run only E2E tests (requires app to be running):
 ```bash
 # Terminal 1: Start the app
 cd WinterAdventurer
-dotnet run
+dotnet run  # Note the port (usually 5004 for dev, 5000 for production)
 
-# Terminal 2: Run E2E tests
-dotnet test --filter "FullyQualifiedName~E2ETests"
+# Terminal 2: Run E2E tests (set E2E_BASE_URL to match your app's port)
+E2E_BASE_URL=http://localhost:5004 dotnet test --filter "FullyQualifiedName~E2ETests"
 ```
 
 **Note:** E2E tests require Playwright browsers to be installed. See `WinterAdventurer.E2ETests/README.md` for setup instructions.

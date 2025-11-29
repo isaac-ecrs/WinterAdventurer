@@ -34,7 +34,7 @@ playwright install
 
 ### 2. Start the Application
 
-The tests expect the WinterAdventurer web app to be running on `http://localhost:5000`.
+The tests expect the WinterAdventurer web app to be running. The default URL is `http://localhost:5000` (CI/production), but for local development you'll need to override this.
 
 In a separate terminal:
 ```bash
@@ -42,14 +42,28 @@ cd WinterAdventurer
 dotnet run
 ```
 
-Adjust the `BaseUrl` in `TourTests.cs` if your app runs on a different port.
+By default, the development server runs on port **5004** (see `launchSettings.json`). Set the `E2E_BASE_URL` environment variable to match:
+
+```bash
+export E2E_BASE_URL=http://localhost:5004  # Linux/Mac
+# or
+set E2E_BASE_URL=http://localhost:5004     # Windows CMD
+# or
+$env:E2E_BASE_URL="http://localhost:5004"  # Windows PowerShell
+```
 
 ## Running Tests
 
 ### Run all E2E tests
+
+**Local development** (with app running on port 5004):
 ```bash
-cd WinterAdventurer.E2ETests
-dotnet test
+E2E_BASE_URL=http://localhost:5004 dotnet test
+```
+
+**CI/production** (app running on port 5000):
+```bash
+dotnet test  # Uses default http://localhost:5000
 ```
 
 ### Run with verbose output
@@ -64,14 +78,32 @@ dotnet test --filter "FullyQualifiedName~DebugTourElements"
 
 ## Available Tests
 
-### `Tour_AssignLocationsStep_ShouldHighlightLocationField`
+### Regression Tests (CardIndex Bug)
+
+#### `CardIndex_ShouldBeSequential_NotAllTheSame`
+**Critical regression test** that prevents the bug where all workshops had `CardIndex=20` instead of sequential values (0, 1, 2, ...).
+
+This bug caused the tour highlighting to fail because only the first workshop (CardIndex=0) gets the `#first-workshop-location` and `#first-workshop-leader` IDs. Without sequential CardIndex values, no workshop would get CardIndex=0, so the tour couldn't find the elements to highlight.
+
+Requires workshops to be loaded (upload an Excel file before running).
+
+#### `FirstWorkshop_ShouldHaveCorrectIDs`
+Verifies that the first workshop (CardIndex=0) has the expected IDs and structure for tour highlighting.
+
+Requires workshops to be loaded.
+
+### Tour Tests
+
+#### `Tour_AssignLocationsStep_ShouldHighlightLocationField`
 Tests that the "Assign Locations" step of the tutorial correctly highlights the location field when workshops are loaded.
 
-### `DebugTourElements_LogsAllRelevantElements`
+Requires workshops to be loaded and tour to be activated.
+
+#### `DebugTourElements_LogsAllRelevantElements`
 Debug test that logs all elements related to the tour (helpful for troubleshooting).
 Run this test first to see what IDs are actually present in the DOM.
 
-### `Tour_CanAccessDebugFunction`
+#### `Tour_CanAccessDebugFunction`
 Verifies that the JavaScript debug helper functions are available.
 
 ## Debugging
@@ -101,11 +133,19 @@ Check your browser's developer console for these logs.
 ### Tests fail with "Could not find 'playwright' command"
 Install Playwright browsers using the setup instructions above.
 
-### Tests fail with "Failed to navigate to http://localhost:5000"
-Make sure the WinterAdventurer web app is running:
+### Tests fail with "Failed to navigate" or "Connection refused"
+Make sure:
+1. The WinterAdventurer web app is running
+2. The `E2E_BASE_URL` environment variable matches your app's port
+
 ```bash
+# Start the app
 cd WinterAdventurer
-dotnet run
+dotnet run  # Note the port in the output (usually 5004 for dev)
+
+# In another terminal, set the URL and run tests
+export E2E_BASE_URL=http://localhost:5004
+dotnet test --filter "FullyQualifiedName~E2ETests"
 ```
 
 ### Element not found errors
