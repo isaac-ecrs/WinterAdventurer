@@ -961,21 +961,42 @@ namespace WinterAdventurer.Library
                                     dayCell.MergeRight = spanDays - 1;
                                 }
 
-                                // Add workshop content
+                                // Add workshop content with adaptive font sizing
                                 var workshopPara = dayCell.AddParagraph();
-                                workshopPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.WorkshopName;
                                 workshopPara.Format.Alignment = ParagraphAlignment.Center;
+
+                                // Calculate adaptive font size based on workshop name length
+                                var workshopDisplayText = isLeading ? $"Leading {workshop.Name}" : workshop.Name;
+                                int workshopFontSize;
+                                if (workshopDisplayText.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.VeryLong)
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.VeryLong;
+                                }
+                                else if (workshopDisplayText.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Long)
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.Long;
+                                }
+                                else if (workshopDisplayText.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Medium)
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.Medium;
+                                }
+                                else
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.Default;
+                                }
+
+                                workshopPara.Format.Font.Size = workshopFontSize;
 
                                 if (isLeading)
                                 {
                                     workshopPara.Format.Font.Name = FontNames.NotoSans;
                                     workshopPara.Format.Font.Bold = true;
-                                    workshopPara.AddText($"Leading {workshop.Name}");
+                                    workshopPara.AddText(workshopDisplayText);
                                 }
                                 else
                                 {
                                     workshopPara.Format.Font.Name = FontNames.Roboto;
-                                    workshopPara.AddText($"{workshop.Name}");
+                                    workshopPara.AddText(workshopDisplayText);
                                 }
 
                                 // Add leader info
@@ -1011,7 +1032,7 @@ namespace WinterAdventurer.Library
                                     leaderPara.AddText($"{workshop.Leader}");
                                 }
 
-                                // Add location info
+                                // Add location info with tags
                                 if (!string.IsNullOrWhiteSpace(workshop.Location))
                                 {
                                     var locationPara = dayCell.AddParagraph();
@@ -1019,7 +1040,19 @@ namespace WinterAdventurer.Library
                                     locationPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.LocationName;
                                     locationPara.Format.Font.Bold = true;
                                     locationPara.Format.Alignment = ParagraphAlignment.Center;
+
+                                    // Add location name in bold
                                     locationPara.AddText(workshop.Location);
+
+                                    // Add tags in lowercase and not bold
+                                    if (workshop.Tags != null && workshop.Tags.Any())
+                                    {
+                                        var tagNames = string.Join(", ", workshop.Tags
+                                            .OrderBy(t => t.Name)
+                                            .Select(t => t.Name.ToLower()));
+                                        var tagText = locationPara.AddFormattedText($" ({tagNames})");
+                                        tagText.Font.Bold = false;
+                                    }
                                 }
 
                                 // If merging, skip the merged days; otherwise just move to next day

@@ -254,6 +254,18 @@ namespace WinterAdventurer.Library
                 public const int Medium = 13;
                 public const int Default = 15;
             }
+
+            /// <summary>
+            /// Corresponding font sizes for workshop names based on length
+            /// Prevents text wrapping in schedule cells while maintaining readability
+            /// </summary>
+            public static class WorkshopFontSizes
+            {
+                public const int VeryLong = 10;  // 45+ characters
+                public const int Long = 11;      // 35-44 characters
+                public const int Medium = 12;    // 28-34 characters
+                public const int Default = 14;   // <28 characters
+            }
         }
 
         /// <summary>
