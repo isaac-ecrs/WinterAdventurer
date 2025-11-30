@@ -80,6 +80,7 @@
                   BlankScheduleCountChanged="EventCallback.Factory.Create<int>(this, OnBlankScheduleCountChanged)"
                   Success="@success"
                   IsDisabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)"
+                  IsLoading="@isLoading"
                   AvailableLocations="@availableLocations"
                   LocationListVersion="@locationListVersion"
                   OnValidSubmit="BuildPdf"

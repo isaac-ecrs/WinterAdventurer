@@ -1,19 +1,24 @@
 @using MudBlazor
 
-<MudItem xs="12" id="pdf-generation-section" Class="d-flex gap-3">
+<MudItem xs="12" id="pdf-generation-section" Class="d-flex gap-3 align-center">
     <MudButton ButtonType="ButtonType.Submit"
                Variant="Variant.Filled"
                Color="Color.Primary"
-               Disabled="@IsDisabled">
+               Disabled="@(IsDisabled || IsLoading)">
         Create PDF
     </MudButton>
     <MudButton ButtonType="ButtonType.Button"
                Variant="Variant.Filled"
                Color="Color.Secondary"
                OnClick="OnCreateMasterScheduleClicked"
-               Disabled="@IsDisabled">
+               Disabled="@(IsDisabled || IsLoading)">
         Download Master Schedule
     </MudButton>
+    @if (IsLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" />
+        <MudText Typo="Typo.body2" Color="Color.Primary">Generating PDF...</MudText>
+    }
 </MudItem>
 
 @code {
@@ -23,6 +28,12 @@
     /// </summary>
     [Parameter]
     public bool IsDisabled { get; set; }
+
+    /// <summary>
+    /// Indicates whether PDF is currently being generated (shows loading spinner)
+    /// </summary>
+    [Parameter]
+    public bool IsLoading { get; set; }
 
     /// <summary>
     /// Event callback invoked when the "Download Master Schedule" button is clicked
