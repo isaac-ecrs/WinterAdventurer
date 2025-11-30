@@ -1,6 +1,7 @@
 @using MudBlazor
 @using WinterAdventurer.Library.Models
 @using WinterAdventurer.Components.Shared
+@using WinterAdventurer.Data
 
 <EditForm Model=Workshops OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
@@ -102,10 +103,10 @@
     public bool IsDisabled { get; set; }
 
     /// <summary>
-    /// List of all available locations from the database
+    /// List of all available locations from the database (with tags loaded)
     /// </summary>
     [Parameter, EditorRequired]
-    public List<string> AvailableLocations { get; set; } = default!;
+    public List<Location> AvailableLocations { get; set; } = default!;
 
     /// <summary>
     /// Version number to force refresh of all workshop cards when locations change

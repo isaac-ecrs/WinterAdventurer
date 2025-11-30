@@ -7,6 +7,7 @@ namespace WinterAdventurer.Services;
 public interface ILocationService
 {
     Task<List<string>> GetAllLocationNamesAsync();
+    Task<List<Location>> GetAllLocationsWithTagsAsync();
     Task<Location?> GetLocationByNameAsync(string name);
     Task<Location> AddOrGetLocationAsync(string name);
     Task<bool> DeleteLocationAsync(string name);
@@ -42,6 +43,17 @@ public class LocationService : ILocationService
             .Select(l => l.Name)
             .ToListAsync();
         _logger.LogDebug("Loaded {Count} locations", locations.Count);
+        return locations;
+    }
+
+    public async Task<List<Location>> GetAllLocationsWithTagsAsync()
+    {
+        _logger.LogDebug("Loading all locations with tags from database");
+        var locations = await _context.Locations
+            .Include(l => l.Tags)
+            .OrderBy(l => l.Name)
+            .ToListAsync();
+        _logger.LogDebug("Loaded {Count} locations with tags", locations.Count);
         return locations;
     }
 

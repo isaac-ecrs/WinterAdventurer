@@ -1,6 +1,7 @@
 @using MudBlazor
 @using WinterAdventurer.Library.Models
 @using WinterAdventurer.Services
+@using WinterAdventurer.Data
 @using Microsoft.Extensions.Logging
 @inject ILocationService LocationService
 @inject ILogger<WorkshopCard> Logger
@@ -19,10 +20,12 @@
              id="@(CardIndex == 0 ? "first-workshop-location" : null)"
              data-card-index="@CardIndex"
              style="position: relative;">
-            <MudAutocomplete T="string"
+            <MudAutocomplete T="Location"
                            Label="Location"
-                           @bind-Value="@Workshop.Location"
+                           Value="@selectedLocation"
+                           ValueChanged="@OnLocationSelected"
                            SearchFunc="@SearchLocations"
+                           ToStringFunc="@(loc => loc?.Name ?? string.Empty)"
                            CoerceText="true"
                            CoerceValue="true"
                            ResetValueOnEmptyText="true"
@@ -35,12 +38,23 @@
                            Variant="Variant.Outlined"
                            SelectValueOnTab="true">
                 <ItemTemplate Context="item">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span>@item</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 4px; flex: 1;">
+                            <span>@item.Name</span>
+                            @foreach (var tag in item.Tags.OrderBy(t => t.Name))
+                            {
+                                <MudChip T="string"
+                                         Size="Size.Small"
+                                         Color="Color.Default"
+                                         Style="@($"background-color: {tag.Color ?? "#e0e0e0"}; color: white; font-size: 0.7rem; height: 18px;")">
+                                    @tag.Name
+                                </MudChip>
+                            }
+                        </div>
                         <MudIconButton Icon="@Icons.Material.Filled.Close"
                                      Size="Size.Small"
                                      Color="Color.Error"
-                                     OnClick="@((e) => OnDeleteLocationClick(item, e))"
+                                     OnClick="@((e) => OnDeleteLocationClick(item.Name, e))"
                                      title="Delete this location" />
                     </div>
                 </ItemTemplate>
@@ -75,10 +89,10 @@
     public int CardIndex { get; set; } = -1;
 
     /// <summary>
-    /// List of all available locations from the database
+    /// List of all available locations from the database (with tags loaded)
     /// </summary>
     [Parameter, EditorRequired]
-    public List<string> AvailableLocations { get; set; } = default!;
+    public List<Location> AvailableLocations { get; set; } = default!;
 
     /// <summary>
     /// Version number used to force component refresh when locations change globally.
@@ -102,17 +116,32 @@
     public EventCallback<string> OnDeleteLocationRequested { get; set; }
 
     private string previousLocation = string.Empty;
+    private Location? selectedLocation = null;
 
     protected override void OnParametersSet()
     {
         previousLocation = Workshop.Location ?? string.Empty;
+
+        // Find the Location object that matches the current workshop location string
+        selectedLocation = AvailableLocations?.FirstOrDefault(loc =>
+            loc.Name.Equals(Workshop.Location, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Handles location selection from autocomplete.
+    /// Updates Workshop.Location string property.
+    /// </summary>
+    private void OnLocationSelected(Location? location)
+    {
+        selectedLocation = location;
+        Workshop.Location = location?.Name ?? string.Empty;
     }
 
     /// <summary>
     /// Search function for location autocomplete with period-based filtering.
     /// Filters out locations already used by other workshops in the same period.
     /// </summary>
-    private async Task<IEnumerable<string>> SearchLocations(string value, CancellationToken token)
+    private async Task<IEnumerable<Location>> SearchLocations(string value, CancellationToken token)
     {
         Logger.LogDebug("SearchLocations called for workshop '{Workshop}' in period '{Period}' with value: '{Value}'",
             Workshop.Name, Workshop.Period.DisplayName, value ?? "NULL");
@@ -130,7 +159,7 @@
 
         // Filter out used locations
         var available = AvailableLocations
-            .Where(loc => !usedLocations.Contains(loc))
+            .Where(loc => !usedLocations.Contains(loc.Name))
             .ToList();
 
         // If value is empty or null, return all available locations
@@ -142,7 +171,7 @@
 
         // Filter locations that contain the search value (case insensitive)
         var filtered = available
-            .Where(loc => loc.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .Where(loc => loc.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         Logger.LogDebug("SearchLocations: Found {Count} matches for '{Value}'", filtered.Count, value);

@@ -13,6 +13,7 @@
 @using WinterAdventurer.Components.Shared
 @using Microsoft.Extensions.Logging
 @using WinterAdventurer.Models
+@using WinterAdventurer.Data
 @inject IJSRuntime JSRuntime
 @inject ILocationService LocationService
 @inject ILogger<Home> Logger
@@ -102,7 +103,7 @@
     private bool _disposed = false;
     private CancellationTokenSource? _cts;
     private bool _hasRendered = false;
-    private List<string> availableLocations = new List<string>();
+    private List<Location> availableLocations = new List<Location>();
     private int locationListVersion = 0; // Increment to force autocomplete recreation
     private string eventName = "";
     private string defaultEventName = $"Winter Adventure {DateTime.Now.Year}";
@@ -583,10 +584,10 @@
 
         try
         {
-            Logger.LogInformation("LoadLocations: Starting to load locations from database");
-            // Load all locations from database
-            availableLocations = await LocationService.GetAllLocationNamesAsync();
-            Logger.LogInformation("LoadLocations: Loaded {Count} locations", availableLocations.Count);
+            Logger.LogInformation("LoadLocations: Starting to load locations with tags from database");
+            // Load all locations with tags from database
+            availableLocations = await LocationService.GetAllLocationsWithTagsAsync();
+            Logger.LogInformation("LoadLocations: Loaded {Count} locations with tags", availableLocations.Count);
         }
         catch (Exception ex)
         {
@@ -605,11 +606,17 @@
         var currentLocation = workshop.Location ?? string.Empty;
 
         // Update cached list if new location added
-        if (!string.IsNullOrWhiteSpace(currentLocation) && !availableLocations.Contains(currentLocation))
+        if (!string.IsNullOrWhiteSpace(currentLocation) &&
+            !availableLocations.Any(loc => loc.Name.Equals(currentLocation, StringComparison.OrdinalIgnoreCase)))
         {
-            availableLocations.Add(currentLocation);
-            availableLocations.Sort();
-            Logger.LogInformation("HandleWorkshopLocationChanged: Added '{Location}' to cached list", currentLocation);
+            // Fetch the location from database (it should exist since AddOrGetLocationAsync was called)
+            var locationEntity = await LocationService.GetLocationByNameAsync(currentLocation);
+            if (locationEntity != null)
+            {
+                availableLocations.Add(locationEntity);
+                availableLocations = availableLocations.OrderBy(loc => loc.Name).ToList();
+                Logger.LogInformation("HandleWorkshopLocationChanged: Added '{Location}' to cached list", currentLocation);
+            }
         }
 
         // Increment version to refresh all dropdowns (for period-based filtering)
@@ -635,7 +642,7 @@
             if (deleted)
             {
                 // Create a new list instance to trigger change detection in MudAutocomplete
-                availableLocations = availableLocations.Where(l => l != locationName).ToList();
+                availableLocations = availableLocations.Where(l => !l.Name.Equals(locationName, StringComparison.OrdinalIgnoreCase)).ToList();
                 Logger.LogInformation("HandleDeleteLocationRequest: Removed '{Location}' from cached list", locationName);
 
                 // Clear any workshops that were using this location

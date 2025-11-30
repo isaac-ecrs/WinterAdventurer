@@ -15,4 +15,7 @@ public class Location
     public string Name { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Navigation property for many-to-many relationship with Tags
+    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }
