@@ -17,6 +17,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+    <PackageReference Include="UglyToad.PdfPig" Version="0.1.9-alpha-20240428-0dc0d" />
   </ItemGroup>
 
   <ItemGroup>
