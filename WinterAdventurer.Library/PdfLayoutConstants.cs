@@ -58,14 +58,14 @@ namespace WinterAdventurer.Library
             /// </summary>
             public static class MasterSchedule
             {
-                public const int Title = 28;
-                public const int ColumnHeader = 12;
-                public const int TimeCell = 10;
-                public const int DayIndicator = 9;
-                public const int ActivityName = 14;
-                public const int WorkshopInfo = 10;
-                public const int LeaderName = 9;
-                public const int LocationHeader = 11;
+                public const int Title = 26;
+                public const int ColumnHeader = 11;
+                public const int TimeCell = 9;
+                public const int DayIndicator = 8;
+                public const int ActivityName = 13;
+                public const int WorkshopInfo = 9;
+                public const int LeaderName = 8;
+                public const int LocationHeader = 10;
             }
 
             /// <summary>
