@@ -80,6 +80,7 @@
                   BlankScheduleCountChanged="EventCallback.Factory.Create<int>(this, OnBlankScheduleCountChanged)"
                   Success="@success"
                   IsDisabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)"
+                  IsLoading="@isLoading"
                   AvailableLocations="@availableLocations"
                   LocationListVersion="@locationListVersion"
                   OnValidSubmit="BuildPdf"
@@ -432,6 +433,20 @@
             Logger.LogInformation($"BuildPdf: Captured localBlankScheduleCount = {localBlankScheduleCount}");
             Logger.LogInformation($"BuildPdf: Captured {localTimeslots?.Count ?? 0} timeslots");
 
+            // Load locations with tags for PDF generation
+            var locationsWithTags = await LocationService.GetAllLocationsWithTagsAsync();
+
+            // Map to dictionary for quick lookup
+            var locationTagsDict = locationsWithTags
+                .Where(l => l.Tags.Any())
+                .ToDictionary(
+                    l => l.Name,
+                    l => l.Tags.Select(t => new WinterAdventurer.Library.Models.LocationTag
+                    {
+                        Name = t.Name
+                    }).ToList()
+                );
+
             // Generate PDF in background thread to keep SignalR circuit alive
             var (pdfBytes, error) = await Task.Run(() =>
             {
@@ -439,6 +454,16 @@
                 {
                     Logger.LogInformation($"Task.Run: Calling CreatePdf with blankScheduleCount={localBlankScheduleCount}");
                     var finalEventName = string.IsNullOrWhiteSpace(eventName) ? defaultEventName : eventName;
+
+                    // Populate workshop tags from location data
+                    foreach (var workshop in ExcelUtils.Workshops)
+                    {
+                        if (locationTagsDict.TryGetValue(workshop.Location, out var tags))
+                        {
+                            workshop.Tags = tags;
+                        }
+                    }
+
                     var document = ExcelUtils.CreatePdf(mergeWorkshopCells: true, timeslots: localTimeslots, blankScheduleCount: localBlankScheduleCount, eventName: finalEventName);
                     if (document == null)
                     {

@@ -49,6 +49,7 @@
             </MudItem>
         }
         <PdfGenerationButtons IsDisabled="IsDisabled"
+                              IsLoading="IsLoading"
                               OnCreateMasterSchedule="OnCreateMasterSchedule" />
     </MudGrid>
 </EditForm>
@@ -101,6 +102,12 @@
     /// </summary>
     [Parameter]
     public bool IsDisabled { get; set; }
+
+    /// <summary>
+    /// Indicates whether PDF is currently being generated (shows loading spinner)
+    /// </summary>
+    [Parameter]
+    public bool IsLoading { get; set; }
 
     /// <summary>
     /// List of all available locations from the database (with tags loaded)

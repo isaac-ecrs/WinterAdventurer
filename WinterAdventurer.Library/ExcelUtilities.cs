@@ -961,21 +961,42 @@ namespace WinterAdventurer.Library
                                     dayCell.MergeRight = spanDays - 1;
                                 }
 
-                                // Add workshop content
+                                // Add workshop content with adaptive font sizing
                                 var workshopPara = dayCell.AddParagraph();
-                                workshopPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.WorkshopName;
                                 workshopPara.Format.Alignment = ParagraphAlignment.Center;
+
+                                // Calculate adaptive font size based on workshop name length
+                                var workshopDisplayText = isLeading ? $"Leading {workshop.Name}" : workshop.Name;
+                                int workshopFontSize;
+                                if (workshopDisplayText.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.VeryLong)
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.VeryLong;
+                                }
+                                else if (workshopDisplayText.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Long)
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.Long;
+                                }
+                                else if (workshopDisplayText.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Medium)
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.Medium;
+                                }
+                                else
+                                {
+                                    workshopFontSize = PdfLayoutConstants.AdaptiveFontSizing.WorkshopFontSizes.Default;
+                                }
+
+                                workshopPara.Format.Font.Size = workshopFontSize;
 
                                 if (isLeading)
                                 {
                                     workshopPara.Format.Font.Name = FontNames.NotoSans;
                                     workshopPara.Format.Font.Bold = true;
-                                    workshopPara.AddText($"Leading {workshop.Name}");
+                                    workshopPara.AddText(workshopDisplayText);
                                 }
                                 else
                                 {
                                     workshopPara.Format.Font.Name = FontNames.Roboto;
-                                    workshopPara.AddText($"{workshop.Name}");
+                                    workshopPara.AddText(workshopDisplayText);
                                 }
 
                                 // Add leader info
@@ -1011,7 +1032,7 @@ namespace WinterAdventurer.Library
                                     leaderPara.AddText($"{workshop.Leader}");
                                 }
 
-                                // Add location info
+                                // Add location info with tags
                                 if (!string.IsNullOrWhiteSpace(workshop.Location))
                                 {
                                     var locationPara = dayCell.AddParagraph();
@@ -1019,7 +1040,19 @@ namespace WinterAdventurer.Library
                                     locationPara.Format.Font.Size = PdfLayoutConstants.FontSizes.IndividualSchedule.LocationName;
                                     locationPara.Format.Font.Bold = true;
                                     locationPara.Format.Alignment = ParagraphAlignment.Center;
+
+                                    // Add location name in bold
                                     locationPara.AddText(workshop.Location);
+
+                                    // Add tags in lowercase and not bold
+                                    if (workshop.Tags != null && workshop.Tags.Any())
+                                    {
+                                        var tagNames = string.Join(", ", workshop.Tags
+                                            .OrderBy(t => t.Name)
+                                            .Select(t => t.Name.ToLower()));
+                                        var tagText = locationPara.AddFormattedText($" ({tagNames})");
+                                        tagText.Font.Bold = false;
+                                    }
                                 }
 
                                 // If merging, skip the merged days; otherwise just move to next day
@@ -1209,10 +1242,16 @@ namespace WinterAdventurer.Library
             if (locations.Count > 5)
             {
                 section.PageSetup.Orientation = Orientation.Landscape;
+                // Smaller margins to maximize space
+                section.PageSetup.LeftMargin = Unit.FromInch(0.4);
+                section.PageSetup.RightMargin = Unit.FromInch(0.4);
+                section.PageSetup.TopMargin = Unit.FromInch(0.4);
+                section.PageSetup.BottomMargin = Unit.FromInch(0.4);
             }
             else
             {
                 section.PageSetup.Orientation = Orientation.Portrait;
+                SetStandardMargins(section);
             }
 
             // Add logo to section
@@ -1225,19 +1264,32 @@ namespace WinterAdventurer.Library
             title.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.Title;
             title.Format.Alignment = ParagraphAlignment.Center;
             title.AddFormattedText(eventName, TextFormat.Bold);
-            title.Format.SpaceAfter = Unit.FromPoint(20);
+            // Add vertical spacing to center content on page
+            title.Format.SpaceBefore = section.PageSetup.Orientation == Orientation.Landscape
+                ? Unit.FromPoint(24)
+                : Unit.FromPoint(12);
+            title.Format.SpaceAfter = Unit.FromPoint(12);
 
             // Create table
             var table = section.AddTable();
             table.Borders.Width = PdfLayoutConstants.Table.BorderWidth;
 
-            // Column widths
+            // Column widths - make table narrower than full width to allow centering
             var timeColumnWidth = PdfLayoutConstants.ColumnWidths.MasterSchedule.Time;
             var daysColumnWidth = PdfLayoutConstants.ColumnWidths.MasterSchedule.Days;
-            var totalUsableWidth = section.PageSetup.Orientation == Orientation.Landscape
-                ? PdfLayoutConstants.PageDimensions.LandscapeUsableWidth
+            var pageUsableWidth = section.PageSetup.Orientation == Orientation.Landscape
+                ? 10.2  // 11" - 0.4" - 0.4"
                 : PdfLayoutConstants.PageDimensions.PortraitUsableWidth;
-            var locationColumnWidth = (totalUsableWidth - timeColumnWidth - daysColumnWidth) / locations.Count;
+            // Make table 9.5" wide to leave room for centering
+            var tableWidth = section.PageSetup.Orientation == Orientation.Landscape ? 9.5 : pageUsableWidth;
+            var locationColumnWidth = (tableWidth - timeColumnWidth - daysColumnWidth) / locations.Count;
+
+            // Add left indent to center the table horizontally (slightly more to the right)
+            if (section.PageSetup.Orientation == Orientation.Landscape)
+            {
+                var leftIndent = (pageUsableWidth - tableWidth) / 2 + 0.15;  // Center + extra shift right
+                table.Rows.LeftIndent = Unit.FromInch(leftIndent);
+            }
 
             // Add columns
             table.AddColumn(Unit.FromInch(timeColumnWidth));  // Time
@@ -1247,10 +1299,19 @@ namespace WinterAdventurer.Library
                 table.AddColumn(Unit.FromInch(locationColumnWidth));
             }
 
+            // Set minimal cell padding for the entire table
+            foreach (Column column in table.Columns)
+            {
+                column.LeftPadding = Unit.FromPoint(2);
+                column.RightPadding = Unit.FromPoint(2);
+            }
+
             // Header row
             var headerRow = table.AddRow();
             headerRow.Shading.Color = Color.FromRgb(220, 220, 220);
             headerRow.HeadingFormat = true;
+            headerRow.TopPadding = Unit.FromPoint(3);
+            headerRow.BottomPadding = Unit.FromPoint(3);
 
             // Time header
             var timeHeader = headerRow.Cells[0];
@@ -1312,7 +1373,12 @@ namespace WinterAdventurer.Library
         {
             // Create two rows: Days 1-2 and Days 3-4
             var row12 = table.AddRow();
+            row12.TopPadding = Unit.FromPoint(2);
+            row12.BottomPadding = Unit.FromPoint(2);
+
             var row34 = table.AddRow();
+            row34.TopPadding = Unit.FromPoint(2);
+            row34.BottomPadding = Unit.FromPoint(2);
 
             // Time cell (merge across both rows)
             var timeCell = row12.Cells[0];
@@ -1410,6 +1476,8 @@ namespace WinterAdventurer.Library
         {
             var row = table.AddRow();
             row.Shading.Color = Color.FromRgb(230, 230, 230);
+            row.TopPadding = Unit.FromPoint(2);
+            row.BottomPadding = Unit.FromPoint(2);
 
             // Time cell
             var timeCell = row.Cells[0];
@@ -1450,8 +1518,28 @@ namespace WinterAdventurer.Library
             cell.VerticalAlignment = VerticalAlignment.Center;
             var para = cell.AddParagraph();
             para.Format.Font.Name = FontNames.NotoSans;
-            para.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.WorkshopInfo;
             para.Format.Alignment = ParagraphAlignment.Center;
+
+            // Calculate adaptive font size based on workshop name length
+            int workshopFontSize;
+            if (workshop.Name.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.VeryLong)
+            {
+                workshopFontSize = 7;  // Very long names (45+ chars)
+            }
+            else if (workshop.Name.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Long)
+            {
+                workshopFontSize = 8;  // Long names (35-44 chars)
+            }
+            else if (workshop.Name.Length >= PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Medium)
+            {
+                workshopFontSize = 8;  // Medium names (28-34 chars)
+            }
+            else
+            {
+                workshopFontSize = PdfLayoutConstants.FontSizes.MasterSchedule.WorkshopInfo;  // Default: 9pt
+            }
+
+            para.Format.Font.Size = workshopFontSize;
 
             // Workshop name
             para.AddFormattedText(workshop.Name, TextFormat.Bold);
@@ -1520,10 +1608,19 @@ namespace WinterAdventurer.Library
                         }
                         else if (documentType == "master")
                         {
-                            // Master schedule - smaller, more centered
+                            // Master schedule - check orientation for proper logo placement
                             logo.Height = PdfLayoutConstants.Logo.Height;
-                            logo.Top = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Top;
-                            logo.Left = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Left;
+
+                            if (section.PageSetup.Orientation == Orientation.Landscape)
+                            {
+                                logo.Top = PdfLayoutConstants.Logo.MasterScheduleLandscape.Top;
+                                logo.Left = PdfLayoutConstants.Logo.MasterScheduleLandscape.Left;
+                            }
+                            else
+                            {
+                                logo.Top = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Top;
+                                logo.Left = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Left;
+                            }
                         }
                         else // roster (default)
                         {

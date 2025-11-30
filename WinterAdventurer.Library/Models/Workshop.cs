@@ -25,6 +25,12 @@ namespace WinterAdventurer.Library.Models
         public int MinAge { get; set; } = 0;
         public List<WorkshopSelection> Selections { get; set; } = new List<WorkshopSelection>();
 
+        /// <summary>
+        /// Location tags (e.g., "Downstairs") for display in participant schedules.
+        /// Used to highlight special location characteristics like floor level.
+        /// </summary>
+        public List<LocationTag>? Tags { get; set; } = null;
+
         // Unique key for this workshop offering
         public string Key => $"{Period.SheetName}|{Name}|{Leader}|{Duration.StartDay}-{Duration.EndDay}";
 

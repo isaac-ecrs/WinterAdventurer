@@ -58,14 +58,14 @@ namespace WinterAdventurer.Library
             /// </summary>
             public static class MasterSchedule
             {
-                public const int Title = 28;
-                public const int ColumnHeader = 12;
-                public const int TimeCell = 10;
-                public const int DayIndicator = 9;
-                public const int ActivityName = 14;
-                public const int WorkshopInfo = 10;
-                public const int LeaderName = 9;
-                public const int LocationHeader = 11;
+                public const int Title = 26;
+                public const int ColumnHeader = 11;
+                public const int TimeCell = 9;
+                public const int DayIndicator = 8;
+                public const int ActivityName = 13;
+                public const int WorkshopInfo = 9;
+                public const int LeaderName = 8;
+                public const int LocationHeader = 10;
             }
 
             /// <summary>
@@ -253,6 +253,18 @@ namespace WinterAdventurer.Library
                 public const int Long = 11;
                 public const int Medium = 13;
                 public const int Default = 15;
+            }
+
+            /// <summary>
+            /// Corresponding font sizes for workshop names based on length
+            /// Prevents text wrapping in schedule cells while maintaining readability
+            /// </summary>
+            public static class WorkshopFontSizes
+            {
+                public const int VeryLong = 10;  // 45+ characters
+                public const int Long = 11;      // 35-44 characters
+                public const int Medium = 12;    // 28-34 characters
+                public const int Default = 14;   // <28 characters
             }
         }
 
