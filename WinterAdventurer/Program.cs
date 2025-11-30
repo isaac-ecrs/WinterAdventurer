@@ -55,6 +55,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add location service
 builder.Services.AddScoped<ILocationService, LocationService>();
 
+// Add tag service
+builder.Services.AddScoped<ITagService, TagService>();
+
 // Add timeslot validation service
 builder.Services.AddScoped<ITimeslotValidationService, TimeslotValidationService>();
 
@@ -72,11 +75,14 @@ GlobalFontSettings.FontResolver = new CustomFontResolver();
 
 var app = builder.Build();
 
-// Ensure database is created
+// Ensure database is created and apply migrations
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    dbContext.Database.Migrate();
+    await DbSeeder.SeedDefaultDataAsync(dbContext, logger);
 }
 
 // Configure the HTTP request pipeline.
