@@ -91,7 +91,12 @@ namespace WinterAdventurer.Test.Helpers
         {
             string allText = ExtractAllText(pdfBytes);
 
-            if (!allText.Contains(expectedText, StringComparison.OrdinalIgnoreCase))
+            // PDF text extraction may not preserve spaces consistently
+            // So we normalize both strings by removing whitespace for comparison
+            string normalizedExpected = expectedText.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "");
+            string normalizedActual = allText.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "");
+
+            if (!normalizedActual.Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase))
             {
                 throw new AssertFailedException(
                     $"{context} should contain '{expectedText}'. " +

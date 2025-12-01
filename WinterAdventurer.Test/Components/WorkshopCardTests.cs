@@ -1,7 +1,9 @@
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MudBlazor;
 using MudBlazor.Services;
 using WinterAdventurer.Components.Shared;
 using WinterAdventurer.Data;
@@ -23,9 +25,18 @@ namespace WinterAdventurer.Test.Components
         public void Setup()
         {
             // Register required services
-            Services.AddMudServices();
+            Services.AddMudServices(config =>
+            {
+                config.PopoverOptions.ThrowOnDuplicateProvider = false;
+            });
             Services.AddSingleton<ILocationService, MockLocationService>();
             Services.AddSingleton(NullLogger<WorkshopCard>.Instance);
+
+            // Configure JSInterop for MudBlazor components
+            JSInterop.Mode = JSRuntimeMode.Loose;
+
+            // Render MudPopoverProvider once for all tests
+            Render<MudPopoverProvider>();
         }
 
         [TestMethod]

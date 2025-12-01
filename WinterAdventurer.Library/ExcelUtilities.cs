@@ -555,14 +555,16 @@ namespace WinterAdventurer.Library
                 periodInfo.AddFormattedText(periodText);
                 periodInfo.Format.SpaceAfter = PdfLayoutConstants.Spacing.SectionSpacing;
 
-                // Separate first choice from backup choices and sort by registration order
+                // Separate first choice from backup choices and sort by last name
                 var firstChoiceAttendees = workshopListing.Selections
                     .Where(s => s.ChoiceNumber == 1)
-                    .OrderBy(s => s.RegistrationId)
+                    .OrderBy(s => s.LastName)
+                    .ThenBy(s => s.FirstName)
                     .ToList();
                 var backupAttendees = workshopListing.Selections
                     .Where(s => s.ChoiceNumber > 1)
-                    .OrderBy(s => s.RegistrationId)
+                    .OrderBy(s => s.LastName)
+                    .ThenBy(s => s.FirstName)
                     .ThenBy(s => s.ChoiceNumber)
                     .ToList();
 

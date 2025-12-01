@@ -97,7 +97,7 @@ public abstract class E2ETestBase : PageTest
         var selector = ".mud-card";
         await Page.WaitForFunctionAsync(
             $"document.querySelectorAll('{selector}').length >= {expectedCount}",
-            new() { Timeout = timeoutMs });
+            new PageWaitForFunctionOptions { Timeout = timeoutMs });
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ public abstract class E2ETestBase : PageTest
     /// <returns>ExcelPackage ready for upload.</returns>
     protected ExcelPackage CreateValidExcelPackage(int workshopCount = 1)
     {
-        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
         var package = new ExcelPackage();
 
         // Add ClassSelection sheet
