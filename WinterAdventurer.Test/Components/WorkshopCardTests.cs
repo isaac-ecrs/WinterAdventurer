@@ -86,7 +86,7 @@ namespace WinterAdventurer.Test.Components
 
             // Assert
             var participantText = cut.Find("p:contains('Participants')");
-            Assert.Contains(participantText.TextContent, "2 Participants");
+            Assert.Contains("2 Participants", participantText.TextContent);
         }
 
         [TestMethod]

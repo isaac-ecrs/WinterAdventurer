@@ -197,7 +197,7 @@ namespace WinterAdventurer.Test
             Assert.IsNotNull(result);
             Assert.IsNotEmpty(result, "Font byte array should not be empty");
             // TTF files typically start with specific byte sequences
-            Assert.IsGreaterThan(result.Length, 100, "Font file should be reasonably sized");
+            Assert.IsTrue(result.Length > 100, "Font file should be reasonably sized");
         }
 
         [TestMethod]

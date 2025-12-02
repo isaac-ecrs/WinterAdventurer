@@ -82,7 +82,7 @@ namespace WinterAdventurer.Test
             {
                 // The InvalidDataException is wrapped in InvalidOperationException
                 Assert.IsInstanceOfType<InvalidOperationException>(ex.InnerException);
-                Assert.Contains(ex.Message, "verify the file format");
+                Assert.Contains("verify the file format", ex.Message);
             }
         }
 
