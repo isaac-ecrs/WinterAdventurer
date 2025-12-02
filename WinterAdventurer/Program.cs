@@ -45,6 +45,17 @@ builder.Services.AddRazorComponents()
         options.HandshakeTimeout = TimeSpan.FromSeconds(30);
         options.MaximumReceiveMessageSize = 128 * 1024; // 128KB for large PDFs
     });
+
+// Configure circuit options for idle timeout handling
+// Single-user workflow: keep circuits alive for extended periods
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options =>
+    {
+        // Keep disconnected circuits for 5 hours (single-user scenario)
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromHours(5);
+        // Only one user at a time, so low retention count is fine
+        options.DisconnectedCircuitMaxRetained = 10;
+    });
 builder.Services.AddMudServices();
 
 // Configure database path for portable deployment
