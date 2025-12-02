@@ -7,6 +7,9 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+
+    <!-- Disable MSTEST0037 analyzer - prefer classic assertion style -->
+    <NoWarn>$(NoWarn);MSTEST0037</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
