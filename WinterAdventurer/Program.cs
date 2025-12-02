@@ -47,10 +47,20 @@ builder.Services.AddRazorComponents()
     });
 builder.Services.AddMudServices();
 
+// Configure database path for portable deployment
+// Use user's LocalApplicationData folder to ensure writable location for single-file executables
+var dataDirectory = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+    "WinterAdventurer"
+);
+Directory.CreateDirectory(dataDirectory);
+
+var defaultConnectionString = $"Data Source={Path.Combine(dataDirectory, "winteradventurer.db")}";
+
 // Add database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=winteradventurer.db"));
+        ?? defaultConnectionString));
 
 // Add location service
 builder.Services.AddScoped<ILocationService, LocationService>();
