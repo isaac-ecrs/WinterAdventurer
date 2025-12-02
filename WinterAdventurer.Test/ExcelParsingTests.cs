@@ -81,8 +81,8 @@ namespace WinterAdventurer.Test
             catch (InvalidOperationException ex)
             {
                 // The InvalidDataException is wrapped in InvalidOperationException
-                Assert.IsTrue(ex.InnerException is InvalidOperationException);
-                Assert.IsTrue(ex.Message.Contains("verify the file format"));
+                Assert.IsInstanceOfType<InvalidOperationException>(ex.InnerException);
+                Assert.Contains("verify the file format", ex.Message);
             }
         }
 
