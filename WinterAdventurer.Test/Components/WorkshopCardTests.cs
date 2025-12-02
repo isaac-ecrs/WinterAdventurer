@@ -9,7 +9,7 @@ using WinterAdventurer.Components.Shared;
 using WinterAdventurer.Data;
 using WinterAdventurer.Library.Models;
 using WinterAdventurer.Services;
-using BunitTestContext = Bunit.TestContext;
+using BunitTestContext = Bunit.BunitContext;
 using DataTimeSlot = WinterAdventurer.Data.TimeSlot;
 
 namespace WinterAdventurer.Test.Components

@@ -12,10 +12,11 @@ public abstract class E2ETestBase : PageTest
 {
     /// <summary>
     /// Base URL for the application under test.
-    /// Can be overridden via E2E_BASE_URL environment variable.
-    /// Default: http://localhost:5000 (for CI), override to http://localhost:5004 for local dev.
+    /// Managed by WebServerManager which handles server startup/shutdown.
+    /// Port can be overridden via E2E_PORT environment variable (default: 5004).
+    /// URL can be overridden via E2E_BASE_URL environment variable (for external servers).
     /// </summary>
-    protected static string BaseUrl => Environment.GetEnvironmentVariable("E2E_BASE_URL") ?? "http://localhost:5000";
+    protected static string BaseUrl => Environment.GetEnvironmentVariable("E2E_BASE_URL") ?? WebServerManager.BaseUrl;
 
     /// <summary>
     /// Test initialization. Navigates to base URL and clears any previous test state.
@@ -23,8 +24,9 @@ public abstract class E2ETestBase : PageTest
     [TestInitialize]
     public async Task BaseSetup()
     {
+        // Set tour as completed before page loads to prevent tour from starting
+        await Page.AddInitScriptAsync("localStorage.setItem('tour_home_completed', 'true')");
         await Page.GotoAsync(BaseUrl);
-        await ClearTourState();
     }
 
     /// <summary>
@@ -45,7 +47,8 @@ public abstract class E2ETestBase : PageTest
             }
 
             // Find file input and upload
-            var fileInput = await Page.WaitForSelectorAsync("input[type='file']", new() { Timeout = 5000 });
+            // Note: MudBlazor file inputs are hidden, so we need to locate them without requiring visibility
+            var fileInput = await Page.Locator("input[type='file']").First.ElementHandleAsync();
             if (fileInput == null)
             {
                 throw new InvalidOperationException("File upload input not found on page");

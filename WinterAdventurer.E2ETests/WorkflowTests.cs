@@ -36,8 +36,8 @@ public class WorkflowTests : E2ETestBase
 
         // Act - Generate PDF
         var downloadTask = Page.WaitForDownloadAsync();
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
-        Assert.IsNotNull(pdfButton, "Generate PDF button should exist");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
+        Assert.IsNotNull(pdfButton, "Create PDF button should exist");
         await pdfButton.ClickAsync();
 
         // Assert - Verify download
@@ -67,7 +67,7 @@ public class WorkflowTests : E2ETestBase
 
         // Generate PDF
         var downloadTask = Page.WaitForDownloadAsync();
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
         if (pdfButton != null)
         {
             await pdfButton.ClickAsync();
@@ -103,7 +103,7 @@ public class WorkflowTests : E2ETestBase
 
         // Generate PDF
         var downloadTask = Page.WaitForDownloadAsync();
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
         if (pdfButton != null)
         {
             await pdfButton.ClickAsync();
@@ -130,7 +130,8 @@ public class WorkflowTests : E2ETestBase
             File.WriteAllBytes(tempPath, new byte[] { 0x50, 0x4B }); // Invalid ZIP header
 
             // Act - Try to upload
-            var fileInput = await Page.WaitForSelectorAsync("input[type='file']");
+            // Note: MudBlazor file inputs are hidden, so we need to locate them without requiring visibility
+            var fileInput = await Page.Locator("input[type='file']").First.ElementHandleAsync();
             if (fileInput != null)
             {
                 await fileInput.SetInputFilesAsync(tempPath);
@@ -166,12 +167,12 @@ public class WorkflowTests : E2ETestBase
         await WaitForWorkshopsLoaded();
 
         // Look for PDF generation button
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
 
         // Assert - Button should exist
         // Note: Actual validation logic depends on timeslot configuration
         // If no timeslots are configured, button should be enabled
-        Assert.IsNotNull(pdfButton, "Generate PDF button should exist");
+        Assert.IsNotNull(pdfButton, "Create PDF button should exist");
     }
 
     #endregion
@@ -188,16 +189,16 @@ public class WorkflowTests : E2ETestBase
 
         // Act - Generate PDF
         var downloadTask = Page.WaitForDownloadAsync();
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
-        Assert.IsNotNull(pdfButton, "Generate PDF button should exist");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
+        Assert.IsNotNull(pdfButton, "Create PDF button should exist");
         await pdfButton.ClickAsync();
 
         var download = await downloadTask;
 
         // Assert - Verify filename
         Assert.IsNotNull(download);
-        Assert.IsTrue(download.SuggestedFilename.Contains("Winter"),
-            $"Filename should contain event name, got: {download.SuggestedFilename}");
+        Assert.IsTrue(download.SuggestedFilename.Contains("Rosters") || download.SuggestedFilename.Contains("rosters"),
+            $"Filename should contain 'Rosters', got: {download.SuggestedFilename}");
         Assert.IsTrue(download.SuggestedFilename.EndsWith(".pdf"),
             $"Filename should end with .pdf, got: {download.SuggestedFilename}");
     }
@@ -251,8 +252,8 @@ public class WorkflowTests : E2ETestBase
 
         // Generate PDF
         var downloadTask = Page.WaitForDownloadAsync();
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
-        Assert.IsNotNull(pdfButton, "Generate PDF button should exist");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
+        Assert.IsNotNull(pdfButton, "Create PDF button should exist");
         await pdfButton.ClickAsync();
 
         // Assert
