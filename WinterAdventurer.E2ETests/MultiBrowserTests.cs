@@ -50,8 +50,8 @@ public class MultiBrowserTests : E2ETestBase
 
         // Act - Generate PDF
         var downloadTask = Page.WaitForDownloadAsync();
-        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Generate PDF')");
-        Assert.IsNotNull(pdfButton, "Generate PDF button should exist");
+        var pdfButton = await Page.QuerySelectorAsync("button:has-text('Create PDF')");
+        Assert.IsNotNull(pdfButton, "Create PDF button should exist");
 
         await pdfButton.ClickAsync();
 
@@ -81,8 +81,11 @@ public class MultiBrowserTests : E2ETestBase
             // Type into autocomplete
             await locationInput.FillAsync("Test Location");
 
-            // Verify text was entered
-            var value = await locationInput.GetAttributeAsync("value");
+            // Wait a moment for the value to be set
+            await Page.WaitForTimeoutAsync(100);
+
+            // Verify text was entered using InputValueAsync (proper method for input elements)
+            var value = await locationInput.InputValueAsync();
             Assert.AreEqual("Test Location", value, "Location input should update with typed value");
         }
         else
@@ -94,7 +97,7 @@ public class MultiBrowserTests : E2ETestBase
         var leaderInput = await Page.QuerySelectorAsync("#first-workshop-leader input");
         if (leaderInput != null)
         {
-            var initialValue = await leaderInput.GetAttributeAsync("value");
+            var initialValue = await leaderInput.InputValueAsync();
             Assert.IsFalse(string.IsNullOrEmpty(initialValue), "Leader name should be populated from Excel");
         }
 

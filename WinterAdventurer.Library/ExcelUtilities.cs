@@ -1302,10 +1302,16 @@ namespace WinterAdventurer.Library
             }
 
             // Set minimal cell padding for the entire table
-            foreach (Column column in table.Columns)
+            if (table.Columns != null)
             {
-                column.LeftPadding = Unit.FromPoint(2);
-                column.RightPadding = Unit.FromPoint(2);
+                foreach (Column? column in table.Columns)
+                {
+                    if (column != null)
+                    {
+                        column.LeftPadding = Unit.FromPoint(2);
+                        column.RightPadding = Unit.FromPoint(2);
+                    }
+                }
             }
 
             // Header row
