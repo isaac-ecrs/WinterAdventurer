@@ -2,8 +2,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WinterAdventurer.Data;
 
+/// <summary>
+/// Provides database seeding functionality to populate initial location and tag data.
+/// </summary>
+/// <remarks>
+/// This class ensures the database contains a standard set of locations and tags when the application starts.
+/// Seeding operations are idempotent - they only add data that doesn't already exist.
+/// </remarks>
 public static class DbSeeder
 {
+    /// <summary>
+    /// Default locations to seed into the database on first run.
+    /// </summary>
+    /// <remarks>
+    /// Each tuple contains the location name and an optional tag name to associate with that location.
+    /// These represent common workshop venues at the event facility.
+    /// </remarks>
     private static readonly (string Name, string? TagName)[] DefaultLocations = new[]
     {
         ("Dining Room", null),
@@ -15,17 +29,44 @@ public static class DbSeeder
         ("Library", null)
     };
 
+    /// <summary>
+    /// Default tags to seed into the database on first run.
+    /// </summary>
+    /// <remarks>
+    /// Each tuple contains the tag name and a hex color code for visual representation in the UI.
+    /// Tags provide categorical labels for locations (e.g., accessibility information).
+    /// </remarks>
     private static readonly (string Name, string Color)[] DefaultTags = new[]
     {
         ("Downstairs", "#FF5722")  // Orange color for downstairs tag
     };
 
+    /// <summary>
+    /// Seeds the database with default tags and locations if they don't already exist.
+    /// </summary>
+    /// <param name="context">The database context to seed data into.</param>
+    /// <param name="logger">Logger for recording seeding operations.</param>
+    /// <returns>A task representing the asynchronous seeding operation.</returns>
+    /// <remarks>
+    /// This method is idempotent and safe to call on every application startup.
+    /// It first seeds tags, then locations, and finally assigns tag-location relationships.
+    /// </remarks>
     public static async Task SeedDefaultDataAsync(ApplicationDbContext context, ILogger logger)
     {
         await SeedDefaultTagsAsync(context, logger);
         await SeedDefaultLocationsAsync(context, logger);
     }
 
+    /// <summary>
+    /// Seeds default tags into the database, skipping any that already exist.
+    /// </summary>
+    /// <param name="context">The database context to seed tags into.</param>
+    /// <param name="logger">Logger for recording the seeding operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <remarks>
+    /// Checks existing tag names before adding new tags to prevent duplicates.
+    /// Logs the number and names of newly seeded tags.
+    /// </remarks>
     private static async Task SeedDefaultTagsAsync(ApplicationDbContext context, ILogger logger)
     {
         // Get existing tag names
@@ -61,6 +102,17 @@ public static class DbSeeder
             string.Join(", ", tagsToAdd.Select(t => t.Name)));
     }
 
+    /// <summary>
+    /// Seeds default locations into the database, skipping any that already exist.
+    /// </summary>
+    /// <param name="context">The database context to seed locations into.</param>
+    /// <param name="logger">Logger for recording the seeding operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <remarks>
+    /// Checks existing location names before adding new locations to prevent duplicates.
+    /// After seeding locations, calls <see cref="AssignDefaultTagsToLocationsAsync"/> to establish tag relationships.
+    /// Logs the number and names of newly seeded locations.
+    /// </remarks>
     private static async Task SeedDefaultLocationsAsync(ApplicationDbContext context, ILogger logger)
     {
         // Get existing location names
@@ -99,6 +151,17 @@ public static class DbSeeder
         await AssignDefaultTagsToLocationsAsync(context, logger);
     }
 
+    /// <summary>
+    /// Assigns default tags to their associated locations based on the <see cref="DefaultLocations"/> configuration.
+    /// </summary>
+    /// <param name="context">The database context containing locations and tags.</param>
+    /// <param name="logger">Logger for recording tag assignment operations.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <remarks>
+    /// Establishes many-to-many relationships between locations and tags.
+    /// Only creates relationships that don't already exist, making this operation idempotent.
+    /// Logs the number of new tag assignments created.
+    /// </remarks>
     private static async Task AssignDefaultTagsToLocationsAsync(ApplicationDbContext context, ILogger logger)
     {
         // Load all locations and tags with their relationships

@@ -211,19 +211,20 @@ Key requirements:
 
 ## Technology Stack
 
-- **.NET 8** - Cross-platform runtime
+- **.NET 9** - Cross-platform runtime
 - **Blazor Server** - Interactive web UI
 - **MudBlazor** - Material Design component library
 - **EPPlus** - Excel parsing
 - **PDFsharp + MigraDoc** - PDF generation
 - **Entity Framework Core** - SQLite database for persistence
 - **Serilog** - Structured logging
+- **Playwright** - Browser automation for E2E testing
 
 ## Development
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.net/download/dotnet/8.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 
 ### Build
 
@@ -243,17 +244,15 @@ Run only unit tests (faster, no browser required):
 dotnet test --filter "FullyQualifiedName!~E2ETests"
 ```
 
-Run only E2E tests (requires app to be running):
+Run only E2E tests:
 ```bash
-# Terminal 1: Start the app
-cd WinterAdventurer
-dotnet run  # Note the port (usually 5004 for dev, 5000 for production)
-
-# Terminal 2: Run E2E tests (set E2E_BASE_URL to match your app's port)
-E2E_BASE_URL=http://localhost:5004 dotnet test --filter "FullyQualifiedName~E2ETests"
+dotnet test --filter "FullyQualifiedName~E2ETests"
 ```
 
-**Note:** E2E tests require Playwright browsers to be installed. See `WinterAdventurer.E2ETests/README.md` for setup instructions.
+**Note:**
+- E2E tests automatically start and stop the web server - no manual setup required
+- E2E tests require Playwright browsers to be installed. See `WinterAdventurer.E2ETests/README.md` for setup instructions
+- Unit tests run in CI; E2E tests run locally only
 
 ### Project Structure
 
@@ -297,4 +296,4 @@ Contributions welcome! Please open an issue or submit a pull request.
 
 ---
 
-Built for [ECRS](https://ecrs.org) Winter Adventure events using .NET 8, Blazor, and Claude Code.
+Built for [ECRS](https://ecrs.org) Winter Adventure events using .NET 9, Blazor, and Claude Code.

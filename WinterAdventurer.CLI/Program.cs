@@ -174,6 +174,13 @@ catch (Exception ex)
 
 // Helper methods and DTOs
 
+/// <summary>
+/// Loads and validates timeslot configuration from a JSON file.
+/// Ensures all period timeslots have configured times and no overlaps exist.
+/// </summary>
+/// <param name="timeslotsPath">Path to the JSON file containing timeslot definitions.</param>
+/// <returns>A validated list of TimeSlot objects ready for PDF generation.</returns>
+/// <exception cref="System.Environment.Exit">Exits with code 1 if file doesn't exist, JSON is invalid, or validation fails.</exception>
 static List<TimeSlot> LoadTimeslots(string timeslotsPath)
 {
     Console.WriteLine($"\nLoading timeslots from: {timeslotsPath}");
@@ -258,16 +265,47 @@ static List<TimeSlot> LoadTimeslots(string timeslotsPath)
     }
 }
 
+/// <summary>
+/// Represents the root structure of a timeslots JSON configuration file.
+/// Used for deserializing JSON into strongly-typed objects for CLI processing.
+/// </summary>
 class TimeslotFileFormat
 {
+    /// <summary>
+    /// Gets or sets the collection of timeslot definitions.
+    /// </summary>
     public List<TimeslotDto>? Timeslots { get; set; }
 }
 
+/// <summary>
+/// Data transfer object for a single timeslot definition in JSON format.
+/// Used during CLI JSON deserialization before conversion to Library TimeSlot model.
+/// </summary>
 class TimeslotDto
 {
+    /// <summary>
+    /// Gets or sets the unique identifier for this timeslot. Auto-generated if not provided.
+    /// </summary>
     public string? Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the display label (e.g., "Morning First Period", "Lunch").
+    /// </summary>
     public string? Label { get; set; }
+
+    /// <summary>
+    /// Gets or sets the start time of this timeslot.
+    /// </summary>
     public TimeSpan? StartTime { get; set; }
+
+    /// <summary>
+    /// Gets or sets the end time of this timeslot.
+    /// </summary>
     public TimeSpan? EndTime { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this timeslot represents a workshop period.
+    /// Period timeslots must have both StartTime and EndTime configured.
+    /// </summary>
     public bool IsPeriod { get; set; }
 }

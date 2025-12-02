@@ -1,12 +1,31 @@
 namespace WinterAdventurer.Library.Models
 {
+    /// <summary>
+    /// Represents the duration of a workshop within a multi-day event.
+    /// Workshops can run for the full event (e.g., days 1-4) or partial event (e.g., days 1-2, days 3-4).
+    /// </summary>
     public class WorkshopDuration
     {
+        /// <summary>
+        /// Gets or sets the first day of the workshop (1-based indexing).
+        /// </summary>
         public int StartDay { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last day of the workshop (1-based indexing, inclusive).
+        /// </summary>
         public int EndDay { get; set; }
 
+        /// <summary>
+        /// Gets the total number of days the workshop runs.
+        /// Calculated as (EndDay - StartDay + 1).
+        /// </summary>
         public int NumberOfDays => EndDay - StartDay + 1;
 
+        /// <summary>
+        /// Gets a human-readable description of the workshop duration.
+        /// Returns "Day X" for single-day workshops or "Days X-Y" for multi-day workshops.
+        /// </summary>
         public string Description => NumberOfDays == 1
             ? $"Day {StartDay}"
             : $"Days {StartDay}-{EndDay}";
