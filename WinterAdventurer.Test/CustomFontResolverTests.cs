@@ -195,9 +195,9 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0, "Font byte array should not be empty");
+            Assert.IsNotEmpty(result, "Font byte array should not be empty");
             // TTF files typically start with specific byte sequences
-            Assert.IsTrue(result.Length > 100, "Font file should be reasonably sized");
+            Assert.IsGreaterThan(result.Length, 100, "Font file should be reasonably sized");
         }
 
         [TestMethod]
@@ -208,7 +208,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0);
+            Assert.IsNotEmpty(result);
         }
 
         [TestMethod]
@@ -219,7 +219,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0);
+            Assert.IsNotEmpty(result);
         }
 
         [TestMethod]
@@ -230,7 +230,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0);
+            Assert.IsNotEmpty(result);
         }
 
         [TestMethod]
@@ -241,7 +241,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0);
+            Assert.IsNotEmpty(result);
         }
 
         [TestMethod]
@@ -252,7 +252,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0);
+            Assert.IsNotEmpty(result);
         }
 
         [TestMethod]
@@ -273,7 +273,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Length > 0);
+            Assert.IsNotEmpty(result);
         }
 
         #endregion

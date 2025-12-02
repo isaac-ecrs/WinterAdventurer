@@ -86,7 +86,7 @@ namespace WinterAdventurer.Test.Components
 
             // Assert
             var participantText = cut.Find("p:contains('Participants')");
-            Assert.IsTrue(participantText.TextContent.Contains("2 Participants"));
+            Assert.Contains(participantText.TextContent, "2 Participants");
         }
 
         [TestMethod]
@@ -129,10 +129,10 @@ namespace WinterAdventurer.Test.Components
 
             // Assert - Second workshop should NOT have special IDs
             var locationDivs = cut.FindAll("#first-workshop-location");
-            Assert.AreEqual(0, locationDivs.Count, "Non-first workshop should not have #first-workshop-location ID");
+            Assert.IsEmpty(locationDivs, "Non-first workshop should not have #first-workshop-location ID");
 
             var leaderDivs = cut.FindAll("#first-workshop-leader");
-            Assert.AreEqual(0, leaderDivs.Count, "Non-first workshop should not have #first-workshop-leader ID");
+            Assert.IsEmpty(leaderDivs, "Non-first workshop should not have #first-workshop-leader ID");
         }
 
         [TestMethod]

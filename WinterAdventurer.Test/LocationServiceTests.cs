@@ -142,7 +142,7 @@ namespace WinterAdventurer.Test
 
             // Verify only one location in database
             var count = await context.Locations.CountAsync();
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(1, (await context.Locations.ToListAsync()).Count);
         }
 
         [TestMethod]
@@ -300,7 +300,7 @@ namespace WinterAdventurer.Test
 
             // Verify only one mapping exists
             var count = await context.WorkshopLocationMappings.CountAsync();
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(1, (await context.WorkshopLocationMappings.ToListAsync()).Count);
         }
 
         [TestMethod]
@@ -497,7 +497,7 @@ namespace WinterAdventurer.Test
 
             // Verify only one timeslot exists
             var count = await context.TimeSlots.CountAsync();
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(1, (await context.TimeSlots.ToListAsync()).Count);
         }
 
         [TestMethod]
@@ -561,7 +561,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             var count = await context.TimeSlots.CountAsync();
-            Assert.AreEqual(0, count);
+            Assert.AreEqual(0, (await context.TimeSlots.ToListAsync()).Count);
         }
 
         [TestMethod]

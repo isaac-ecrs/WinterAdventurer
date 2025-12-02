@@ -167,9 +167,9 @@ namespace WinterAdventurer.Test
             var aliceIndex = normalizedText.IndexOf("AliceAdams", StringComparison.OrdinalIgnoreCase);
             var bobIndex = normalizedText.IndexOf("BobBaker", StringComparison.OrdinalIgnoreCase);
 
-            Assert.IsTrue(aliceIndex > 0, "Alice Adams should appear in PDF");
-            Assert.IsTrue(bobIndex > 0, "Bob Baker should appear in PDF");
-            Assert.IsTrue(aliceIndex < bobIndex, "Alice Adams should appear before Bob Baker (sorted by last name)");
+            Assert.IsGreaterThan(aliceIndex, 0, "Alice Adams should appear in PDF");
+            Assert.IsGreaterThan(bobIndex, 0, "Bob Baker should appear in PDF");
+            Assert.IsLessThan(aliceIndex, bobIndex, "Alice Adams should appear before Bob Baker (sorted by last name)");
         }
 
         [TestMethod]
@@ -272,7 +272,7 @@ namespace WinterAdventurer.Test
 
             // Assert - Check for images on first page (logo should be there)
             int imageCount = PdfTestHelper.CountImages(pdfBytes, pageNumber: 1);
-            Assert.IsTrue(imageCount > 0, "First page should contain at least one image (logo)");
+            Assert.IsGreaterThan(imageCount, 0, "First page should contain at least one image (logo)");
         }
 
         #endregion
@@ -306,7 +306,7 @@ namespace WinterAdventurer.Test
 
             // Assert - PDF should have pages for blank schedules
             int pageCount = PdfTestHelper.GetPageCount(pdfBytes);
-            Assert.IsTrue(pageCount >= blankScheduleCount,
+            Assert.IsGreaterThanOrEqualTo(pageCount, blankScheduleCount,
                 $"PDF should have at least {blankScheduleCount} pages for blank schedules");
         }
 
