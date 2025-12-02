@@ -21,12 +21,35 @@ using Microsoft.Extensions.Logging;
 
 namespace WinterAdventurer.Library
 {
+    /// <summary>
+    /// Main entry point for Excel import and PDF generation in the WinterAdventurer system.
+    /// Provides comprehensive functionality for parsing workshop registration data from Excel files
+    /// and generating class rosters, individual schedules, and master schedules as PDF documents.
+    /// Uses a schema-driven architecture where Excel column mappings are defined in JSON configuration files.
+    /// </summary>
     public class ExcelUtilities
     {
+        /// <summary>
+        /// Collection of all workshops parsed from the Excel file.
+        /// Each workshop is uniquely identified by the combination of Period, Name, Leader, and Duration.
+        /// Populated by calling <see cref="ImportExcel"/> or <see cref="ParseWorkshops"/>.
+        /// </summary>
         public List<Workshop> Workshops = new List<Workshop>();
+
+        /// <summary>
+        /// Event schema configuration loaded from embedded JSON resource.
+        /// Defines Excel column mappings and workshop parsing rules for the event.
+        /// </summary>
         private EventSchema? _schema;
+
+        /// <summary>
+        /// Logger instance for diagnostic information, warnings, and error reporting during Excel parsing and PDF generation.
+        /// </summary>
         private readonly ILogger<ExcelUtilities> _logger;
 
+        /// <summary>
+        /// Standard black color used throughout PDF document generation.
+        /// </summary>
         readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
 
         public ExcelUtilities(ILogger<ExcelUtilities> logger)
