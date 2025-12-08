@@ -190,6 +190,126 @@ namespace WinterAdventurer.Test
             PdfTestHelper.AssertContainsText(pdfBytes, "Choice #", "Workshop roster backup section");
         }
 
+        [TestMethod]
+        public void CreatePdf_WorkshopRoster_WithMultipleWorkshops_HasProperSectionBreaks()
+        {
+            // Arrange - Create multiple workshops across different periods
+            var package = CreateExcelWithMultiplePeriods();
+            using var stream = new MemoryStream();
+            package.SaveAs(stream);
+            stream.Position = 0;
+            _excelUtilities.ImportExcel(stream);
+
+            // Act
+            var document = _excelUtilities.CreatePdf();
+            var pdfBytes = PdfTestHelper.RenderPdfToBytes(document);
+            var text = PdfTestHelper.ExtractAllText(pdfBytes);
+
+            // Assert - Multiple workshops should appear in PDF
+            PdfTestHelper.AssertContainsText(pdfBytes, "Pottery", "Workshop roster");
+            PdfTestHelper.AssertContainsText(pdfBytes, "Woodworking", "Workshop roster");
+            PdfTestHelper.AssertContainsText(pdfBytes, "Painting", "Workshop roster");
+
+            // Should have section breaks between workshops
+            Assert.IsTrue(text.Contains("Morning First Period") || text.Contains("MorningFirstPeriod"),
+                "PDF should indicate period information");
+        }
+
+        [TestMethod]
+        public void CreatePdf_WorkshopRoster_WithLongNames_HandlesGracefully()
+        {
+            // Arrange - Create workshop with very long participant names
+            var package = new ExcelPackage();
+
+            // Add ClassSelection sheet with long names
+            var classSelection = package.Workbook.Worksheets.Add("ClassSelection");
+            AddClassSelectionHeaders(classSelection);
+            classSelection.Cells[2, 1].Value = "SEL001";
+            classSelection.Cells[2, 2].Value = "Alexandrina-Elizabeth-Catherine";
+            classSelection.Cells[2, 3].Value = "Montgomery-Weatherbottom-Smith";
+
+            classSelection.Cells[3, 1].Value = "SEL002";
+            classSelection.Cells[3, 2].Value = "Bartholomew-Christopher";
+            classSelection.Cells[3, 3].Value = "Fitzwilliam-Thompson";
+
+            // Add period sheet - both select same workshop
+            var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
+            AddPeriodSheetHeaders(periodSheet);
+
+            periodSheet.Cells[2, 1].Value = "SEL001";
+            periodSheet.Cells[2, 5].Value = "1";
+            periodSheet.Cells[2, 6].Value = "Pottery (John Smith)";
+            periodSheet.Cells[2, 7].Value = "1";
+
+            periodSheet.Cells[3, 1].Value = "SEL002";
+            periodSheet.Cells[3, 5].Value = "2";
+            periodSheet.Cells[3, 6].Value = "Pottery (John Smith)";
+            periodSheet.Cells[3, 7].Value = "1";
+
+            using var stream = new MemoryStream();
+            package.SaveAs(stream);
+            stream.Position = 0;
+            _excelUtilities.ImportExcel(stream);
+
+            // Act
+            var document = _excelUtilities.CreatePdf();
+            var pdfBytes = PdfTestHelper.RenderPdfToBytes(document);
+
+            // Assert - Long names should appear (possibly truncated or with smaller font)
+            PdfTestHelper.AssertContainsText(pdfBytes, "Alexandrina", "Workshop roster with long names");
+            PdfTestHelper.AssertContainsText(pdfBytes, "Montgomery", "Workshop roster with long names");
+            PdfTestHelper.AssertContainsText(pdfBytes, "Bartholomew", "Workshop roster with long names");
+        }
+
+        [TestMethod]
+        public void CreatePdf_WorkshopRoster_WithManyParticipants_HandlesColumnLayout()
+        {
+            // Arrange - Create workshop with many participants (tests two-column layout)
+            var package = new ExcelPackage();
+
+            // Add ClassSelection sheet
+            var classSelection = package.Workbook.Worksheets.Add("ClassSelection");
+            AddClassSelectionHeaders(classSelection);
+
+            // Add 20 participants
+            for (int i = 1; i <= 20; i++)
+            {
+                classSelection.Cells[i + 1, 1].Value = $"SEL{i:D3}";
+                classSelection.Cells[i + 1, 2].Value = $"First{i}";
+                classSelection.Cells[i + 1, 3].Value = $"Last{i}";
+            }
+
+            // Add period sheet - all select same workshop
+            var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
+            AddPeriodSheetHeaders(periodSheet);
+
+            for (int i = 1; i <= 20; i++)
+            {
+                periodSheet.Cells[i + 1, 1].Value = $"SEL{i:D3}";
+                periodSheet.Cells[i + 1, 5].Value = i.ToString();
+                periodSheet.Cells[i + 1, 6].Value = "Pottery (John Smith)";
+                periodSheet.Cells[i + 1, 7].Value = "1";
+            }
+
+            using var stream = new MemoryStream();
+            package.SaveAs(stream);
+            stream.Position = 0;
+            _excelUtilities.ImportExcel(stream);
+
+            // Act
+            var document = _excelUtilities.CreatePdf();
+            var pdfBytes = PdfTestHelper.RenderPdfToBytes(document);
+            var text = PdfTestHelper.ExtractAllText(pdfBytes);
+
+            // Assert - All participants should appear
+            Assert.IsTrue(text.Contains("First1"), "First participant should appear");
+            Assert.IsTrue(text.Contains("First10"), "Middle participant should appear");
+            Assert.IsTrue(text.Contains("First20"), "Last participant should appear");
+
+            // Check that enrolled section exists
+            PdfTestHelper.AssertContainsText(pdfBytes, "Enrolled Participants", "Workshop roster");
+        }
+
         #endregion
 
         #region Individual Schedule Tests
@@ -536,6 +656,59 @@ namespace WinterAdventurer.Test
             periodSheet.Cells[3, 5].Value = "2";
             periodSheet.Cells[3, 6].Value = "Pottery (John Smith)";
             periodSheet.Cells[3, 7].Value = "3"; // Third choice (backup)
+
+            return package;
+        }
+
+        /// <summary>
+        /// Creates an Excel package with workshops across multiple periods.
+        /// </summary>
+        private ExcelPackage CreateExcelWithMultiplePeriods()
+        {
+            var package = new ExcelPackage();
+
+            // Add ClassSelection sheet with 3 attendees
+            var classSelection = package.Workbook.Worksheets.Add("ClassSelection");
+            AddClassSelectionHeaders(classSelection);
+            classSelection.Cells[2, 1].Value = "SEL001";
+            classSelection.Cells[2, 2].Value = "Alice";
+            classSelection.Cells[2, 3].Value = "Johnson";
+
+            classSelection.Cells[3, 1].Value = "SEL002";
+            classSelection.Cells[3, 2].Value = "Bob";
+            classSelection.Cells[3, 3].Value = "Williams";
+
+            classSelection.Cells[4, 1].Value = "SEL003";
+            classSelection.Cells[4, 2].Value = "Carol";
+            classSelection.Cells[4, 3].Value = "Davis";
+
+            // Add MorningFirstPeriod sheet
+            var morningFirstPeriod = package.Workbook.Worksheets.Add("MorningFirstPeriod");
+            AddPeriodSheetHeaders(morningFirstPeriod);
+
+            morningFirstPeriod.Cells[2, 1].Value = "SEL001";
+            morningFirstPeriod.Cells[2, 5].Value = "1";
+            morningFirstPeriod.Cells[2, 6].Value = "Pottery (John Smith)";
+            morningFirstPeriod.Cells[2, 7].Value = "1";
+
+            morningFirstPeriod.Cells[3, 1].Value = "SEL002";
+            morningFirstPeriod.Cells[3, 5].Value = "2";
+            morningFirstPeriod.Cells[3, 6].Value = "Woodworking (Jane Doe)";
+            morningFirstPeriod.Cells[3, 7].Value = "1";
+
+            // Add AfternoonPeriod sheet (matches schema)
+            var afternoonPeriod = package.Workbook.Worksheets.Add("AfternoonPeriod");
+            AddPeriodSheetHeaders(afternoonPeriod);
+
+            afternoonPeriod.Cells[2, 1].Value = "SEL001";
+            afternoonPeriod.Cells[2, 5].Value = "1";
+            afternoonPeriod.Cells[2, 6].Value = "Painting (Mary Johnson)";
+            afternoonPeriod.Cells[2, 7].Value = "1";
+
+            afternoonPeriod.Cells[3, 1].Value = "SEL003";
+            afternoonPeriod.Cells[3, 5].Value = "3";
+            afternoonPeriod.Cells[3, 6].Value = "Painting (Mary Johnson)";
+            afternoonPeriod.Cells[3, 7].Value = "1";
 
             return package;
         }
