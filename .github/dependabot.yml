@@ -1,0 +1,40 @@
+version: 2
+updates:
+  # NuGet package updates
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Ignore major version updates initially
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    reviewers:
+      - "isaac-ecrs"
+    assignees:
+      - "isaac-ecrs"
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "ci-cd"
+      - "automated"
