@@ -25,19 +25,19 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Unit Tests with Coverage
-      run: dotnet test --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~E2ETests" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./coverage/
+      run: dotnet test --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~E2ETests" --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: ./WinterAdventurer.Test/coverage/coverage.cobertura.xml
+        files: ./TestResults/*/coverage.cobertura.xml
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Generate Coverage Summary
       uses: irongut/CodeCoverageSummary@v1.3.0
       with:
-        filename: ./WinterAdventurer.Test/coverage/coverage.cobertura.xml
+        filename: ./TestResults/*/coverage.cobertura.xml
         badge: true
         format: markdown
         output: both
