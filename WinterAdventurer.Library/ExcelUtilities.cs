@@ -430,11 +430,12 @@ namespace WinterAdventurer.Library
 
         /// <summary>
         /// Creates a comprehensive PDF document containing workshop rosters and individual participant schedules.
-        /// Optionally includes blank schedules for walk-in participants.
+        /// Optionally includes blank schedules for attendees that did not pre-register for classes.
         /// </summary>
-        /// <param name="mergeWorkshopCells">Whether to merge cells for multi-day workshops in individual schedules.</param>
+        /// <param name="mergeWorkshopCells">Whether to merge cells for multi-day workshops in individual schedules.
+        ///                                  Otherwise they are repeated for each day on the schedule.</param>
         /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
-        /// <param name="blankScheduleCount">Number of blank schedule pages to append for walk-in participants.</param>
+        /// <param name="blankScheduleCount">Number of blank schedule pages to append for attendees that did not pre-register for classes.</param>
         /// <param name="eventName">Name of the event displayed in PDF headers and footers.</param>
         /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
         public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
@@ -450,7 +451,7 @@ namespace WinterAdventurer.Library
 
         /// <summary>
         /// Creates a master schedule PDF showing all workshops organized by location, time, and days.
-        /// Useful for event staff to see the complete workshop schedule at a glance.
+        /// Intended to be posted at the site for attendees to reference in addition to their personal schedules.
         /// </summary>
         /// <param name="eventName">Name of the event displayed in PDF title.</param>
         /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
