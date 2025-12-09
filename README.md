@@ -211,7 +211,7 @@ Key requirements:
 
 ## Technology Stack
 
-- **.NET 9** - Cross-platform runtime
+- **.NET 10** - Cross-platform runtime
 - **Blazor Server** - Interactive web UI
 - **MudBlazor** - Material Design component library
 - **EPPlus** - Excel parsing
@@ -224,7 +224,7 @@ Key requirements:
 
 ### Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ### Build
 
@@ -296,4 +296,4 @@ Contributions welcome! Please open an issue or submit a pull request.
 
 ---
 
-Built for [ECRS](https://ecrs.org) Winter Adventure events using .NET 9, Blazor, and Claude Code.
+Built for [ECRS](https://ecrs.org) Winter Adventure events using .NET 10, Blazor, and Claude Code.

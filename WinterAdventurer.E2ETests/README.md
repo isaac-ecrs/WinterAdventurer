@@ -18,12 +18,12 @@ If `playwright` command is not found, use PowerShell (Windows) or install Playwr
 
 **Windows (PowerShell):**
 ```powershell
-pwsh bin/Debug/net9.0/playwright.ps1 install
+pwsh bin/Debug/net10.0/playwright.ps1 install
 ```
 
 **Linux/Mac:**
 ```bash
-pwsh bin/Debug/net9.0/playwright.ps1 install
+pwsh bin/Debug/net10.0/playwright.ps1 install
 ```
 
 Or install globally:
