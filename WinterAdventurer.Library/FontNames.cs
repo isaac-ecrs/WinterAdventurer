@@ -8,7 +8,7 @@ namespace WinterAdventurer.Library
     {
         /// <summary>
         /// Noto Sans font family - clean, readable sans-serif font
-        /// Used for body text, headers, and general content
+        /// Used for body text, subheaders, and general content
         /// </summary>
         public const string NotoSans = "NotoSans";
 

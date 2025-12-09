@@ -43,7 +43,7 @@ namespace WinterAdventurer.Library.Services
         /// <param name="eventName">Name of the event displayed in PDF headers and footers.</param>
         /// <param name="mergeWorkshopCells">Whether to merge table cells for multi-day workshops in individual schedules.</param>
         /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots.</param>
-        /// <param name="blankScheduleCount">Number of blank schedule pages to append for walk-in participants.</param>
+        /// <param name="blankScheduleCount">Number of blank schedule pages to append.</param>
         /// <returns>MigraDoc Document ready for rendering, or null if workshops collection is empty.</returns>
         public Document? CreateWorkshopAndSchedulePdf(
             List<Workshop> workshops,

@@ -41,6 +41,7 @@ namespace WinterAdventurer.Library.Services
         /// <param name="mergeWorkshopCells">Whether to merge table cells for multi-day workshops to show continuity.</param>
         /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
         /// <returns>List of MigraDoc Section objects, one per participant.</returns>
+        /// @TODO: break this up to smaller methods
         public List<Section> GenerateIndividualSchedules(
             List<Workshop> workshops,
             string eventName,
@@ -353,7 +354,7 @@ namespace WinterAdventurer.Library.Services
         }
 
         /// <summary>
-        /// Generates blank schedule templates for walk-in participants who register on-site.
+        /// Generates blank schedule templates for attendees who did not preregister for classes.
         /// Each schedule includes a name field and empty master schedule grid to be filled in manually.
         /// </summary>
         /// <param name="workshops">List of workshops with locations (used to generate location columns in blank schedule).</param>

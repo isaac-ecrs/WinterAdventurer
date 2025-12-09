@@ -4,7 +4,6 @@ namespace WinterAdventurer.Library
 {
     /// <summary>
     /// Centralized constants for PDF layout and formatting.
-    /// Replaces magic numbers throughout the codebase to improve maintainability.
     /// </summary>
     public static class PdfLayoutConstants
     {
