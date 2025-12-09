@@ -1,100 +1,34 @@
-﻿using System.Collections;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using OfficeOpenXml;
+using WinterAdventurer.Library.EventSchemas;
+using WinterAdventurer.Library.Exceptions;
 using WinterAdventurer.Library.Extensions;
 using WinterAdventurer.Library.Models;
-using WinterAdventurer.Library.EventSchemas;
-using WinterAdventurer.Library.Services;
-using WinterAdventurer.Library.Exceptions;
-using MigraDoc;
-using MigraDoc.DocumentObjectModel;
-using MigraDoc.DocumentObjectModel.Tables;
-using MigraDoc.DocumentObjectModel.Shapes;
-using System.Data.Common;
-using System.Xml;
-using PdfSharp.Fonts;
-using System.Diagnostics;
-using MigraDoc.DocumentObjectModel.Visitors;
-using PdfSharp.Pdf;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
 
-namespace WinterAdventurer.Library
+namespace WinterAdventurer.Library.Services
 {
     /// <summary>
-    /// Main entry point for Excel import and PDF generation in the WinterAdventurer system.
-    /// Provides comprehensive functionality for parsing workshop registration data from Excel files
-    /// and generating class rosters, individual schedules, and master schedules as PDF documents.
-    /// Uses a schema-driven architecture where Excel column mappings are defined in JSON configuration files.
-    ///
-    /// NOTE: This class now acts as a facade, delegating to specialized service classes while maintaining
-    /// backward compatibility with existing code. For new code, consider using the service classes directly:
-    /// - ExcelParser for Excel import
-    /// - PdfDocumentOrchestrator for PDF generation
+    /// Parses Excel files containing workshop registration data using schema-driven configuration.
+    /// Extracts attendees and workshop selections from structured Excel exports.
     /// </summary>
-    public class ExcelUtilities
+    public class ExcelParser
     {
-        /// <summary>
-        /// Collection of all workshops parsed from the Excel file.
-        /// Each workshop is uniquely identified by the combination of Period, Name, Leader, and Duration.
-        /// Populated by calling <see cref="ImportExcel"/> or <see cref="ParseWorkshops"/>.
-        /// </summary>
-        public List<Workshop> Workshops = new List<Workshop>();
-
-        /// <summary>
-        /// Event schema configuration loaded from embedded JSON resource.
-        /// Defines Excel column mappings and workshop parsing rules for the event.
-        /// </summary>
+        private readonly ILogger<ExcelParser> _logger;
         private EventSchema? _schema;
 
         /// <summary>
-        /// Logger instance for diagnostic information, warnings, and error reporting during Excel parsing and PDF generation.
+        /// Initializes a new instance of the ExcelParser class.
         /// </summary>
-        private readonly ILogger<ExcelUtilities> _logger;
-
-        /// <summary>
-        /// Excel parser service for importing workshop data from Excel files.
-        /// </summary>
-        private readonly ExcelParser _excelParser;
-
-        /// <summary>
-        /// PDF document orchestrator for coordinating PDF generation across multiple generators.
-        /// </summary>
-        private readonly PdfDocumentOrchestrator _pdfOrchestrator;
-
-        /// <summary>
-        /// Standard black color used throughout PDF document generation.
-        /// </summary>
-        readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
-
-        public ExcelUtilities(ILogger<ExcelUtilities> logger)
+        /// <param name="logger">Logger for diagnostic output.</param>
+        public ExcelParser(ILogger<ExcelParser> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            GlobalFontSettings.FontResolver = new CustomFontResolver();
-
-            // Load schema for service dependencies
-            _schema = LoadEventSchema();
-
-            // Create service dependencies
-            var excelParserLogger = new LoggerFactory().CreateLogger<ExcelParser>();
-            _excelParser = new ExcelParser(excelParserLogger);
-
-            var rosterLogger = new LoggerFactory().CreateLogger<WorkshopRosterGenerator>();
-            var rosterGenerator = new WorkshopRosterGenerator(rosterLogger);
-
-            var scheduleLogger = new LoggerFactory().CreateLogger<IndividualScheduleGenerator>();
-            var masterScheduleLogger = new LoggerFactory().CreateLogger<MasterScheduleGenerator>();
-            var masterScheduleGenerator = new MasterScheduleGenerator(_schema, masterScheduleLogger);
-            var scheduleGenerator = new IndividualScheduleGenerator(_schema, masterScheduleGenerator, scheduleLogger);
-
-            var orchestratorLogger = new LoggerFactory().CreateLogger<PdfDocumentOrchestrator>();
-            _pdfOrchestrator = new PdfDocumentOrchestrator(
-                rosterGenerator,
-                scheduleGenerator,
-                masterScheduleGenerator,
-                orchestratorLogger);
         }
 
         /// <summary>
@@ -111,7 +45,11 @@ namespace WinterAdventurer.Library
             {
                 if (stream == null)
                 {
-                    throw new FileNotFoundException($"Could not find embedded resource: {resourceName}");
+                    throw new MissingResourceException($"Could not find embedded resource: {resourceName}")
+                    {
+                        ResourceName = resourceName,
+                        Section = "SchemaLoading"
+                    };
                 }
 
                 using (StreamReader reader = new StreamReader(stream))
@@ -120,7 +58,10 @@ namespace WinterAdventurer.Library
                     var schema = JsonConvert.DeserializeObject<EventSchema>(json);
                     if (schema == null)
                     {
-                        throw new InvalidDataException("Failed to deserialize event schema");
+                        throw new SchemaValidationException("Failed to deserialize event schema")
+                        {
+                            SchemaName = resourceName
+                        };
                     }
                     return schema;
                 }
@@ -128,30 +69,47 @@ namespace WinterAdventurer.Library
         }
 
         /// <summary>
-        /// Imports workshop registration data from an Excel file stream.
-        /// Parses attendee information and workshop selections, populating the Workshops collection.
+        /// Parses workshops from an Excel file stream.
         /// </summary>
         /// <param name="stream">Excel file stream to import. Stream will be reset to position 0.</param>
-        public void ImportExcel(Stream stream)
+        /// <returns>List of parsed Workshop objects with associated participant selections.</returns>
+        public List<Workshop> ParseFromStream(Stream stream)
         {
             try
             {
-                // Delegate to ExcelParser service
-                Workshops = _excelParser.ParseFromStream(stream);
-                _logger.LogInformation("Excel import completed successfully via ExcelParser, {Count} workshops parsed", Workshops.Count);
+                ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
+
+                if (stream == null || stream.Length == 0)
+                {
+                    throw new ExcelParsingException("Excel file stream is empty or null");
+                }
+
+                stream.Position = 0;
+
+                _logger.LogInformation("Starting Excel import, stream size: {Size} bytes", stream.Length);
+
+                using (var package = new ExcelPackage(stream))
+                {
+                    if (package.Workbook.Worksheets.Count == 0)
+                    {
+                        throw new ExcelParsingException("Excel file contains no worksheets");
+                    }
+
+                    _logger.LogDebug("Excel package loaded with {Count} worksheets", package.Workbook.Worksheets.Count);
+                    var workshops = ParseWorkshops(package);
+                    _logger.LogInformation("Excel import completed successfully, {Count} workshops parsed", workshops.Count);
+                    return workshops;
+                }
             }
-            catch (ExcelParsingException ex)
+            catch (ExcelParsingException)
             {
-                _logger.LogError(ex, "Failed to import Excel file");
-                // Double-wrap to maintain backward compatibility with old exception structure
-                // Old code: InvalidOperationException -> InvalidOperationException -> underlying exception
-                var innerException = new InvalidOperationException(ex.Message, ex);
-                throw new InvalidOperationException("Failed to import Excel file. Please verify the file format matches the expected schema.", innerException);
+                // Re-throw our custom exceptions
+                throw;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to import Excel file");
-                throw new InvalidOperationException("Failed to import Excel file. Please verify the file format matches the expected schema.", ex);
+                throw new ExcelParsingException("Failed to import Excel file. Please verify the file format matches the expected schema.", ex);
             }
         }
 
@@ -163,8 +121,46 @@ namespace WinterAdventurer.Library
         /// <param name="outputPath">File path where JSON schema dump will be written.</param>
         public void DumpExcelSchema(Stream stream, string outputPath)
         {
-            // Delegate to ExcelParser service
-            _excelParser.DumpExcelSchema(stream, outputPath);
+            ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
+            stream.Position = 0;
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var schema = new
+                {
+                    WorksheetCount = package.Workbook.Worksheets.Count,
+                    Worksheets = package.Workbook.Worksheets.Select(ws =>
+                    {
+                        var headers = ws.Dimension != null
+                            ? Enumerable.Range(1, ws.Dimension.Columns)
+                                .Select(i => new { Column = i, Value = ws.Cells[1, i].Value?.ToString() })
+                                .Cast<object>()
+                                .ToList()
+                            : new List<object>();
+
+                        var sampleRow = ws.Dimension != null
+                            ? Enumerable.Range(1, ws.Dimension.Columns)
+                                .Select(i => new { Column = i, Value = ws.Cells[2, i].Value?.ToString() })
+                                .Cast<object>()
+                                .ToList()
+                            : new List<object>();
+
+                        return new
+                        {
+                            Name = ws.Name,
+                            Dimensions = ws.Dimension?.Address,
+                            RowCount = ws.Dimension?.Rows,
+                            ColumnCount = ws.Dimension?.Columns,
+                            Headers = headers,
+                            SampleRow = sampleRow
+                        };
+                    }).ToList()
+                };
+
+                var json = JsonConvert.SerializeObject(schema, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(outputPath, json);
+                _logger.LogInformation("Excel schema written to: {OutputPath}", outputPath);
+            }
         }
 
         /// <summary>
@@ -173,7 +169,7 @@ namespace WinterAdventurer.Library
         /// </summary>
         /// <param name="package">EPPlus ExcelPackage containing workshop registration data.</param>
         /// <returns>List of Workshop objects with associated participant selections.</returns>
-        public List<Workshop> ParseWorkshops(ExcelPackage package)
+        private List<Workshop> ParseWorkshops(ExcelPackage package)
         {
             try
             {
@@ -209,10 +205,15 @@ namespace WinterAdventurer.Library
                 _logger.LogInformation("Total workshops parsed: {Count}", allWorkshops.Count);
                 return allWorkshops;
             }
+            catch (ExcelParsingException)
+            {
+                // Re-throw our custom exceptions
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to parse workshops from Excel package");
-                throw new InvalidOperationException("Failed to parse workshops. Please verify the Excel file structure matches the expected schema.", ex);
+                throw new ExcelParsingException("Failed to parse workshops. Please verify the Excel file structure matches the expected schema.", ex);
             }
         }
 
@@ -234,10 +235,15 @@ namespace WinterAdventurer.Library
 
                 if (sheet == null)
                 {
-                    var availableSheets = string.Join(", ", package.Workbook.Worksheets.Select(ws => ws.Name));
+                    var availableSheets = package.Workbook.Worksheets.Select(ws => ws.Name).ToList();
                     _logger.LogWarning("ClassSelection sheet '{SheetName}' not found. Available sheets: {AvailableSheets}",
-                        sheetConfig.SheetName, availableSheets);
-                    throw new InvalidDataException($"Required sheet '{sheetConfig.SheetName}' not found in Excel file. Available sheets: {availableSheets}");
+                        sheetConfig.SheetName, string.Join(", ", availableSheets));
+
+                    throw new MissingSheetException($"Required sheet '{sheetConfig.SheetName}' not found in Excel file.")
+                    {
+                        SheetName = sheetConfig.SheetName,
+                        AvailableSheets = availableSheets
+                    };
                 }
 
                 if (sheet.Dimension == null)
@@ -289,10 +295,18 @@ namespace WinterAdventurer.Library
 
                 return attendees;
             }
+            catch (MissingSheetException)
+            {
+                // Re-throw our custom exception
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load attendees from ClassSelection sheet");
-                throw new InvalidOperationException("Failed to load attendees. Please verify the ClassSelection sheet structure.", ex);
+                throw new ExcelParsingException("Failed to load attendees. Please verify the ClassSelection sheet structure.", ex)
+                {
+                    SheetName = schema.ClassSelectionSheet.SheetName
+                };
             }
         }
 
@@ -424,44 +438,11 @@ namespace WinterAdventurer.Library
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to collect workshops from sheet {SheetName}", sheet.Name);
-                throw new InvalidOperationException($"Failed to collect workshops from sheet '{sheet.Name}'. Please verify the sheet structure.", ex);
+                throw new ExcelParsingException($"Failed to collect workshops from sheet '{sheet.Name}'. Please verify the sheet structure.", ex)
+                {
+                    SheetName = sheet.Name
+                };
             }
-        }
-
-        /// <summary>
-        /// Creates a comprehensive PDF document containing workshop rosters and individual participant schedules.
-        /// Optionally includes blank schedules for walk-in participants.
-        /// </summary>
-        /// <param name="mergeWorkshopCells">Whether to merge cells for multi-day workshops in individual schedules.</param>
-        /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
-        /// <param name="blankScheduleCount">Number of blank schedule pages to append for walk-in participants.</param>
-        /// <param name="eventName">Name of the event displayed in PDF headers and footers.</param>
-        /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
-        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
-        {
-            // Delegate to PdfDocumentOrchestrator service
-            return _pdfOrchestrator.CreateWorkshopAndSchedulePdf(
-                workshops: Workshops,
-                eventName: eventName,
-                mergeWorkshopCells: mergeWorkshopCells,
-                timeslots: timeslots,
-                blankScheduleCount: blankScheduleCount);
-        }
-
-        /// <summary>
-        /// Creates a master schedule PDF showing all workshops organized by location, time, and days.
-        /// Useful for event staff to see the complete workshop schedule at a glance.
-        /// </summary>
-        /// <param name="eventName">Name of the event displayed in PDF title.</param>
-        /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
-        /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
-        public Document? CreateMasterSchedulePdf(string eventName = "Master Schedule", List<Models.TimeSlot>? timeslots = null)
-        {
-            // Delegate to PdfDocumentOrchestrator service
-            return _pdfOrchestrator.CreateMasterSchedulePdf(
-                workshops: Workshops,
-                eventName: eventName,
-                timeslots: timeslots);
         }
     }
 }
