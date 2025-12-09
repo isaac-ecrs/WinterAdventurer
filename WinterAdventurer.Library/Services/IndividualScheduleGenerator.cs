@@ -356,11 +356,12 @@ namespace WinterAdventurer.Library.Services
         /// Generates blank schedule templates for walk-in participants who register on-site.
         /// Each schedule includes a name field and empty master schedule grid to be filled in manually.
         /// </summary>
+        /// <param name="workshops">List of workshops with locations (used to generate location columns in blank schedule).</param>
         /// <param name="eventName">Name of the event displayed in section footers.</param>
         /// <param name="count">Number of blank schedule copies to generate.</param>
         /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
         /// <returns>List of MigraDoc Section objects containing blank schedules.</returns>
-        public List<Section> GenerateBlankSchedules(string eventName, int count, List<Models.TimeSlot>? timeslots = null)
+        public List<Section> GenerateBlankSchedules(List<Workshop> workshops, string eventName, int count, List<Models.TimeSlot>? timeslots = null)
         {
             _logger.LogInformation($"GenerateBlankSchedules called with count={count}");
             var sections = new List<Section>();
@@ -369,8 +370,9 @@ namespace WinterAdventurer.Library.Services
             for (int i = 0; i < count; i++)
             {
                 // Get master schedule sections (typically just one section)
+                // Pass workshops so master schedule can extract locations for the grid
                 var masterSections = _masterScheduleGenerator.GenerateMasterSchedule(
-                    workshops: new List<Workshop>(),
+                    workshops: workshops,
                     eventName: "Workshop Schedule",
                     timeslots: timeslots);
 

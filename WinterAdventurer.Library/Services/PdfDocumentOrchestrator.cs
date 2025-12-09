@@ -52,37 +52,42 @@ namespace WinterAdventurer.Library.Services
             List<Models.TimeSlot>? timeslots = null,
             int blankScheduleCount = 0)
         {
-            if (workshops == null || !workshops.Any())
+            // Allow creating PDF with just blank schedules if workshops is empty
+            if ((workshops == null || !workshops.Any()) && blankScheduleCount == 0)
             {
-                _logger.LogWarning("Cannot create PDF - workshops collection is empty");
+                _logger.LogWarning("Cannot create PDF - workshops collection is empty and no blank schedules requested");
                 return null;
             }
 
             var document = new Document();
 
-            // Add workshop rosters
-            var rosterSections = _rosterGenerator.GenerateRosterSections(workshops, eventName, timeslots);
-            foreach (var section in rosterSections)
+            // Add workshop rosters (only if workshops exist)
+            if (workshops != null && workshops.Any())
             {
-                document.Sections.Add(section);
-            }
+                var rosterSections = _rosterGenerator.GenerateRosterSections(workshops, eventName, timeslots);
+                foreach (var section in rosterSections)
+                {
+                    document.Sections.Add(section);
+                }
 
-            // Add individual schedules
-            var scheduleSections = _scheduleGenerator.GenerateIndividualSchedules(
-                workshops,
-                eventName,
-                mergeWorkshopCells,
-                timeslots);
-            foreach (var section in scheduleSections)
-            {
-                document.Sections.Add(section);
+                // Add individual schedules
+                var scheduleSections = _scheduleGenerator.GenerateIndividualSchedules(
+                    workshops,
+                    eventName,
+                    mergeWorkshopCells,
+                    timeslots);
+                foreach (var section in scheduleSections)
+                {
+                    document.Sections.Add(section);
+                }
             }
 
             // Add blank schedules if requested
             if (blankScheduleCount > 0)
             {
                 _logger.LogInformation($"Generating {blankScheduleCount} blank schedules");
-                var blankSections = _scheduleGenerator.GenerateBlankSchedules(eventName, blankScheduleCount, timeslots);
+                // Pass workshops so blank schedules can include location columns
+                var blankSections = _scheduleGenerator.GenerateBlankSchedules(workshops ?? new List<Workshop>(), eventName, blankScheduleCount, timeslots);
                 _logger.LogInformation($"Generated {blankSections.Count} blank schedule sections");
 
                 foreach (var section in blankSections)
