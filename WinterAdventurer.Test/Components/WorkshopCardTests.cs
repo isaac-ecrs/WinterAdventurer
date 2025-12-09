@@ -190,9 +190,10 @@ namespace WinterAdventurer.Test.Components
                 .Add(p => p.AvailableLocations, locations)
                 .Add(p => p.CardIndex, 0));
 
-            // Assert - Location should be set in the autocomplete
-            var locationInput = cut.Find("input[placeholder='Location']");
-            Assert.IsNotNull(locationInput);
+            // Assert - Location wrapper div should exist and markup should contain the location
+            var locationDiv = cut.Find("#first-workshop-location");
+            Assert.IsNotNull(locationDiv);
+            Assert.Contains("Art Studio", cut.Markup);
         }
 
         [TestMethod]
@@ -482,9 +483,11 @@ namespace WinterAdventurer.Test.Components
                 .Add(p => p.AvailableLocations, locations)
                 .Add(p => p.CardIndex, 0));
 
-            // Assert - Verify autocomplete is rendered with location input
-            var locationInput = cut.Find("input[placeholder='Location']");
-            Assert.IsNotNull(locationInput);
+            // Assert - Verify MudAutocomplete is rendered (it contains MudBlazor component classes)
+            Assert.Contains("mud-autocomplete", cut.Markup.ToLower());
+            // Verify the location wrapper div exists
+            var locationDiv = cut.Find("#first-workshop-location");
+            Assert.IsNotNull(locationDiv);
         }
 
         [TestMethod]
