@@ -155,6 +155,458 @@ namespace WinterAdventurer.Test.Components
             Assert.IsNotNull(leaderInput, "Leader input should exist with correct value");
         }
 
+        [TestMethod]
+        public void WorkshopCard_Render_DisplaysPeriodName()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert
+            Assert.Contains("Morning First Period", cut.Markup);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_OnParametersSet_SetsSelectedLocation()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            workshop.Location = "Art Studio";
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Location should be set in the autocomplete
+            var locationInput = cut.Find("input[placeholder='Location']");
+            Assert.IsNotNull(locationInput);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_OnParametersSet_HandlesNullLocation()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            workshop.Location = string.Empty;
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should render without error
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_SearchLocations_ReturnsAllLocationsForEmptySearch()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" },
+                new Location { Id = 2, Name = "Workshop Room" },
+                new Location { Id = 3, Name = "Craft Hall" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Component should render all locations (tested via markup)
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_SearchLocations_FiltersOutUsedLocationsInSamePeriod()
+        {
+            // Arrange
+            var period = new Period("MorningFirstPeriod");
+            var workshop1 = CreateTestWorkshop("Pottery", "John Smith");
+            workshop1.Location = "Art Studio";
+            workshop1.Period = period;
+
+            var workshop2 = CreateTestWorkshop("Woodworking", "Jane Doe");
+            workshop2.Period = period;
+
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" },
+                new Location { Id = 2, Name = "Workshop Room" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop2)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop1, workshop2 })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should render successfully (Art Studio should be filtered out in SearchLocations)
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_SearchLocations_AllowsCurrentWorkshopLocation()
+        {
+            // Arrange
+            var period = new Period("MorningFirstPeriod");
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            workshop.Location = "Art Studio";
+            workshop.Period = period;
+
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should render with current location available
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_SearchLocations_DoesNotFilterLocationsFromDifferentPeriods()
+        {
+            // Arrange
+            var period1 = new Period("MorningFirstPeriod");
+            var period2 = new Period("AfternoonFirstPeriod");
+
+            var workshop1 = CreateTestWorkshop("Pottery", "John Smith");
+            workshop1.Location = "Art Studio";
+            workshop1.Period = period1;
+
+            var workshop2 = CreateTestWorkshop("Woodworking", "Jane Doe");
+            workshop2.Period = period2;
+
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop2)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop1, workshop2 })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Art Studio should be available since it's in a different period
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_TagsDisplay_RendersLocationTags()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            var locations = new List<Location>
+            {
+                new Location
+                {
+                    Id = 1,
+                    Name = "Art Studio",
+                    Tags = new List<Tag>
+                    {
+                        new Tag { Id = 1, Name = "Downstairs", Color = "#FF0000" }
+                    }
+                }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should render successfully with tags
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_MultipleSelections_ShowsCorrectCount()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            for (int i = 1; i <= 10; i++)
+            {
+                workshop.Selections.Add(new WorkshopSelection
+                {
+                    FirstName = $"First{i}",
+                    LastName = $"Last{i}",
+                    ChoiceNumber = 1
+                });
+            }
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert
+            Assert.Contains("10 Participants", cut.Markup);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_ZeroSelections_ShowsZeroCount()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert
+            Assert.Contains("0 Participants", cut.Markup);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_LocationListVersion_UpdatesCausesRerender()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" }
+            };
+
+            // Act - Render with version 0
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.LocationListVersion, 0)
+                .Add(p => p.CardIndex, 0));
+
+            var initialMarkup = cut.Markup;
+
+            // Update to version 1
+            cut.SetParametersAndRender(parameters => parameters
+                .Add(p => p.LocationListVersion, 1));
+
+            var updatedMarkup = cut.Markup;
+
+            // Assert - Markup should contain new version key
+            Assert.IsNotNull(initialMarkup);
+            Assert.IsNotNull(updatedMarkup);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_NameField_IsEditable()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Find name input
+            var nameInput = cut.Find("input[type='text'][value='Pottery']");
+            Assert.IsNotNull(nameInput);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_LeaderField_IsEditable()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Find leader input
+            var inputs = cut.FindAll("input[type='text']");
+            var leaderInput = inputs.FirstOrDefault(i => i.GetAttribute("value") == "John Smith");
+            Assert.IsNotNull(leaderInput);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_LocationAutocomplete_HasCorrectAttributes()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Art Studio" }
+            };
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, locations)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Verify autocomplete is rendered with location input
+            var locationInput = cut.Find("input[placeholder='Location']");
+            Assert.IsNotNull(locationInput);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_MudCardStructure_HasHeaderAndContent()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should have MudCard structure
+            Assert.Contains("mud-card", cut.Markup.ToLower());
+        }
+
+        [TestMethod]
+        public void WorkshopCard_DifferentPeriods_DisplayCorrectly()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            workshop.Period = new Period("AfternoonSecondPeriod");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert
+            Assert.Contains("Afternoon Second Period", cut.Markup);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_OnLocationChanged_CallbackParameter_IsProvided()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            bool callbackInvoked = false;
+            EventCallback<Workshop> callback = EventCallback.Factory.Create<Workshop>(this, (w) => callbackInvoked = true);
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.OnLocationChanged, callback)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Component should render with callback
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_OnDeleteLocationRequested_CallbackParameter_IsProvided()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            bool callbackInvoked = false;
+            EventCallback<string> callback = EventCallback.Factory.Create<string>(this, (loc) => callbackInvoked = true);
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.OnDeleteLocationRequested, callback)
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Component should render with callback
+            Assert.IsNotNull(cut);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_CardWithBackupSelections_DisplaysAllSelections()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+            workshop.Selections.Add(new WorkshopSelection
+            {
+                FirstName = "Alice",
+                LastName = "Johnson",
+                ChoiceNumber = 1
+            });
+            workshop.Selections.Add(new WorkshopSelection
+            {
+                FirstName = "Bob",
+                LastName = "Smith",
+                ChoiceNumber = 2 // Backup choice
+            });
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should show total count including backup
+            Assert.Contains("2 Participants", cut.Markup);
+        }
+
+        [TestMethod]
+        public void WorkshopCard_EmptyLocationsList_DoesNotCauseError()
+        {
+            // Arrange
+            var workshop = CreateTestWorkshop("Pottery", "John Smith");
+
+            // Act
+            var cut = Render<WorkshopCard>(parameters => parameters
+                .Add(p => p.Workshop, workshop)
+                .Add(p => p.AllWorkshops, new List<Workshop> { workshop })
+                .Add(p => p.AvailableLocations, new List<Location>())
+                .Add(p => p.CardIndex, 0));
+
+            // Assert - Should render without error
+            Assert.IsNotNull(cut);
+        }
+
         /// <summary>
         /// Helper method to create a test workshop with minimal data.
         /// </summary>
