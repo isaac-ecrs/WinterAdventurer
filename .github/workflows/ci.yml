@@ -31,7 +31,7 @@ jobs:
       run: dotnet test --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~E2ETests" --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
     - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         files: ./TestResults/*/coverage.cobertura.xml
         fail_ci_if_error: false
