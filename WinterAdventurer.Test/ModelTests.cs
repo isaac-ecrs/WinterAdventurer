@@ -405,5 +405,372 @@ namespace WinterAdventurer.Test
         }
 
         #endregion
+
+        #region TimeSlot Tests
+
+        [TestMethod]
+        public void TimeSlot_DefaultValues_InitializedCorrectly()
+        {
+            // Arrange & Act
+            var timeSlot = new TimeSlot();
+
+            // Assert
+            Assert.IsNotNull(timeSlot.Id);
+            Assert.IsFalse(string.IsNullOrEmpty(timeSlot.Id));
+            Assert.AreEqual(string.Empty, timeSlot.Label);
+            Assert.IsNull(timeSlot.StartTime);
+            Assert.IsNull(timeSlot.EndTime);
+            Assert.IsFalse(timeSlot.IsPeriod);
+            Assert.AreEqual(string.Empty, timeSlot.TimeRange);
+        }
+
+        [TestMethod]
+        public void TimeSlot_WithStartAndEndTime_FormatsTimeRangeCorrectly()
+        {
+            // Arrange
+            var timeSlot = new TimeSlot
+            {
+                Label = "Morning Session",
+                StartTime = new TimeSpan(8, 0, 0),
+                EndTime = new TimeSpan(9, 30, 0),
+                IsPeriod = true
+            };
+
+            // Act
+            var timeRange = timeSlot.TimeRange;
+
+            // Assert
+            Assert.AreEqual("8:00 AM - 9:30 AM", timeRange);
+        }
+
+        [TestMethod]
+        public void TimeSlot_WithOnlyStartTime_FormatsWithQuestionMark()
+        {
+            // Arrange
+            var timeSlot = new TimeSlot
+            {
+                Label = "Free Time",
+                StartTime = new TimeSpan(14, 0, 0),
+                EndTime = null
+            };
+
+            // Act
+            var timeRange = timeSlot.TimeRange;
+
+            // Assert
+            Assert.AreEqual("2:00 PM - ?", timeRange);
+        }
+
+        [TestMethod]
+        public void TimeSlot_WithNoTimes_ReturnsEmptyTimeRange()
+        {
+            // Arrange
+            var timeSlot = new TimeSlot
+            {
+                Label = "TBD",
+                StartTime = null,
+                EndTime = null
+            };
+
+            // Act
+            var timeRange = timeSlot.TimeRange;
+
+            // Assert
+            Assert.AreEqual(string.Empty, timeRange);
+        }
+
+        [TestMethod]
+        public void TimeSlot_IsPeriod_CanBeSetAndRetrieved()
+        {
+            // Arrange
+            var periodSlot = new TimeSlot { IsPeriod = true };
+            var activitySlot = new TimeSlot { IsPeriod = false };
+
+            // Assert
+            Assert.IsTrue(periodSlot.IsPeriod);
+            Assert.IsFalse(activitySlot.IsPeriod);
+        }
+
+        [TestMethod]
+        public void TimeSlot_AfternoonTime_FormatsCorrectly()
+        {
+            // Arrange
+            var timeSlot = new TimeSlot
+            {
+                StartTime = new TimeSpan(13, 30, 0),
+                EndTime = new TimeSpan(15, 0, 0)
+            };
+
+            // Act
+            var timeRange = timeSlot.TimeRange;
+
+            // Assert
+            Assert.AreEqual("1:30 PM - 3:00 PM", timeRange);
+        }
+
+        [TestMethod]
+        public void TimeSlot_MidnightTime_FormatsCorrectly()
+        {
+            // Arrange
+            var timeSlot = new TimeSlot
+            {
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(1, 0, 0)
+            };
+
+            // Act
+            var timeRange = timeSlot.TimeRange;
+
+            // Assert
+            Assert.AreEqual("12:00 AM - 1:00 AM", timeRange);
+        }
+
+        #endregion
+
+        #region WorkshopSelection Tests
+
+        [TestMethod]
+        public void WorkshopSelection_DefaultValues_InitializedCorrectly()
+        {
+            // Arrange & Act
+            var selection = new WorkshopSelection();
+
+            // Assert
+            Assert.AreEqual(string.Empty, selection.ClassSelectionId);
+            Assert.AreEqual(string.Empty, selection.WorkshopName);
+            Assert.AreEqual(string.Empty, selection.FullName);
+            Assert.AreEqual(string.Empty, selection.FirstName);
+            Assert.AreEqual(string.Empty, selection.LastName);
+            Assert.AreEqual(0, selection.ChoiceNumber);
+            Assert.AreEqual(0, selection.RegistrationId);
+            Assert.IsNotNull(selection.Duration);
+        }
+
+        [TestMethod]
+        public void WorkshopSelection_AllProperties_CanBeSetAndRetrieved()
+        {
+            // Arrange
+            var duration = new WorkshopDuration(1, 4);
+            var selection = new WorkshopSelection
+            {
+                ClassSelectionId = "12345",
+                WorkshopName = "Pottery",
+                FullName = "John Smith",
+                FirstName = "John",
+                LastName = "Smith",
+                ChoiceNumber = 1,
+                RegistrationId = 100,
+                Duration = duration
+            };
+
+            // Assert
+            Assert.AreEqual("12345", selection.ClassSelectionId);
+            Assert.AreEqual("Pottery", selection.WorkshopName);
+            Assert.AreEqual("John Smith", selection.FullName);
+            Assert.AreEqual("John", selection.FirstName);
+            Assert.AreEqual("Smith", selection.LastName);
+            Assert.AreEqual(1, selection.ChoiceNumber);
+            Assert.AreEqual(100, selection.RegistrationId);
+            Assert.AreEqual(duration, selection.Duration);
+        }
+
+        [TestMethod]
+        public void WorkshopSelection_FirstChoice_HasChoiceNumberOne()
+        {
+            // Arrange & Act
+            var selection = new WorkshopSelection
+            {
+                ChoiceNumber = 1
+            };
+
+            // Assert
+            Assert.AreEqual(1, selection.ChoiceNumber);
+        }
+
+        [TestMethod]
+        public void WorkshopSelection_BackupChoice_HasChoiceNumberGreaterThanOne()
+        {
+            // Arrange & Act
+            var selection = new WorkshopSelection
+            {
+                ChoiceNumber = 2
+            };
+
+            // Assert
+            Assert.IsTrue(selection.ChoiceNumber > 1);
+            Assert.AreEqual(2, selection.ChoiceNumber);
+        }
+
+        [TestMethod]
+        public void WorkshopSelection_ToString_ReturnsJsonRepresentation()
+        {
+            // Arrange
+            var selection = new WorkshopSelection
+            {
+                ClassSelectionId = "12345",
+                WorkshopName = "Pottery",
+                FirstName = "John",
+                LastName = "Smith",
+                ChoiceNumber = 1
+            };
+
+            // Act
+            var json = selection.ToString();
+
+            // Assert
+            Assert.IsFalse(string.IsNullOrEmpty(json));
+            Assert.IsTrue(json.Contains("12345"));
+            Assert.IsTrue(json.Contains("Pottery"));
+            Assert.IsTrue(json.Contains("John"));
+            Assert.IsTrue(json.Contains("Smith"));
+        }
+
+        [TestMethod]
+        public void WorkshopSelection_WithDifferentDurations_MaintainsDuration()
+        {
+            // Arrange
+            var duration12 = new WorkshopDuration(1, 2);
+            var duration34 = new WorkshopDuration(3, 4);
+
+            var selection1 = new WorkshopSelection { Duration = duration12 };
+            var selection2 = new WorkshopSelection { Duration = duration34 };
+
+            // Assert
+            Assert.AreEqual(2, selection1.Duration.NumberOfDays);
+            Assert.AreEqual(2, selection2.Duration.NumberOfDays);
+            Assert.AreEqual("Days 1-2", selection1.Duration.Description);
+            Assert.AreEqual("Days 3-4", selection2.Duration.Description);
+        }
+
+        #endregion
+
+        #region Attendee Tests
+
+        [TestMethod]
+        public void Attendee_DefaultValues_InitializedCorrectly()
+        {
+            // Arrange & Act
+            var attendee = new Attendee();
+
+            // Assert
+            Assert.AreEqual(string.Empty, attendee.ClassSelectionId);
+            Assert.AreEqual(string.Empty, attendee.FirstName);
+            Assert.AreEqual(string.Empty, attendee.LastName);
+            Assert.AreEqual(string.Empty, attendee.Email);
+            Assert.AreEqual(string.Empty, attendee.Age);
+            Assert.AreEqual(" ", attendee.FullName); // FirstName + space + LastName
+        }
+
+        [TestMethod]
+        public void Attendee_AllProperties_CanBeSetAndRetrieved()
+        {
+            // Arrange
+            var attendee = new Attendee
+            {
+                ClassSelectionId = "12345",
+                FirstName = "John",
+                LastName = "Smith",
+                Email = "john.smith@example.com",
+                Age = "14"
+            };
+
+            // Assert
+            Assert.AreEqual("12345", attendee.ClassSelectionId);
+            Assert.AreEqual("John", attendee.FirstName);
+            Assert.AreEqual("Smith", attendee.LastName);
+            Assert.AreEqual("john.smith@example.com", attendee.Email);
+            Assert.AreEqual("14", attendee.Age);
+        }
+
+        [TestMethod]
+        public void Attendee_FullName_CombinesFirstAndLastName()
+        {
+            // Arrange
+            var attendee = new Attendee
+            {
+                FirstName = "Jane",
+                LastName = "Doe"
+            };
+
+            // Act
+            var fullName = attendee.FullName;
+
+            // Assert
+            Assert.AreEqual("Jane Doe", fullName);
+        }
+
+        [TestMethod]
+        public void Attendee_FullName_WithOnlyFirstName_ShowsFirstNameWithSpace()
+        {
+            // Arrange
+            var attendee = new Attendee
+            {
+                FirstName = "Alice",
+                LastName = ""
+            };
+
+            // Act
+            var fullName = attendee.FullName;
+
+            // Assert
+            Assert.AreEqual("Alice ", fullName);
+        }
+
+        [TestMethod]
+        public void Attendee_AgeRange_CanBeStored()
+        {
+            // Arrange
+            var attendee = new Attendee
+            {
+                Age = "12-14"
+            };
+
+            // Assert
+            Assert.AreEqual("12-14", attendee.Age);
+        }
+
+        [TestMethod]
+        public void Attendee_ToString_ReturnsJsonRepresentation()
+        {
+            // Arrange
+            var attendee = new Attendee
+            {
+                ClassSelectionId = "12345",
+                FirstName = "John",
+                LastName = "Smith",
+                Email = "john@example.com",
+                Age = "14"
+            };
+
+            // Act
+            var json = attendee.ToString();
+
+            // Assert
+            Assert.IsFalse(string.IsNullOrEmpty(json));
+            Assert.IsTrue(json.Contains("12345"));
+            Assert.IsTrue(json.Contains("John"));
+            Assert.IsTrue(json.Contains("Smith"));
+            Assert.IsTrue(json.Contains("john@example.com"));
+            Assert.IsTrue(json.Contains("14"));
+        }
+
+        [TestMethod]
+        public void Attendee_WithSpecialCharactersInName_HandlesCorrectly()
+        {
+            // Arrange
+            var attendee = new Attendee
+            {
+                FirstName = "O'Brien",
+                LastName = "De La Cruz"
+            };
+
+            // Act
+            var fullName = attendee.FullName;
+
+            // Assert
+            Assert.AreEqual("O'Brien De La Cruz", fullName);
+        }
+
+        #endregion
     }
 }
