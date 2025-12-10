@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <!-- Treat all warnings as errors -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Set explicit warning level (4 = all warnings) -->
+    <WarningLevel>4</WarningLevel>
+
+    <!-- Enable nullable reference types across all projects -->
+    <Nullable>enable</Nullable>
+
+    <!-- Common properties -->
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
