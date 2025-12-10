@@ -5,6 +5,10 @@
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- Suppress less critical analyzer warnings for E2E test infrastructure -->
+    <!-- Keep security/critical rules, suppress design/style rules for test code -->
+    <NoWarn>$(NoWarn);CA1001;CA1002;CA1031;CA1034;CA1051;CA1052;CA1056;CA1062;CA1307;CA1310;CA1501;CA1508;CA1822;CA1849;CA2000;CA2227;CA2234</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

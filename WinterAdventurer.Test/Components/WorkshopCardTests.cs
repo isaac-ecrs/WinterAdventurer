@@ -530,8 +530,7 @@ namespace WinterAdventurer.Test.Components
         {
             // Arrange
             var workshop = CreateTestWorkshop("Pottery", "John Smith");
-            bool callbackInvoked = false;
-            EventCallback<Workshop> callback = EventCallback.Factory.Create<Workshop>(this, (w) => callbackInvoked = true);
+            EventCallback<Workshop> callback = EventCallback.Factory.Create<Workshop>(this, (_) => { });
 
             // Act
             var cut = Render<WorkshopCard>(parameters => parameters
@@ -550,8 +549,7 @@ namespace WinterAdventurer.Test.Components
         {
             // Arrange
             var workshop = CreateTestWorkshop("Pottery", "John Smith");
-            bool callbackInvoked = false;
-            EventCallback<string> callback = EventCallback.Factory.Create<string>(this, (loc) => callbackInvoked = true);
+            EventCallback<string> callback = EventCallback.Factory.Create<string>(this, (_) => { });
 
             // Act
             var cut = Render<WorkshopCard>(parameters => parameters

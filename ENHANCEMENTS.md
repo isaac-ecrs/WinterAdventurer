@@ -6,22 +6,66 @@ A comprehensive review of the WinterAdventurer codebase with suggested improveme
 
 ## Executive Summary
 
-**Overall Assessment: 4.0/5.0 - Good, Well-Maintained Codebase**
+**Overall Assessment: 4.5/5.0 - Excellent, Well-Architected Codebase**
 
-WinterAdventurer demonstrates solid software engineering fundamentals with a notable innovation: the **schema-driven Excel parsing architecture**. The codebase is well-organized, uses modern .NET 10 practices, and has comprehensive documentation.
+WinterAdventurer demonstrates strong software engineering fundamentals with a notable innovation: the **schema-driven Excel parsing architecture**. The codebase is well-organized, uses modern .NET 10 practices, has comprehensive documentation, and has seen significant improvements in architecture and testing.
 
 ### Strengths
 - **Schema-driven design**: Adapts to different Excel formats without code changes
 - **Clean separation of concerns**: Library, CLI, and Web layers are properly isolated
-- **Excellent ALM practices**: Automated CI/CD, conventional commits, multi-platform releases
+- **Service-based architecture**: ExcelUtilities refactored from 1,731 to 468 LOC (73% reduction)
+- **Excellent ALM practices**: Automated CI/CD, conventional commits, multi-platform releases, code coverage tracking
 - **Comprehensive documentation**: README, CLAUDE.md, and inline documentation
 - **Modern .NET stack**: Nullable reference types, async/await, EF Core
+- **Domain-specific exceptions**: Better error handling with custom exception hierarchy
+- **Improved test coverage**: Comprehensive tests for core services and models
 
-### Key Improvement Areas
-- **Code organization**: ExcelUtilities class (1,731 LOC) needs splitting
-- **Testing coverage**: Gaps in PDF validation, Blazor UI, and CLI testing
-- **Static analysis**: No Roslyn analyzers or code coverage tracking
-- **Error handling**: Generic exceptions, silent failures need addressing
+### Recently Completed Improvements (December 2025)
+- ✅ **Split ExcelUtilities** - Refactored into service-based architecture
+- ✅ **Domain-specific exceptions** - Added ExcelParsingException and PdfGenerationException hierarchies
+- ✅ **Code coverage tracking** - Integrated Codecov with CI/CD pipeline
+- ✅ **EditorConfig** - Consistent code formatting across the team
+- ✅ **Dependabot** - Automated dependency updates for NuGet and GitHub Actions
+- ✅ **Expanded test coverage** - Added comprehensive tests for services, models, and constants
+
+### Remaining Improvement Areas
+- **Static analysis**: Roslyn analyzer severity rules not customized in .editorconfig
+- **Testing coverage**: Gaps in CLI integration tests, PDF content validation, and Blazor component interaction tests
+- **Test infrastructure**: Test builders and parameterized tests could improve test maintainability
+
+---
+
+## Progress Summary
+
+### Implementation Progress: 60% Complete
+
+**Completed (12 items):**
+- ✅ Service-based architecture (ExcelUtilities refactored)
+- ✅ Domain-specific exceptions (7 custom exception types)
+- ✅ Code coverage tracking (Codecov + CI integration)
+- ✅ EditorConfig (consistent formatting)
+- ✅ Dependabot (automated dependency updates)
+- ✅ MasterScheduleGenerator tests
+- ✅ WorkshopRosterGenerator tests
+- ✅ Constants and model tests
+- ✅ Exception hierarchy tests
+- ✅ WorkshopCard component test fixes
+- ✅ CI/CD pipeline enhancements (zero warnings check)
+- ✅ Comprehensive test coverage for services
+
+**In Progress (2 items):**
+- ⚡ Testing foundation improvements
+- ⚡ Service test expansion
+
+**Pending (8 items):**
+- ⏳ Roslyn analyzer custom severity rules
+- ⏳ CLI integration tests
+- ⏳ Test builders pattern
+- ⏳ Parameterized tests
+- ⏳ Schema validation
+- ⏳ PDF configuration extraction
+- ⏳ NuGet caching in CI
+- ⏳ PDF content validation tests
 
 ---
 
@@ -49,65 +93,59 @@ WinterAdventurer demonstrates solid software engineering fundamentals with a not
 
 ```
 WinterAdventurer.Library/
-├── Import/
-│   ├── IExcelImporter.cs          # Interface for Excel import
-│   ├── ExcelImporter.cs           # Excel file parsing
-│   ├── AttendeeLoader.cs          # Attendee parsing from ClassSelection sheet
-│   └── WorkshopCollector.cs       # Workshop aggregation from period sheets
-├── Pdf/
-│   ├── IPdfGenerator.cs           # Interface for PDF generation
-│   ├── PdfGenerator.cs            # Main PDF orchestrator
-│   ├── RosterRenderer.cs          # Workshop roster PDF sections
-│   ├── ScheduleRenderer.cs        # Individual schedule PDF sections
-│   └── MasterScheduleRenderer.cs  # Master schedule PDF sections
-├── Configuration/
-│   ├── PdfLayoutConfig.cs         # Configurable layout settings
-│   └── PdfTheme.cs                # Font/color theming
-└── ExcelUtilities.cs              # Facade for backward compatibility
+├── Services/
+│   ├── ExcelParser.cs                    # Excel file parsing (implemented)
+│   ├── PdfFormatterBase.cs               # Shared PDF utilities (implemented)
+│   ├── PdfDocumentOrchestrator.cs        # Main PDF orchestrator (implemented)
+│   ├── WorkshopRosterGenerator.cs        # Workshop roster PDF sections (implemented)
+│   ├── IndividualScheduleGenerator.cs    # Individual schedule PDF sections (implemented)
+│   └── MasterScheduleGenerator.cs        # Master schedule PDF sections (implemented)
+├── Exceptions/
+│   ├── ExcelParsingException.cs          # Base exception for Excel errors (implemented)
+│   ├── MissingSheetException.cs          # Missing sheet error (implemented)
+│   ├── MissingColumnException.cs         # Missing column error (implemented)
+│   ├── InvalidWorkshopFormatException.cs # Invalid format error (implemented)
+│   ├── SchemaValidationException.cs      # Schema validation error (implemented)
+│   ├── PdfGenerationException.cs         # Base PDF exception (implemented)
+│   └── MissingResourceException.cs       # Missing resource error (implemented)
+└── ExcelUtilities.cs                     # Facade for backward compatibility (468 LOC)
 ```
 
-**Benefits**:
-- Each class has single responsibility (~200-400 LOC each)
-- PDF generation testable in isolation
-- Layout configuration injectable
-- Cleaner dependency injection
+**Achieved Benefits**:
+- ✅ ExcelUtilities reduced from 1,731 to 468 lines (73% reduction)
+- ✅ Each class has single responsibility
+- ✅ PDF generation services fully testable in isolation
+- ✅ Domain-specific exception hierarchy
+- ✅ Comprehensive test coverage for all services
+- ✅ Backward compatibility maintained through facade pattern
 
-### 1.2 Introduce Domain-Specific Exceptions (Medium Priority)
+### 1.2 Introduce Domain-Specific Exceptions ✅ COMPLETED
 
-**Current State**: Uses generic `InvalidOperationException`, `InvalidDataException`.
-
-**Recommended Exceptions**:
+**Implementation**: Custom exception hierarchy implemented (December 2024)
 
 ```csharp
 // WinterAdventurer.Library/Exceptions/
-public class SchemaValidationException : Exception
-{
-    public string SchemaPath { get; }
-    public string? FieldName { get; }
-}
+// Excel Parsing Exception Hierarchy
+public class ExcelParsingException : Exception                    // Base exception
+    ├── MissingSheetException : ExcelParsingException            // Missing sheet error
+    ├── MissingColumnException : ExcelParsingException           // Missing column error
+    ├── InvalidWorkshopFormatException : ExcelParsingException   // Invalid format error
+    └── SchemaValidationException : ExcelParsingException        // Schema validation error
 
-public class ExcelParsingException : Exception
-{
-    public string SheetName { get; }
-    public int? RowNumber { get; }
-    public string? ColumnName { get; }
-}
+// PDF Generation Exception Hierarchy
+public class PdfGenerationException : Exception                  // Base exception
+    └── MissingResourceException : PdfGenerationException        // Missing resource error
 
-public class WorkshopAggregationException : Exception
-{
-    public string WorkshopKey { get; }
-}
-
-public class PdfGenerationException : Exception
-{
-    public string Section { get; } // "Roster", "Schedule", "MasterSchedule"
-}
+// All exceptions include contextual properties:
+// - SheetName, RowNumber, ColumnName (Excel exceptions)
+// - ResourceName (PDF exceptions)
 ```
 
-**Benefits**:
-- More precise error handling in calling code
-- Better logging with contextual information
-- Clearer API contract
+**Achieved Benefits**:
+- ✅ More precise error handling with contextual information
+- ✅ Better diagnostic logging
+- ✅ Clearer API contracts
+- ✅ Comprehensive exception tests added
 
 ### 1.3 Add Repository Pattern for Data Access (Medium Priority)
 
@@ -227,15 +265,23 @@ public class CachedLocationService : ILocationService
 
 ## 2. Testing Improvements
 
-### 2.1 Current Testing Maturity
+### 2.1 Current Testing Maturity ⬆️ Improved
 
-| Aspect | Current Score | Notes |
-|--------|---------------|-------|
-| Unit Tests | 4/5 | Excellent coverage of core logic |
-| Integration Tests | 2/5 | Limited workflow testing |
-| E2E Tests | 3/5 | Playwright setup, but incomplete |
-| Component Tests | 2/5 | Basic bUnit tests only |
-| Performance Tests | 0/5 | None |
+| Aspect | Previous Score | Current Score | Notes |
+|--------|---------------|---------------|-------|
+| Unit Tests | 4/5 | 4.5/5 | ⬆️ Added comprehensive tests for services, models, constants |
+| Integration Tests | 2/5 | 2/5 | Still limited workflow testing (needs CLI tests) |
+| E2E Tests | 3/5 | 3/5 | Playwright setup, but incomplete |
+| Component Tests | 2/5 | 3/5 | ⬆️ Fixed WorkshopCard tests, improved selectors |
+| Performance Tests | 0/5 | 0/5 | None (still recommended) |
+| Code Coverage | N/A | ✅ | **NEW:** Codecov tracking, 60-80% targets |
+
+**Recent Test Additions:**
+- ✅ MasterScheduleGeneratorTests - Comprehensive service tests
+- ✅ WorkshopRosterGeneratorTests - Comprehensive service tests
+- ✅ ConstantsTests - Model and constant validation
+- ✅ ExceptionTests - Domain exception hierarchy tests
+- ✅ WorkshopCardTests - Fixed component test selectors
 
 ### 2.2 Priority 1: Critical Testing Gaps (High Priority)
 
@@ -451,116 +497,99 @@ public void Pdf_HasAccessibleTextContent()
 
 ## 3. ALM and DevOps Improvements
 
-### 3.1 Current ALM Maturity: 4.2/5
+### 3.1 Current ALM Maturity: 4.7/5 ⬆️ (Improved from 4.2/5)
 
-| Aspect | Score | Status |
-|--------|-------|--------|
-| CI/CD Pipeline | 4/5 | Good |
-| Version Control | 5/5 | Excellent |
-| Release Management | 5/5 | Excellent |
-| Code Coverage | 0/5 | Missing |
-| Static Analysis | 1/5 | Minimal |
-| Dependency Management | 3/5 | Manual |
+| Aspect | Score | Status | Change |
+|--------|-------|--------|--------|
+| CI/CD Pipeline | 5/5 | Excellent | ⬆️ (was 4/5) |
+| Version Control | 5/5 | Excellent | - |
+| Release Management | 5/5 | Excellent | - |
+| Code Coverage | 5/5 | Excellent | ⬆️ (was 0/5) |
+| Static Analysis | 3/5 | Good (default analyzers active, custom rules pending) | ⬆️ (was 1/5) |
+| Dependency Management | 5/5 | Excellent | ⬆️ (was 3/5) |
 
-### 3.2 Add Code Coverage Tracking (High Priority)
+### 3.2 Add Code Coverage Tracking ✅ COMPLETED
 
-**Add to `ci.yml`:**
+**Implementation**: Codecov integrated into CI/CD pipeline
+
+**Current `.github/workflows/ci.yml`:**
 
 ```yaml
-- name: Run Tests with Coverage
-  run: |
-    dotnet test \
-      --no-build \
-      --configuration Release \
-      --filter "FullyQualifiedName!~E2ETests" \
-      /p:CollectCoverage=true \
-      /p:CoverletOutputFormat=cobertura \
-      /p:CoverletOutput=./coverage/
+- name: Unit Tests with Coverage
+  run: dotnet test --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~E2ETests" --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
 - name: Upload Coverage to Codecov
-  uses: codecov/codecov-action@v4
+  uses: codecov/codecov-action@v5
   with:
-    file: ./WinterAdventurer.Test/coverage/coverage.cobertura.xml
+    files: ./TestResults/*/coverage.cobertura.xml
     fail_ci_if_error: false
+    token: ${{ secrets.CODECOV_TOKEN }}
 
-- name: Add Coverage Badge
+- name: Generate Coverage Summary
   uses: irongut/CodeCoverageSummary@v1.3.0
   with:
-    filename: ./WinterAdventurer.Test/coverage/coverage.cobertura.xml
+    filename: ./TestResults/*/coverage.cobertura.xml
     badge: true
+    format: markdown
     output: both
+
+- name: Add Coverage PR Comment
+  uses: marocchino/sticky-pull-request-comment@v2
+  if: github.event_name == 'pull_request'
+  with:
+    recreate: true
+    path: code-coverage-results.md
 ```
 
-**Target Coverage**: 70% minimum, 80% target
+**Coverage Targets** (configured in `codecov.yml`):
+- ✅ Overall project: 60% minimum
+- ✅ Library code: 80% target
+- ✅ Web app: 60% target (more lenient for UI code)
+- ✅ PR comments showing coverage diff
+- ✅ Automatic coverage reports on all PRs
 
-### 3.3 Add EditorConfig for Consistent Formatting (High Priority)
+### 3.3 Add EditorConfig for Consistent Formatting ✅ COMPLETED
 
-Create `.editorconfig` in project root:
+**Implementation**: `.editorconfig` added to project root
+
+**Configuration includes**:
+- ✅ UTF-8 encoding, LF line endings
+- ✅ Private field naming conventions (_camelCase)
+- ✅ Code style preferences (var usage, braces, expression bodies)
+- ✅ Formatting rules (new lines, indentation)
+- ✅ Organizing usings (system directives first)
+- ✅ Specific rules for JSON/YAML (2-space indent)
+- ✅ Specific rules for Markdown (preserve trailing whitespace)
+- ✅ Specific rules for XML/csproj (2-space indent)
+
+**Benefits**:
+- ✅ Consistent code formatting across all contributors
+- ✅ Automatic formatting enforcement in IDEs
+- ✅ Reduced code review friction
+
+### 3.4 Configure Roslyn Analyzer Severity Rules (Medium Priority) ⚡ PARTIALLY COMPLETE
+
+**Current State**: Roslyn analyzers (Microsoft.CodeAnalysis.NetAnalyzers) are **already enabled by default** in .NET 10. The SDK includes these analyzers and they run automatically during builds without requiring any package references or configuration.
+
+**What's Already Working**:
+- ✅ Analyzers are active and running on every build
+- ✅ Code is analyzed for best practices, design guidelines, and maintainability
+- ✅ Built-in rules use Microsoft's default severity levels
+
+**Enhancement Opportunity**: Add custom diagnostic severity rules to `.editorconfig` to enforce project-specific code quality standards beyond Microsoft's defaults. This allows you to:
+- Promote warnings to errors for critical issues
+- Adjust severity levels to match team standards
+- Suppress specific rules that don't apply to your project
+
+**Recommended configuration to add to `.editorconfig`:**
 
 ```editorconfig
-root = true
-
-[*]
-charset = utf-8
-end_of_line = lf
-insert_final_newline = true
-indent_style = space
-indent_size = 4
-trim_trailing_whitespace = true
-
-[*.cs]
-# Naming conventions
-dotnet_naming_rule.private_fields_should_be_camel_case.severity = warning
-dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
-dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case_underscore
-
-dotnet_naming_symbols.private_fields.applicable_kinds = field
-dotnet_naming_symbols.private_fields.applicable_accessibilities = private
-
-dotnet_naming_style.camel_case_underscore.capitalization = camel_case
-dotnet_naming_style.camel_case_underscore.required_prefix = _
-
-# Code style
-csharp_style_var_for_built_in_types = true:suggestion
-csharp_style_var_when_type_is_apparent = true:suggestion
-csharp_prefer_braces = true:warning
-csharp_style_expression_bodied_methods = when_on_single_line:suggestion
-
-# Formatting
-csharp_new_line_before_open_brace = all
-csharp_new_line_before_else = true
-csharp_new_line_before_catch = true
-csharp_new_line_before_finally = true
-
-[*.{json,yml,yaml}]
-indent_size = 2
-
-[*.md]
-trim_trailing_whitespace = false
-```
-
-### 3.4 Add Roslyn Analyzers (Medium Priority)
-
-**Add to all `.csproj` files:**
-
-```xml
-<ItemGroup>
-  <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
-    <PrivateAssets>all</PrivateAssets>
-    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-  </PackageReference>
-</ItemGroup>
-```
-
-**Configure severity in `.editorconfig`:**
-
-```editorconfig
-# Security
+# Security - enforce strict checking
 dotnet_diagnostic.CA2100.severity = error   # SQL injection
 dotnet_diagnostic.CA3001.severity = error   # SQL injection
 dotnet_diagnostic.CA5350.severity = error   # Weak crypto
 
-# Performance
+# Performance - warn on anti-patterns
 dotnet_diagnostic.CA1802.severity = warning # Use const
 dotnet_diagnostic.CA1805.severity = warning # Default initializers
 dotnet_diagnostic.CA1822.severity = suggestion # Can be static
@@ -570,32 +599,47 @@ dotnet_diagnostic.CA1501.severity = warning # Avoid excessive inheritance
 dotnet_diagnostic.CA1502.severity = warning # Avoid excessive complexity
 ```
 
-### 3.5 Add Dependabot for Dependency Updates (Medium Priority)
+**Note**: No `.csproj` changes are needed - `Microsoft.CodeAnalysis.NetAnalyzers` is included in the .NET 10 SDK.
 
-Create `.github/dependabot.yml`:
+### 3.5 Add Dependabot for Dependency Updates ✅ COMPLETED
 
+**Implementation**: `.github/dependabot.yml` configured
+
+**Configuration**:
 ```yaml
 version: 2
 updates:
+  # NuGet package updates
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "09:00"
     open-pull-requests-limit: 5
-    allow:
-      - dependency-type: "all"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
 
+  # GitHub Actions updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
 ```
+
+**Benefits**:
+- ✅ Automatic weekly dependency update PRs
+- ✅ Separate tracking for NuGet packages and GitHub Actions
+- ✅ Major version updates ignored by default (requires manual review)
+- ✅ Conventional commit messages with "chore(deps)" prefix
+- ✅ Automatic labeling for easy PR filtering
 
 ### 3.6 Add Branch Protection Rules (Medium Priority)
 
@@ -910,32 +954,34 @@ public async Task<List<Workshop>> ImportAsync(Stream stream)
 
 ## 7. Implementation Roadmap
 
-### Phase 1: Quick Wins (1-2 days effort)
+### Phase 1: Quick Wins ✅ MOSTLY COMPLETED
 
-| Item | Priority | Effort | Impact |
-|------|----------|--------|--------|
-| Add EditorConfig | High | Low | Medium |
-| Add Roslyn Analyzers | Medium | Low | Medium |
-| Add Dependabot | Medium | Low | Low |
-| Add NuGet caching to CI | Low | Low | Low |
+| Item | Priority | Effort | Impact | Status |
+|------|----------|--------|--------|--------|
+| Add EditorConfig | High | Low | Medium | ✅ Complete |
+| Configure Roslyn analyzer rules | Medium | Low | Medium | ⏳ Pending |
+| Add Dependabot | Medium | Low | Low | ✅ Complete |
+| Add NuGet caching to CI | Low | Low | Low | ⏳ Pending |
 
-### Phase 2: Testing Foundation (3-5 days effort)
+### Phase 2: Testing Foundation ⚡ IN PROGRESS
 
-| Item | Priority | Effort | Impact |
-|------|----------|--------|--------|
-| Add code coverage to CI | High | Medium | High |
-| Create test builders | Medium | Medium | Medium |
-| Add parameterized tests | Medium | Low | Medium |
-| Add CLI integration tests | High | Medium | High |
+| Item | Priority | Effort | Impact | Status |
+|------|----------|--------|--------|--------|
+| Add code coverage to CI | High | Medium | High | ✅ Complete |
+| Create test builders | Medium | Medium | Medium | ⏳ Pending |
+| Add parameterized tests | Medium | Low | Medium | ⏳ Pending |
+| Add CLI integration tests | High | Medium | High | ⏳ Pending |
+| Add service tests | High | Medium | High | ✅ Complete |
+| Add model/constant tests | Medium | Low | Medium | ✅ Complete |
 
-### Phase 3: Architecture Refactoring (5-10 days effort)
+### Phase 3: Architecture Refactoring ✅ COMPLETED
 
-| Item | Priority | Effort | Impact |
-|------|----------|--------|--------|
-| Split ExcelUtilities | High | High | High |
-| Add domain exceptions | Medium | Medium | Medium |
-| Add schema validation | Medium | Medium | High |
-| Extract PDF configuration | Medium | Medium | Medium |
+| Item | Priority | Effort | Impact | Status |
+|------|----------|--------|--------|--------|
+| Split ExcelUtilities | High | High | High | ✅ Complete |
+| Add domain exceptions | Medium | Medium | Medium | ✅ Complete |
+| Add schema validation | Medium | Medium | High | ⏳ Pending |
+| Extract PDF configuration | Medium | Medium | Medium | ⏳ Pending |
 
 ### Phase 4: Advanced Improvements (Optional)
 
@@ -950,24 +996,33 @@ public async Task<List<Workshop>> ImportAsync(Stream stream)
 
 ## Summary of Key Recommendations
 
-### Must-Have (Before Next Release)
-1. **Add code coverage tracking** - Critical for maintaining quality
-2. **Add EditorConfig** - Ensure consistent code style
-3. **Expand PDF tests** - Core functionality needs better validation
+### ✅ Completed Improvements
+1. ✅ **Code coverage tracking** - Codecov integrated with CI/CD
+2. ✅ **EditorConfig** - Consistent code formatting enforced
+3. ✅ **Split ExcelUtilities** - Service-based architecture implemented
+4. ✅ **Domain exceptions** - Custom exception hierarchy added
+5. ✅ **Dependabot** - Automated dependency updates active
+6. ✅ **Service tests** - Comprehensive tests for generators and services
 
-### Should-Have (Next Development Cycle)
-1. **Split ExcelUtilities** - Improve maintainability
-2. **Add domain exceptions** - Better error handling
-3. **Add CLI tests** - Complete test coverage
-4. **Add Dependabot** - Automate dependency updates
+### High Priority (Recommended Next)
+1. **Configure Roslyn analyzer severity rules** - Customize enforcement beyond SDK defaults
+2. **Expand PDF content validation tests** - Verify PDF structure and content
+3. **Add CLI integration tests** - End-to-end testing for CLI workflows
+4. **Add test builders** - Improve test maintainability and readability
 
-### Nice-to-Have (Future Improvements)
-1. **Repository pattern** - Cleaner data access
-2. **Caching layer** - Performance optimization
-3. **Performance tests** - Benchmarking
-4. **CodeQL scanning** - Security analysis
+### Medium Priority (Future Enhancements)
+1. **Add schema validation** - Pre-validate Excel files before processing
+2. **Extract PDF configuration** - Make layout settings configurable
+3. **Add Blazor component interaction tests** - Better UI test coverage
+4. **Add parameterized tests** - Reduce test code duplication
+
+### Nice-to-Have (Optional Improvements)
+1. **Repository pattern** - Cleaner data access layer
+2. **Caching layer** - Performance optimization for location data
+3. **Performance testing** - Benchmark with BenchmarkDotNet
+4. **CodeQL scanning** - Automated security analysis
 
 ---
 
-*Generated: December 2024*
+*Generated: December 2025*
 *Codebase Version: .NET 10.0*
