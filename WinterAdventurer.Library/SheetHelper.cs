@@ -64,7 +64,10 @@ namespace WinterAdventurer.Library
         public string? GetCellValue(int row, string headerName)
         {
             var colIndex = GetColumnIndex(headerName);
-            if (!colIndex.HasValue) return null;
+            if (!colIndex.HasValue)
+            {
+                return null;
+            }
 
             return _sheet.Cells[row, colIndex.Value].Value?.ToString();
         }
@@ -79,7 +82,10 @@ namespace WinterAdventurer.Library
         public string? GetCellValueByPattern(int row, string pattern)
         {
             var colIndex = GetColumnIndexByPattern(pattern);
-            if (!colIndex.HasValue) return null;
+            if (!colIndex.HasValue)
+            {
+                return null;
+            }
 
             return _sheet.Cells[row, colIndex.Value].Value?.ToString();
         }

@@ -27,15 +27,21 @@ namespace WinterAdventurer.Library
                 case "notosans":
                 case "arial":
                     if (isBold)
+                    {
                         return new FontResolverInfo("NotoSans-Bold");
+                    }
                     return new FontResolverInfo("NotoSans-Regular");
                 case "oswald":
                     if (isBold)
+                    {
                         return new FontResolverInfo("Oswald-Bold");
+                    }
                     return new FontResolverInfo("Oswald-Regular");
                 case "roboto":
                     if (isBold)
+                    {
                         return new FontResolverInfo("Roboto-Bold");
+                    }
                     return new FontResolverInfo("Roboto-Regular");
 
                 default:
@@ -59,7 +65,9 @@ namespace WinterAdventurer.Library
         {
             string? resourceName = GetFontResourceName(faceName);
             if (resourceName == null)
+            {
                 throw new InvalidOperationException($"Font resource for {faceName} not found.");
+            }
 
             return LoadFontFromResource(resourceName);
         }
@@ -106,7 +114,9 @@ namespace WinterAdventurer.Library
             using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
             {
                 if (stream == null)
+                {
                     throw new InvalidOperationException($"Resource {resourceName} not found.");
+                }
 
                 using (MemoryStream ms = new MemoryStream())
                 {

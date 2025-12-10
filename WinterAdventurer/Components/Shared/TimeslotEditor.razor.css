@@ -1,0 +1,83 @@
+/* Timeslot row with smooth transitions for position changes */
+.timeslot-row {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 300ms ease-out;
+}
+
+/* Initial load animation using a version attribute */
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(1) {
+    animation: fadeSlideIn 300ms ease-out 0ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(2) {
+    animation: fadeSlideIn 300ms ease-out 50ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(3) {
+    animation: fadeSlideIn 300ms ease-out 100ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(4) {
+    animation: fadeSlideIn 300ms ease-out 150ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(5) {
+    animation: fadeSlideIn 300ms ease-out 200ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(6) {
+    animation: fadeSlideIn 300ms ease-out 250ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(7) {
+    animation: fadeSlideIn 300ms ease-out 300ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(8) {
+    animation: fadeSlideIn 300ms ease-out 350ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(9) {
+    animation: fadeSlideIn 300ms ease-out 400ms backwards;
+}
+.timeslot-container[data-version="1"] .timeslot-row:nth-child(10) {
+    animation: fadeSlideIn 300ms ease-out 450ms backwards;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Re-sort animation - briefly highlight when position changes */
+.timeslot-row.reordering {
+    animation: highlightFlash 400ms ease-out;
+}
+
+@keyframes highlightFlash {
+    0% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.08);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Smooth transitions for all interactive elements */
+.mud-input-root,
+.mud-button {
+    transition: all 200ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .timeslot-row,
+    .timeslot-row.reordering {
+        animation: none !important;
+        transition: none !important;
+    }
+    .timeslot-container[data-version="1"] .timeslot-row {
+        animation: none !important;
+    }
+}

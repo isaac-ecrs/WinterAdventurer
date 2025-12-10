@@ -192,11 +192,16 @@ namespace WinterAdventurer.Library.EventSchemas
         /// <returns>Column name string (exact or pattern), or empty string if key not found or value is invalid.</returns>
         public string GetColumnName(string key)
         {
-            if (!Columns.ContainsKey(key)) return string.Empty;
-
+            if (!Columns.ContainsKey(key))
+            {
+                return string.Empty;
+            }
             var value = Columns[key];
 
-            if (value is string str) return str;
+            if (value is string str)
+            {
+                return str;
+            }
 
             if (value is Newtonsoft.Json.Linq.JObject obj && obj["pattern"] != null)
             {

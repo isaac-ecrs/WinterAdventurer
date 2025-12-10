@@ -267,7 +267,9 @@ namespace WinterAdventurer.Library.Services
 
                         // Skip rows with no name
                         if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
+                        {
                             continue;
+                        }
 
                         // Generate fallback ID if missing
                         if (string.IsNullOrWhiteSpace(selectionId))
@@ -343,10 +345,14 @@ namespace WinterAdventurer.Library.Services
                         var registrationIdStr = helper.GetCellValueByPattern(row, periodConfig.GetColumnName("registrationId"));
 
                         if (!int.TryParse(choiceNumberStr, out int choiceNumber))
+                        {
                             choiceNumber = 1;
+                        }
 
                         if (!int.TryParse(registrationIdStr, out int registrationId))
+                        {
                             registrationId = 0;
+                        }
 
                         // Process each workshop column configured for this period
                         foreach (var workshopCol in periodConfig.WorkshopColumns)
@@ -354,7 +360,10 @@ namespace WinterAdventurer.Library.Services
                             try
                             {
                                 var cellValue = helper.GetCellValue(row, workshopCol.ColumnName);
-                                if (string.IsNullOrWhiteSpace(cellValue)) continue;
+                                if (string.IsNullOrWhiteSpace(cellValue))
+                                {
+                                    continue;
+                                }
 
                                 var workshopName = cellValue.GetWorkshopName();
                                 var leaderName = cellValue.GetLeaderName();

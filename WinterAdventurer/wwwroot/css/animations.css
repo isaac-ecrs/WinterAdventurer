@@ -1,0 +1,128 @@
+/* Loading state animations */
+.loading-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeIn 300ms ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.loading-text {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Success state animations */
+.success-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: successFadeIn 400ms ease-out;
+}
+
+@keyframes successFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-checkmark {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--mud-palette-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: checkmarkPop 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes checkmarkPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-checkmark::after {
+    content: '✓';
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    animation: checkmarkDraw 300ms ease-out 100ms backwards;
+}
+
+@keyframes checkmarkDraw {
+    from {
+        opacity: 0;
+        transform: scale(0);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Button state transitions */
+.mud-button {
+    transition: all 200ms ease-in-out !important;
+}
+
+.mud-button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+/* File upload button animation */
+.file-upload-button {
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.file-upload-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress indicator smooth appearance */
+.mud-progress-circular {
+    animation: fadeIn 200ms ease-out;
+}
+
+/* Spinner rotation enhancement */
+@keyframes spinnerRotate {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-container,
+    .loading-text,
+    .success-container,
+    .success-checkmark,
+    .success-checkmark::after,
+    .file-upload-button:hover,
+    .mud-button:active,
+    .mud-progress-circular {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}

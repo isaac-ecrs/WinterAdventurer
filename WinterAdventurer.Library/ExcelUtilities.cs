@@ -34,7 +34,7 @@ namespace WinterAdventurer.Library
     /// - ExcelParser for Excel import
     /// - PdfDocumentOrchestrator for PDF generation
     /// </summary>
-    public class ExcelUtilities
+    public partial class ExcelUtilities
     {
         /// <summary>
         /// Collection of all workshops parsed from the Excel file.
@@ -329,10 +329,14 @@ namespace WinterAdventurer.Library
                         var registrationIdStr = helper.GetCellValueByPattern(row, periodConfig.GetColumnName("registrationId"));
 
                         if (!int.TryParse(choiceNumberStr, out int choiceNumber))
+                        {
                             choiceNumber = 1;
+                        }
 
                         if (!int.TryParse(registrationIdStr, out int registrationId))
+                        {
                             registrationId = 0;
+                        }
 
                         // Process each workshop column configured for this period
                         foreach (var workshopCol in periodConfig.WorkshopColumns)
@@ -340,7 +344,10 @@ namespace WinterAdventurer.Library
                             try
                             {
                                 var cellValue = helper.GetCellValue(row, workshopCol.ColumnName);
-                                if (string.IsNullOrWhiteSpace(cellValue)) continue;
+                                if (string.IsNullOrWhiteSpace(cellValue))
+                                {
+                                    continue;
+                                }
 
                                 var workshopName = cellValue.GetWorkshopName();
                                 var leaderName = cellValue.GetLeaderName();
