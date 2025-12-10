@@ -81,6 +81,7 @@
                   Success="@success"
                   IsDisabled="@(hasOverlappingTimeslots || hasUnconfiguredTimeslots)"
                   IsLoading="@isLoading"
+                  ShowSuccess="@showPdfSuccess"
                   AvailableLocations="@availableLocations"
                   LocationListVersion="@locationListVersion"
                   OnValidSubmit="BuildPdf"
@@ -96,6 +97,7 @@
     private List<Workshop> workshops = new List<Library.Models.Workshop>();
     private bool isLoading;
     private bool success = false;
+    private bool showPdfSuccess = false;
     private string? errorMessage;
     private List<Period> periods = new List<Period>();
     private List<TimeSlotViewModel> timeslots = new List<TimeSlotViewModel>();
@@ -505,6 +507,12 @@
                 var base64 = Convert.ToBase64String(pdfBytes);
                 await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "ClassRosters.pdf", base64);
                 Logger.LogInformation("BuildPdf: PDF download initiated");
+
+                // Show success message
+                showPdfSuccess = true;
+                if (!_disposed) await InvokeAsync(StateHasChanged);
+                await Task.Delay(3000);
+                showPdfSuccess = false;
             }
 
             isLoading = false;
@@ -574,6 +582,12 @@
             {
                 var base64 = Convert.ToBase64String(pdfBytes);
                 await JSRuntime.InvokeVoidAsync("downloadFile", _cts?.Token ?? default, "MasterSchedule.pdf", base64);
+
+                // Show success message
+                showPdfSuccess = true;
+                if (!_disposed) await InvokeAsync(StateHasChanged);
+                await Task.Delay(3000);
+                showPdfSuccess = false;
             }
 
             isLoading = false;

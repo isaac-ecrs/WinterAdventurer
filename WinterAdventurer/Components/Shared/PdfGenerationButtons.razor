@@ -16,8 +16,17 @@
     </MudButton>
     @if (IsLoading)
     {
-        <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" />
-        <MudText Typo="Typo.body2" Color="Color.Primary">Generating PDF...</MudText>
+        <div class="loading-container">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" />
+            <MudText Typo="Typo.body2" Color="Color.Primary" Class="loading-text">Generating PDF...</MudText>
+        </div>
+    }
+    @if (ShowSuccess)
+    {
+        <div class="success-container">
+            <div class="success-checkmark"></div>
+            <MudText Typo="Typo.body2" Color="Color.Success">PDF Generated Successfully!</MudText>
+        </div>
     }
 </MudItem>
 
@@ -34,6 +43,12 @@
     /// </summary>
     [Parameter]
     public bool IsLoading { get; set; }
+
+    /// <summary>
+    /// Indicates whether to show the success message after PDF generation
+    /// </summary>
+    [Parameter]
+    public bool ShowSuccess { get; set; }
 
     /// <summary>
     /// Event callback invoked when the "Download Master Schedule" button is clicked

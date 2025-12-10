@@ -11,6 +11,7 @@ public class ThemeService
 {
     private readonly IJSRuntime _jsRuntime;
     private bool _isDarkMode = true; // Default to dark mode
+    private bool _isTransitioning = false;
 
     /// <summary>
     /// Event raised when the theme changes, allowing components to react to theme updates.
@@ -31,6 +32,12 @@ public class ThemeService
     /// </summary>
     /// <value>True if dark mode is active; false if light mode is active.</value>
     public bool IsDarkMode => _isDarkMode;
+
+    /// <summary>
+    /// Gets a value indicating whether a theme transition is currently in progress.
+    /// </summary>
+    /// <value>True if transitioning between themes; false otherwise.</value>
+    public bool IsTransitioning => _isTransitioning;
 
     /// <summary>
     /// Initializes the theme service by loading the saved theme preference from browser localStorage.
@@ -56,13 +63,21 @@ public class ThemeService
     }
 
     /// <summary>
-    /// Toggles the current theme between light and dark mode.
+    /// Toggles the current theme between light and dark mode with a smooth transition animation.
     /// Persists the new theme preference to localStorage, updates the tour theme via JavaScript interop,
     /// and raises the <see cref="OnThemeChanged"/> event to notify subscribers.
     /// </summary>
     /// <returns>A task representing the asynchronous toggle operation.</returns>
     public async Task ToggleThemeAsync()
     {
+        // Prevent rapid toggling during transition
+        if (_isTransitioning) return;
+
+        _isTransitioning = true;
+        OnThemeChanged?.Invoke(); // Trigger overlay fade-in
+
+        await Task.Delay(150); // Half of 300ms transition
+
         _isDarkMode = !_isDarkMode;
         await SaveThemeAsync();
 
@@ -76,7 +91,11 @@ public class ThemeService
             // Ignore if JavaScript is not available
         }
 
-        OnThemeChanged?.Invoke();
+        OnThemeChanged?.Invoke(); // Trigger theme change
+
+        await Task.Delay(150); // Complete the transition
+        _isTransitioning = false;
+        OnThemeChanged?.Invoke(); // Final update to remove overlay
     }
 
     /// <summary>
