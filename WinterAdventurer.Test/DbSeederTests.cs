@@ -1,6 +1,9 @@
+// <copyright file="DbSeederTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Data;
 
 namespace WinterAdventurer.Test;
@@ -12,7 +15,8 @@ namespace WinterAdventurer.Test;
 public class DbSeederTests
 {
     private ApplicationDbContext _context = null!;
-    private ILogger _logger = null!;
+    private ILogger<DbSeeder> _logger = null!;
+    private DbSeeder _dbSeeder = null!;
 
     [TestInitialize]
     public void Setup()
@@ -25,7 +29,10 @@ public class DbSeederTests
 
         // Create logger
         _logger = LoggerFactory.Create(builder => builder.AddConsole())
-            .CreateLogger<DbSeederTests>();
+                    .CreateLogger<DbSeeder>();
+
+        // Create DB context
+        _dbSeeder = new DbSeeder(_logger);
     }
 
     [TestCleanup]
@@ -35,13 +42,11 @@ public class DbSeederTests
         _context.Dispose();
     }
 
-    #region SeedDefaultDataAsync Tests
-
     [TestMethod]
     public async Task SeedDefaultDataAsync_EmptyDatabase_SeedsDefaultLocationsAndTags()
     {
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - verify tags were created
         var tags = await _context.Tags.ToListAsync();
@@ -56,7 +61,7 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_EmptyDatabase_CreatesDownstairsTag()
     {
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert
         var downstairsTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == "Downstairs");
@@ -76,11 +81,11 @@ public class DbSeederTests
             "Craft Room",
             "Elm Room",
             "Rec Hall",
-            "Library"
+            "Library",
         };
 
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert
         foreach (var expectedLocation in expectedLocations)
@@ -94,7 +99,7 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_EmptyDatabase_AssignsDownstairsTagToCorrectLocations()
     {
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - Craft Room should have Downstairs tag
         var craftRoom = await _context.Locations
@@ -117,7 +122,7 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_EmptyDatabase_LocationsWithoutTagsHaveEmptyTagsList()
     {
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - Dining Room should have no tags
         var diningRoom = await _context.Locations
@@ -138,12 +143,12 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_AlreadySeeded_IsIdempotent()
     {
         // Arrange - seed once
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
         var initialTagCount = await _context.Tags.CountAsync();
         var initialLocationCount = await _context.Locations.CountAsync();
 
         // Act - seed again
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - counts should not change
         var finalTagCount = await _context.Tags.CountAsync();
@@ -160,12 +165,12 @@ public class DbSeederTests
         {
             Name = "Downstairs",
             Color = "#FF5722",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
         // Act - run seeder
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - should still only have one tag (not duplicated)
         var tags = await _context.Tags.Where(t => t.Name == "Downstairs").ToListAsync();
@@ -179,12 +184,12 @@ public class DbSeederTests
         _context.Locations.Add(new Location
         {
             Name = "Dining Room",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
         // Act - run seeder
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - should still only have one Dining Room (not duplicated)
         var diningRooms = await _context.Locations.Where(l => l.Name == "Dining Room").ToListAsync();
@@ -205,7 +210,7 @@ public class DbSeederTests
         _context.ChangeTracker.Clear();
 
         // Act - run seeder
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - should still only have one tag assignment
         var craftRoom = await _context.Locations
@@ -219,7 +224,7 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_CreatesTimestamps()
     {
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - verify tags have CreatedAt timestamps
         var tag = await _context.Tags.FirstAsync();
@@ -236,13 +241,13 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_MultipleRuns_RemainsIdempotent()
     {
         // Act - seed multiple times
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
         var count1 = await _context.Locations.CountAsync();
 
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
         var count2 = await _context.Locations.CountAsync();
 
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
         var count3 = await _context.Locations.CountAsync();
 
         // Assert - all counts should be the same
@@ -254,7 +259,7 @@ public class DbSeederTests
     public async Task SeedDefaultDataAsync_EmptyDatabase_TagAssignmentsMatchExpectedConfiguration()
     {
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - only Craft Room and Rec Hall should have tags
         var locationsWithTags = await _context.Locations
@@ -269,10 +274,6 @@ public class DbSeederTests
         Assert.AreEqual("Rec Hall", locationNames[1]);
     }
 
-    #endregion
-
-    #region Edge Cases
-
     [TestMethod]
     public async Task SeedDefaultDataAsync_CustomLocationExists_DoesNotConflict()
     {
@@ -280,12 +281,12 @@ public class DbSeederTests
         _context.Locations.Add(new Location
         {
             Name = "Custom Workshop",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - custom location should still exist
         var customLocation = await _context.Locations.FirstOrDefaultAsync(l => l.Name == "Custom Workshop");
@@ -304,12 +305,12 @@ public class DbSeederTests
         {
             Name = "Accessible",
             Color = "#00FF00",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
         // Act
-        await DbSeeder.SeedDefaultDataAsync(_context, _logger);
+        await _dbSeeder.SeedDefaultDataAsync(_context);
 
         // Assert - custom tag should still exist
         var customTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == "Accessible");
@@ -319,6 +320,4 @@ public class DbSeederTests
         var totalTags = await _context.Tags.CountAsync();
         Assert.IsTrue(totalTags >= 2, "Should have at least 1 default + 1 custom tag");
     }
-
-    #endregion
 }

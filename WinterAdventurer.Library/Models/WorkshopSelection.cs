@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// <copyright file="WorkshopSelection.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Newtonsoft.Json;
 
 namespace WinterAdventurer.Library.Models

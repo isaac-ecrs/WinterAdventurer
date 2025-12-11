@@ -1,8 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
+// <copyright file="MasterScheduleGenerator.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
-using Microsoft.Extensions.Logging;
 using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Models;
 
@@ -17,11 +19,12 @@ namespace WinterAdventurer.Library.Services
         private readonly EventSchema _schema;
 
         /// <summary>
-        /// Initializes a new instance of the MasterScheduleGenerator class.
+        /// Initializes a new instance of the <see cref="MasterScheduleGenerator"/> class.
         /// </summary>
         /// <param name="schema">Event schema configuration defining period structure.</param>
         /// <param name="logger">Logger for diagnostic output.</param>
-        public MasterScheduleGenerator(EventSchema schema, ILogger<MasterScheduleGenerator> logger) : base(logger)
+        public MasterScheduleGenerator(EventSchema schema, ILogger<MasterScheduleGenerator> logger)
+            : base(logger)
         {
             _schema = schema ?? throw new ArgumentNullException(nameof(schema));
         }
@@ -34,12 +37,12 @@ namespace WinterAdventurer.Library.Services
         /// <param name="eventName">Name of the event displayed in PDF title.</param>
         /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
         /// <returns>List containing a single MigraDoc Section with the master schedule table.</returns>
-        public List<Section> GenerateMasterSchedule(List<Workshop> workshops, string eventName, List<Models.TimeSlot>? timeslots = null)
+        public List<Section> GenerateMasterSchedule(List<Workshop> workshops, string eventName, List<TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
             // If no timeslots provided, create default set
-            if (timeslots == null || !timeslots.Any())
+            if (timeslots == null || timeslots.Count == 0)
             {
                 timeslots = CreateDefaultTimeslots();
             }
@@ -47,7 +50,7 @@ namespace WinterAdventurer.Library.Services
             // Get unique locations sorted alphabetically
             var locations = GetUniqueLocations(workshops);
 
-            if (!locations.Any())
+            if (locations.Count == 0)
             {
                 // No locations assigned, skip master schedule
                 return sections;
@@ -59,6 +62,7 @@ namespace WinterAdventurer.Library.Services
             if (locations.Count > 5)
             {
                 section.PageSetup.Orientation = Orientation.Landscape;
+
                 // Smaller margins to maximize space
                 section.PageSetup.LeftMargin = Unit.FromInch(0.4);
                 section.PageSetup.RightMargin = Unit.FromInch(0.4);
@@ -81,6 +85,7 @@ namespace WinterAdventurer.Library.Services
             title.Format.Font.Size = PdfLayoutConstants.FontSizes.MasterSchedule.Title;
             title.Format.Alignment = ParagraphAlignment.Center;
             title.AddFormattedText(eventName, TextFormat.Bold);
+
             // Add vertical spacing to center content on page
             title.Format.SpaceBefore = section.PageSetup.Orientation == Orientation.Landscape
                 ? Unit.FromPoint(24)
@@ -95,8 +100,9 @@ namespace WinterAdventurer.Library.Services
             var timeColumnWidth = PdfLayoutConstants.ColumnWidths.MasterSchedule.Time;
             var daysColumnWidth = PdfLayoutConstants.ColumnWidths.MasterSchedule.Days;
             var pageUsableWidth = section.PageSetup.Orientation == Orientation.Landscape
-                ? 10.2  // 11" - 0.4" - 0.4"
+                ? 10.2 // 11" - 0.4" - 0.4"
                 : PdfLayoutConstants.PageDimensions.PortraitUsableWidth;
+
             // Make table 9.5" wide to leave room for centering
             var tableWidth = section.PageSetup.Orientation == Orientation.Landscape ? 9.5 : pageUsableWidth;
             var locationColumnWidth = (tableWidth - timeColumnWidth - daysColumnWidth) / locations.Count;
@@ -104,7 +110,7 @@ namespace WinterAdventurer.Library.Services
             // Add left indent to center the table horizontally (slightly more to the right)
             if (section.PageSetup.Orientation == Orientation.Landscape)
             {
-                var leftIndent = (pageUsableWidth - tableWidth) / 2 + 0.15;  // Center + extra shift right
+                var leftIndent = ((pageUsableWidth - tableWidth) / 2) + 0.15;  // Center + extra shift right
                 table.Rows.LeftIndent = Unit.FromInch(leftIndent);
             }
 
@@ -193,7 +199,7 @@ namespace WinterAdventurer.Library.Services
         /// <param name="timeslot">Period timeslot containing workshop assignments.</param>
         /// <param name="locations">Ordered list of locations defining table columns.</param>
         /// <param name="workshops">List of workshops to search for location/period matches.</param>
-        private void AddPeriodRows(Table table, Models.TimeSlot timeslot, List<string> locations, List<Workshop> workshops)
+        private void AddPeriodRows(Table table, TimeSlot timeslot, List<string> locations, List<Workshop> workshops)
         {
             // Create two rows: Days 1-2 and Days 3-4
             var row12 = table.AddRow();
@@ -296,7 +302,7 @@ namespace WinterAdventurer.Library.Services
         /// <param name="table">MigraDoc table to add the row to.</param>
         /// <param name="timeslot">Activity timeslot containing label and time information.</param>
         /// <param name="locationCount">Number of location columns to merge across.</param>
-        private void AddActivityRow(Table table, Models.TimeSlot timeslot, int locationCount)
+        private void AddActivityRow(Table table, TimeSlot timeslot, int locationCount)
         {
             var row = table.AddRow();
             row.Shading.Color = Color.FromRgb(230, 230, 230);
@@ -396,37 +402,37 @@ namespace WinterAdventurer.Library.Services
         /// Includes Breakfast, all period sheets from schema, Lunch, and Evening Program.
         /// </summary>
         /// <returns>List of TimeSlot objects representing the event's daily schedule structure.</returns>
-        public List<Models.TimeSlot> CreateDefaultTimeslots()
+        public List<TimeSlot> CreateDefaultTimeslots()
         {
-            var timeslots = new List<Models.TimeSlot>();
+            var timeslots = new List<TimeSlot>();
 
             // Add periods from schema
             foreach (var period in _schema.PeriodSheets)
             {
-                timeslots.Add(new Models.TimeSlot
+                timeslots.Add(new TimeSlot
                 {
                     Label = period.DisplayName,
-                    IsPeriod = true
+                    IsPeriod = true,
                 });
             }
 
             // Add default non-period activities
-            timeslots.Insert(0, new Models.TimeSlot
+            timeslots.Insert(0, new TimeSlot
             {
                 Label = "Breakfast",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
-            timeslots.Add(new Models.TimeSlot
+            timeslots.Add(new TimeSlot
             {
                 Label = "Lunch",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
-            timeslots.Add(new Models.TimeSlot
+            timeslots.Add(new TimeSlot
             {
                 Label = "Evening Program",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             return timeslots;

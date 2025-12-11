@@ -52,6 +52,48 @@ csharp_preserve_single_line_blocks = true
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
 
+# --------------------------------------------------------------------------
+# STYLECOP.ANALYZERS (SAxxxx) RULES 
+# --------------------------------------------------------------------------
+
+# Set default StyleCop severity. If not explicitly defined below, it will fall 
+# back to the general dotnet_analyzer_diagnostic.severity if set.
+
+# SA1000: Using directives should be placed correctly (e.g., inside/outside namespace)
+dotnet_diagnostic.SA1000.severity = error
+
+# SA1101: Prefix local calls with 'this.' (Disabling, as IDE0003 handles 'this' qualification)
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1516: Elements should be separated by single blank line (Disabling for cleaner code blocks)
+dotnet_diagnostic.SA1516.severity = none
+
+# SA1600: Elements should be documented (Require documentation for public members)
+dotnet_diagnostic.SA1600.severity = warning
+
+# SA1633: File must have a file header (Required for copyright/company name)
+# DISABLED: Too many test files without headers, adding them all is unnecessary
+dotnet_diagnostic.SA1633.severity = error
+
+# ===================================
+# STYLECOP RULES - PRAGMATIC CONFIGURATION (Modern C# Conventions)
+# ===================================
+
+# SA1309: Field names should not begin with underscore
+# DISABLED: Conflicts with modern C# convention (Microsoft style guide requires _fieldName for private fields)
+# This is enforced instead via naming conventions above (dotnet_naming_rule.private_fields_should_be_camel_case)
+dotnet_diagnostic.SA1309.severity = none
+dotnet_diagnostic.SA1310.severity = none
+
+# SA1516: Elements should be separated by single blank line (Disabling for cleaner code blocks)
+dotnet_diagnostic.SA1516.severity = none
+
+# SA1101: Prefix local calls with 'this.' (Disabling, as IDE0003 handles 'this' qualification)
+dotnet_diagnostic.SA1101.severity = none
+
+# SA0001: XML comment analysis - This is a config issue, can be suppressed
+dotnet_diagnostic.SA0001.severity = none
+
 # ===================================
 # ROSLYN ANALYZER RULES - STRINGENT CONFIGURATION
 # ===================================
@@ -332,6 +374,98 @@ dotnet_diagnostic.IDE0072.severity = warning # Add missing cases to switch expre
 dotnet_diagnostic.IDE0080.severity = warning # Remove unnecessary suppression operator
 dotnet_diagnostic.IDE0100.severity = error   # Remove unnecessary equality operator
 dotnet_diagnostic.IDE0110.severity = error   # Remove unnecessary discard
+
+# ===================================
+# PROJECT-SPECIFIC OVERRIDES
+# ===================================
+
+# CLI Program.cs has multiple record types for configuration
+[WinterAdventurer.CLI/Program.cs]
+dotnet_diagnostic.SA1402.severity = none  # Single type per file
+dotnet_diagnostic.SA1649.severity = none  # File name should match first type name
+dotnet_diagnostic.SA1400.severity = none  # Element should declare access modifier
+
+# EventSchema.cs contains tightly coupled configuration classes (Schema + 4 nested configs)
+[WinterAdventurer.Library/EventSchemas/EventSchema.cs]
+dotnet_diagnostic.SA1402.severity = none  # Single type per file
+
+# ExcelUtilities.cs exposes public Workshops field as part of facade pattern for backward compatibility
+[WinterAdventurer.Library/ExcelUtilities.cs]
+dotnet_diagnostic.SA1401.severity = none  # Field should be private (intentionally public for facade API)
+
+# PdfFormatterBase.cs uses protected fields for subclass access
+[WinterAdventurer.Library/Services/PdfFormatterBase.cs]
+dotnet_diagnostic.SA1401.severity = none  # Field should be private (intentionally protected for subclass use)
+
+# Exception classes have properties before constructors - pragmatic design for init patterns
+[WinterAdventurer.Library/Exceptions/*.cs]
+dotnet_diagnostic.SA1201.severity = none  # Constructor after property (intentional for exception patterns)
+
+# Service and model classes have members ordered by logical grouping rather than access level
+[WinterAdventurer.Library/Services/*.cs]
+dotnet_diagnostic.SA1202.severity = none  # Member ordering (logically grouped rather than access-based)
+dotnet_diagnostic.SA1204.severity = none  # Static member ordering (logically grouped)
+
+[WinterAdventurer.Library/Models/*.cs]
+dotnet_diagnostic.SA1201.severity = none  # Constructor after property (intentional design)
+dotnet_diagnostic.SA1202.severity = none  # Member ordering (property initialization order)
+dotnet_diagnostic.SA1214.severity = none  # Readonly field ordering (initialization order)
+
+[WinterAdventurer.Library/ExcelUtilities.cs]
+dotnet_diagnostic.SA1202.severity = none  # Member ordering (logical grouping for facade)
+dotnet_diagnostic.SA1214.severity = none  # Readonly field ordering
+
+[WinterAdventurer.Library/PdfLayoutConstants.cs]
+dotnet_diagnostic.SA1201.severity = none  # Field after nested class (intentional constants organization)
+
+# Unit test files - relaxed for test scenarios
+[WinterAdventurer.Test/*.cs]
+dotnet_diagnostic.SA1018.severity = none  # Nullable spacing
+dotnet_diagnostic.SA1117.severity = none  # Parameter line breaking (test readability)
+dotnet_diagnostic.SA1201.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1202.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1402.severity = none  # Single type per file (test helpers/mocks)
+dotnet_diagnostic.SA1413.severity = none  # Trailing comma (less important in test initialization)
+dotnet_diagnostic.SA1505.severity = none  # Opening brace blank line
+dotnet_diagnostic.SA1515.severity = none  # Comment blank line
+
+# Unit test subdirectories
+[WinterAdventurer.Test/Mocks/*.cs]
+dotnet_diagnostic.SA1018.severity = none  # Nullable spacing
+dotnet_diagnostic.SA1117.severity = none  # Parameter line breaking (test readability)
+dotnet_diagnostic.SA1201.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1202.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1402.severity = none  # Single type per file (test helpers/mocks)
+dotnet_diagnostic.SA1413.severity = none  # Trailing comma (less important in test initialization)
+dotnet_diagnostic.SA1505.severity = none  # Opening brace blank line
+dotnet_diagnostic.SA1515.severity = none  # Comment blank line
+
+[WinterAdventurer.Test/Components/*.cs]
+dotnet_diagnostic.SA1018.severity = none  # Nullable spacing
+dotnet_diagnostic.SA1117.severity = none  # Parameter line breaking (test readability)
+dotnet_diagnostic.SA1201.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1202.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1402.severity = none  # Single type per file (test helpers/mocks)
+dotnet_diagnostic.SA1413.severity = none  # Trailing comma (less important in test initialization)
+dotnet_diagnostic.SA1505.severity = none  # Opening brace blank line
+dotnet_diagnostic.SA1515.severity = none  # Comment blank line
+
+# E2E Test files - relaxed for test scenarios
+[WinterAdventurer.E2ETests/*.cs]
+dotnet_diagnostic.SA1108.severity = none  # Embedded comments (for test documentation)
+dotnet_diagnostic.SA1117.severity = none  # Parameter line breaking (test readability)
+dotnet_diagnostic.SA1201.severity = none  # Member ordering (test organization)
+dotnet_diagnostic.SA1213.severity = none  # Event naming
+dotnet_diagnostic.SA1214.severity = none  # Readonly field ordering
+dotnet_diagnostic.SA1413.severity = none  # Trailing comma (less important in tests)
+
+# Web app services - member ordering based on functionality
+[WinterAdventurer/Services/*.cs]
+dotnet_diagnostic.SA1201.severity = none  # Constructor after property/event (intentional grouping)
+dotnet_diagnostic.SA1204.severity = none  # Static members ordering (logically grouped)
+
+[WinterAdventurer/Data/DbSeeder.cs]
+dotnet_diagnostic.SA1204.severity = none  # Static members ordering (LoggerMessage pattern)
 
 # JSON, YAML files
 [*.{json,yml,yaml}]

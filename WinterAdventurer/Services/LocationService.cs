@@ -1,6 +1,9 @@
+// <copyright file="LocationService.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using WinterAdventurer.Data;
-using Microsoft.Extensions.Logging;
 
 namespace WinterAdventurer.Services;
 
@@ -57,6 +60,7 @@ public interface ILocationService
     /// </summary>
     /// <param name="workshopName">The name of the workshop.</param>
     /// <param name="locationName">The name of the location to assign.</param>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     Task SaveWorkshopLocationMappingAsync(string workshopName, string locationName);
 
     /// <summary>
@@ -95,6 +99,7 @@ public interface ILocationService
     /// <summary>
     /// Removes all time slots from the database.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     Task ClearAllTimeSlotsAsync();
 
     /// <summary>
@@ -102,6 +107,7 @@ public interface ILocationService
     /// This operation replaces all existing time slots with the provided collection.
     /// </summary>
     /// <param name="timeSlots">The collection of time slots to save.</param>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     Task SaveAllTimeSlotsAsync(List<TimeSlot> timeSlots);
 }
 
@@ -236,7 +242,7 @@ public partial class LocationService : ILocationService
             var mapping = new WorkshopLocationMapping
             {
                 WorkshopName = workshopName,
-                LocationName = locationName
+                LocationName = locationName,
             };
             _context.WorkshopLocationMappings.Add(mapping);
             LogCreatedNewMapping(workshopName);

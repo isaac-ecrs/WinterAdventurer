@@ -1,5 +1,8 @@
+// <copyright file="ThemeServiceTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.JSInterop;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Services;
 
 namespace WinterAdventurer.Test;
@@ -10,8 +13,6 @@ namespace WinterAdventurer.Test;
 [TestClass]
 public class ThemeServiceTests
 {
-    #region InitializeAsync Tests
-
     [TestMethod]
     public async Task InitializeAsync_NoSavedTheme_DefaultsToDarkMode()
     {
@@ -102,10 +103,6 @@ public class ThemeServiceTests
         Assert.IsTrue(jsRuntime.UpdateTourThemeCalled);
         Assert.IsTrue(jsRuntime.LastTourThemeValue);
     }
-
-    #endregion
-
-    #region ToggleThemeAsync Tests
 
     [TestMethod]
     public async Task ToggleThemeAsync_FromDarkToLight_UpdatesTheme()
@@ -243,10 +240,6 @@ public class ThemeServiceTests
         Assert.IsFalse(service.IsDarkMode); // Should still toggle
     }
 
-    #endregion
-
-    #region Integration Tests
-
     [TestMethod]
     public async Task ThemeService_CompleteWorkflow_InitializeToggleAndPersist()
     {
@@ -270,13 +263,9 @@ public class ThemeServiceTests
         Assert.AreEqual("dark", jsRuntime.GetLocalStorageValue("theme"));
     }
 
-    #endregion
-
-    #region Mock JSRuntime
-
     public class MockJSRuntime : IJSRuntime
     {
-        private readonly Dictionary<string, string?> _localStorage = new();
+        private readonly Dictionary<string, string?> _localStorage = new ();
         public bool ThrowOnLocalStorageAccess { get; set; }
         public bool ThrowOnUpdateTourTheme { get; set; }
         public bool UpdateTourThemeCalled { get; set; }
@@ -292,14 +281,17 @@ public class ThemeServiceTests
             return _localStorage.TryGetValue(key, out var value) ? value : null;
         }
 
-        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
+        /// <inheritdoc/>
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[] ? args)
         {
             if (identifier == "localStorage.getItem")
             {
                 if (ThrowOnLocalStorageAccess)
+                {
                     throw new JSException("localStorage not available");
+                }
 
-                var key = args?[0]?.ToString() ?? "";
+                var key = args?[0]?.ToString() ?? string.Empty;
                 var value = GetLocalStorageValue(key);
                 return new ValueTask<TValue>((TValue)(object)value!);
             }
@@ -307,9 +299,11 @@ public class ThemeServiceTests
             if (identifier == "localStorage.setItem")
             {
                 if (ThrowOnLocalStorageAccess)
+                {
                     throw new JSException("localStorage not available");
+                }
 
-                var key = args?[0]?.ToString() ?? "";
+                var key = args?[0]?.ToString() ?? string.Empty;
                 var value = args?[1]?.ToString();
                 SetLocalStorageValue(key, value);
                 return default;
@@ -318,26 +312,28 @@ public class ThemeServiceTests
             if (identifier == "updateTourTheme")
             {
                 if (ThrowOnUpdateTourTheme)
+                {
                     throw new JSException("updateTourTheme failed");
+                }
 
                 UpdateTourThemeCalled = true;
                 if (args != null && args.Length > 0)
                 {
-                    LastTourThemeValue = (bool)args[0]!;
+                    LastTourThemeValue = (bool)args[0] !;
                 }
+
                 return default;
             }
 
             return default;
         }
 
-        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
+        /// <inheritdoc/>
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[] ? args)
         {
             return InvokeAsync<TValue>(identifier, args);
         }
     }
-
-    #endregion
 }
 
 /// <summary>
@@ -353,9 +349,11 @@ internal static class ThemeServiceTestExtensions
             if (mockRuntime != null)
             {
                 if (mockRuntime.ThrowOnLocalStorageAccess)
+                {
                     throw new JSException("localStorage not available");
+                }
 
-                var key = args[0]?.ToString() ?? "";
+                var key = args[0]?.ToString() ?? string.Empty;
                 var value = args[1]?.ToString();
                 mockRuntime.SetLocalStorageValue(key, value);
             }
@@ -366,12 +364,14 @@ internal static class ThemeServiceTestExtensions
             if (mockRuntime != null)
             {
                 if (mockRuntime.ThrowOnUpdateTourTheme)
+                {
                     throw new JSException("updateTourTheme failed");
+                }
 
                 mockRuntime.UpdateTourThemeCalled = true;
                 if (args.Length > 0)
                 {
-                    mockRuntime.LastTourThemeValue = (bool)args[0]!;
+                    mockRuntime.LastTourThemeValue = (bool)args[0] !;
                 }
             }
         }

@@ -1,4 +1,6 @@
-using System;
+// <copyright file="InvalidWorkshopFormatException.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.Library.Exceptions
 {
@@ -9,36 +11,39 @@ namespace WinterAdventurer.Library.Exceptions
     public class InvalidWorkshopFormatException : ExcelParsingException
     {
         /// <summary>
-        /// The actual cell value that failed to parse.
+        /// Gets or sets the actual cell value that failed to parse.
         /// </summary>
         public string CellValue { get; set; } = string.Empty;
 
         /// <summary>
-        /// The expected format for workshop cells.
+        /// Gets or sets the expected format for workshop cells.
         /// </summary>
         public string ExpectedFormat { get; set; } = "WorkshopName (LeaderName)";
 
         /// <summary>
-        /// Initializes a new instance of the InvalidWorkshopFormatException class.
+        /// Initializes a new instance of the <see cref="InvalidWorkshopFormatException"/> class.
         /// </summary>
-        public InvalidWorkshopFormatException() : base()
+        public InvalidWorkshopFormatException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the InvalidWorkshopFormatException class with a specified error message.
+        /// Initializes a new instance of the <see cref="InvalidWorkshopFormatException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public InvalidWorkshopFormatException(string message) : base(message)
+        public InvalidWorkshopFormatException(string message)
+            : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the InvalidWorkshopFormatException class with a specified error message and inner exception.
+        /// Initializes a new instance of the <see cref="InvalidWorkshopFormatException"/> class with a specified error message and inner exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public InvalidWorkshopFormatException(string message, Exception innerException) : base(message, innerException)
+        public InvalidWorkshopFormatException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

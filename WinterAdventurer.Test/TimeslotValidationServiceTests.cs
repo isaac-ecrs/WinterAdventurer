@@ -1,3 +1,7 @@
+// <copyright file="TimeslotValidationServiceTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using WinterAdventurer.Library.Services;
 
 namespace WinterAdventurer.Test
@@ -5,15 +9,13 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class TimeslotValidationServiceTests
     {
-        private ITimeslotValidationService _validationService = null!;
+        private TimeslotValidationService _validationService = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _validationService = new TimeslotValidationService();
         }
-
-        #region No Issues - Valid Scenarios
 
         [TestMethod]
         public void ValidateTimeslots_NoTimeslots_ReturnsValid()
@@ -43,7 +45,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -67,7 +69,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -75,7 +77,7 @@ namespace WinterAdventurer.Test
                     Label = "Lunch",
                     StartTime = new TimeSpan(12, 0, 0),
                     EndTime = new TimeSpan(13, 0, 0),
-                    IsPeriod = false
+                    IsPeriod = false,
                 },
                 new TimeSlotDto
                 {
@@ -84,7 +86,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(13, 30, 0),
                     EndTime = new TimeSpan(15, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -108,7 +110,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -117,7 +119,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(10, 30, 0),
                     EndTime = new TimeSpan(12, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -141,7 +143,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -150,7 +152,7 @@ namespace WinterAdventurer.Test
                     StartTime = null,
                     EndTime = null,
                     IsPeriod = false // Not a period, so it's okay to be unconfigured
-                }
+                },
             };
 
             // Act
@@ -161,10 +163,6 @@ namespace WinterAdventurer.Test
             Assert.IsFalse(result.HasOverlappingTimeslots);
             Assert.IsFalse(result.HasUnconfiguredTimeslots);
         }
-
-        #endregion
-
-        #region Unconfigured Timeslots Detection
 
         [TestMethod]
         public void ValidateTimeslots_PeriodMissingStartTime_DetectsUnconfigured()
@@ -179,7 +177,7 @@ namespace WinterAdventurer.Test
                     StartTime = null,
                     EndTime = new TimeSpan(10, 30, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -204,7 +202,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = null,
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -229,7 +227,7 @@ namespace WinterAdventurer.Test
                     StartTime = null,
                     EndTime = null,
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -253,7 +251,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -262,7 +260,7 @@ namespace WinterAdventurer.Test
                     StartTime = null,
                     EndTime = new TimeSpan(15, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -273,10 +271,6 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(result.HasUnconfiguredTimeslots);
             Assert.IsFalse(result.HasOverlappingTimeslots);
         }
-
-        #endregion
-
-        #region Overlapping Timeslots Detection
 
         [TestMethod]
         public void ValidateTimeslots_OverlappingTimeslots_DetectsOverlap()
@@ -290,7 +284,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -299,7 +293,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(10, 0, 0), // Starts 30 min before first ends
                     EndTime = new TimeSpan(11, 30, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -323,7 +317,7 @@ namespace WinterAdventurer.Test
                     Label = "All Day",
                     StartTime = new TimeSpan(8, 0, 0),
                     EndTime = new TimeSpan(17, 0, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -332,7 +326,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(12, 0, 0),
                     EndTime = new TimeSpan(13, 0, 0),
                     IsPeriod = false
-                }
+                },
             };
 
             // Act
@@ -356,7 +350,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -365,7 +359,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(10, 29, 0), // 1 minute before first ends
                     EndTime = new TimeSpan(11, 30, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -389,7 +383,7 @@ namespace WinterAdventurer.Test
                     Label = "Afternoon",
                     StartTime = new TimeSpan(13, 0, 0),
                     EndTime = new TimeSpan(15, 0, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -398,7 +392,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(10, 0, 0),
                     EndTime = new TimeSpan(13, 30, 0), // Overlaps with afternoon
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -409,10 +403,6 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(result.HasOverlappingTimeslots);
             Assert.IsFalse(result.HasUnconfiguredTimeslots);
         }
-
-        #endregion
-
-        #region Both Issues Present
 
         [TestMethod]
         public void ValidateTimeslots_BothOverlapAndUnconfigured_DetectsBoth()
@@ -426,7 +416,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -434,7 +424,7 @@ namespace WinterAdventurer.Test
                     Label = "Late Morning",
                     StartTime = new TimeSpan(10, 0, 0), // Overlaps
                     EndTime = new TimeSpan(11, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -443,7 +433,7 @@ namespace WinterAdventurer.Test
                     StartTime = null, // Unconfigured
                     EndTime = new TimeSpan(15, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -454,10 +444,6 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(result.HasOverlappingTimeslots);
             Assert.IsTrue(result.HasUnconfiguredTimeslots);
         }
-
-        #endregion
-
-        #region Edge Cases
 
         [TestMethod]
         public void ValidateTimeslots_MultipleTimeslotsWithNullTimes_IgnoresNullsForOverlapCheck()
@@ -471,7 +457,7 @@ namespace WinterAdventurer.Test
                     Label = "TBD Period 1",
                     StartTime = null,
                     EndTime = null,
-                    IsPeriod = false
+                    IsPeriod = false,
                 },
                 new TimeSlotDto
                 {
@@ -480,7 +466,7 @@ namespace WinterAdventurer.Test
                     StartTime = null,
                     EndTime = null,
                     IsPeriod = false
-                }
+                },
             };
 
             // Act
@@ -504,7 +490,7 @@ namespace WinterAdventurer.Test
                     Label = "Period 1",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 0, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -512,7 +498,7 @@ namespace WinterAdventurer.Test
                     Label = "Period 2",
                     StartTime = new TimeSpan(10, 0, 0),
                     EndTime = new TimeSpan(11, 0, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -521,7 +507,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(11, 0, 0),
                     EndTime = new TimeSpan(12, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -545,7 +531,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -553,7 +539,7 @@ namespace WinterAdventurer.Test
                     Label = "Break",
                     StartTime = new TimeSpan(10, 30, 0),
                     EndTime = new TimeSpan(10, 45, 0),
-                    IsPeriod = false
+                    IsPeriod = false,
                 },
                 new TimeSlotDto
                 {
@@ -561,7 +547,7 @@ namespace WinterAdventurer.Test
                     Label = "Late Morning Period",
                     StartTime = new TimeSpan(10, 45, 0),
                     EndTime = new TimeSpan(12, 0, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -569,7 +555,7 @@ namespace WinterAdventurer.Test
                     Label = "Lunch",
                     StartTime = new TimeSpan(12, 0, 0),
                     EndTime = new TimeSpan(13, 0, 0),
-                    IsPeriod = false
+                    IsPeriod = false,
                 },
                 new TimeSlotDto
                 {
@@ -578,7 +564,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(13, 0, 0),
                     EndTime = new TimeSpan(15, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -603,7 +589,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(12, 0, 0),
                     EndTime = new TimeSpan(12, 0, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -627,7 +613,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -636,7 +622,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -660,7 +646,7 @@ namespace WinterAdventurer.Test
                     Label = "Late Night Activities",
                     StartTime = new TimeSpan(21, 15, 0), // 9:15 PM
                     EndTime = null,
-                    IsPeriod = false
+                    IsPeriod = false,
                 },
                 new TimeSlotDto
                 {
@@ -669,7 +655,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(21, 15, 0), // 9:15 PM - same start time
                     EndTime = null,
                     IsPeriod = false
-                }
+                },
             };
 
             // Act
@@ -680,10 +666,6 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(result.HasOverlappingTimeslots, "Should detect overlap when start times are identical");
             Assert.IsFalse(result.HasUnconfiguredTimeslots, "Custom timeslots can have null end times");
         }
-
-        #endregion
-
-        #region Real-World Scenarios
 
         [TestMethod]
         public void ValidateTimeslots_TypicalWinterAdventureSchedule_ReturnsValid()
@@ -697,7 +679,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning First Period",
                     StartTime = new TimeSpan(9, 15, 0),
                     EndTime = new TimeSpan(10, 45, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -705,7 +687,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Second Period",
                     StartTime = new TimeSpan(11, 0, 0),
                     EndTime = new TimeSpan(12, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -713,7 +695,7 @@ namespace WinterAdventurer.Test
                     Label = "Lunch",
                     StartTime = new TimeSpan(12, 30, 0),
                     EndTime = new TimeSpan(13, 30, 0),
-                    IsPeriod = false
+                    IsPeriod = false,
                 },
                 new TimeSlotDto
                 {
@@ -721,7 +703,7 @@ namespace WinterAdventurer.Test
                     Label = "Afternoon First Period",
                     StartTime = new TimeSpan(13, 30, 0),
                     EndTime = new TimeSpan(15, 0, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -730,7 +712,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(15, 15, 0),
                     EndTime = new TimeSpan(16, 45, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -754,7 +736,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning First Period",
                     StartTime = new TimeSpan(9, 15, 0),
                     EndTime = new TimeSpan(10, 45, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -763,7 +745,7 @@ namespace WinterAdventurer.Test
                     StartTime = null, // User forgot to configure this
                     EndTime = null,
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -787,7 +769,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning Period",
                     StartTime = new TimeSpan(9, 0, 0),
                     EndTime = new TimeSpan(10, 30, 0),
-                    IsPeriod = true
+                    IsPeriod = true,
                 },
                 new TimeSlotDto
                 {
@@ -796,7 +778,7 @@ namespace WinterAdventurer.Test
                     StartTime = new TimeSpan(10, 0, 0), // Typo - meant 11:00
                     EndTime = new TimeSpan(11, 30, 0),
                     IsPeriod = true
-                }
+                },
             };
 
             // Act
@@ -807,7 +789,5 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(result.HasOverlappingTimeslots);
             Assert.IsFalse(result.HasUnconfiguredTimeslots);
         }
-
-        #endregion
     }
 }

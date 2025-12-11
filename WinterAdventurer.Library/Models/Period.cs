@@ -1,3 +1,7 @@
+// <copyright file="Period.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Text.RegularExpressions;
 
 namespace WinterAdventurer.Library.Models
@@ -12,16 +16,17 @@ namespace WinterAdventurer.Library.Models
         /// Gets or sets the technical Excel sheet name for this period (e.g., "MorningFirstPeriod").
         /// Used for matching Excel sheets during import.
         /// </summary>
-        public string SheetName {get;set;} = string.Empty;
+        public string SheetName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the user-friendly display name for this period (e.g., "Morning First Period").
         /// Generated automatically from SheetName by inserting spaces before capital letters.
         /// Used in schedules and reports.
         /// </summary>
-        public string DisplayName {get;set;} = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Period"/> class.
         /// Creates a period from an Excel sheet name, generating a user-friendly display name.
         /// Display name conversion enables showing "Morning First Period" instead of "MorningFirstPeriod" in schedules and reports.
         /// </summary>

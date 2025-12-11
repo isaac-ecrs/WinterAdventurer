@@ -1,5 +1,8 @@
+// <copyright file="MasterScheduleGeneratorTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Models;
 using WinterAdventurer.Library.Services;
@@ -22,15 +25,13 @@ namespace WinterAdventurer.Test
             _generator = new MasterScheduleGenerator(_schema, NullLogger<MasterScheduleGenerator>.Instance);
         }
 
-        #region GenerateMasterSchedule Tests
-
         [TestMethod]
         public void GenerateMasterSchedule_WithNoLocations_ReturnsEmptySections()
         {
             // Arrange
             var workshops = new List<Workshop>
             {
-                CreateSampleWorkshop("Pottery", "John Smith", null) // No location
+                CreateSampleWorkshop("Pottery", "John Smith", null), // No location
             };
 
             // Act
@@ -46,7 +47,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var workshops = new List<Workshop>
             {
-                CreateSampleWorkshop("Pottery", "John Smith", "Art Studio")
+                CreateSampleWorkshop("Pottery", "John Smith", "Art Studio"),
             };
 
             // Act
@@ -63,7 +64,7 @@ namespace WinterAdventurer.Test
             var workshops = new List<Workshop>
             {
                 CreateSampleWorkshop("Pottery", "John Smith", "Art Studio"),
-                CreateSampleWorkshop("Woodworking", "Jane Doe", "Workshop Room")
+                CreateSampleWorkshop("Woodworking", "Jane Doe", "Workshop Room"),
             };
 
             // Act
@@ -81,7 +82,7 @@ namespace WinterAdventurer.Test
             {
                 CreateSampleWorkshop("Workshop1", "Leader1", "Location1"),
                 CreateSampleWorkshop("Workshop2", "Leader2", "Location2"),
-                CreateSampleWorkshop("Workshop3", "Leader3", "Location3")
+                CreateSampleWorkshop("Workshop3", "Leader3", "Location3"),
             };
 
             // Act
@@ -104,7 +105,7 @@ namespace WinterAdventurer.Test
                 CreateSampleWorkshop("Workshop3", "Leader3", "Location3"),
                 CreateSampleWorkshop("Workshop4", "Leader4", "Location4"),
                 CreateSampleWorkshop("Workshop5", "Leader5", "Location5"),
-                CreateSampleWorkshop("Workshop6", "Leader6", "Location6")
+                CreateSampleWorkshop("Workshop6", "Leader6", "Location6"),
             };
 
             // Act
@@ -122,7 +123,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var workshops = new List<Workshop>
             {
-                CreateSampleWorkshop("Pottery", "John Smith", "Art Studio")
+                CreateSampleWorkshop("Pottery", "John Smith", "Art Studio"),
             };
 
             // Act
@@ -148,7 +149,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var workshops = new List<Workshop>
             {
-                CreateSampleWorkshop("Pottery", "John Smith", "Art Studio")
+                CreateSampleWorkshop("Pottery", "John Smith", "Art Studio"),
             };
 
             var customTimeslots = new List<TimeSlot>
@@ -159,7 +160,7 @@ namespace WinterAdventurer.Test
                     IsPeriod = true,
                     StartTime = new TimeSpan(8, 0, 0),
                     EndTime = new TimeSpan(10, 0, 0)
-                }
+                },
             };
 
             // Act
@@ -167,6 +168,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.AreEqual(1, sections.Count);
+
             // Should have created a section with the custom timeslot
         }
 
@@ -178,7 +180,7 @@ namespace WinterAdventurer.Test
             {
                 CreateSampleWorkshop("Workshop1", "Leader1", "Zebra Room"),
                 CreateSampleWorkshop("Workshop2", "Leader2", "Alpha Room"),
-                CreateSampleWorkshop("Workshop3", "Leader3", "Beta Room")
+                CreateSampleWorkshop("Workshop3", "Leader3", "Beta Room"),
             };
 
             // Act
@@ -203,8 +205,8 @@ namespace WinterAdventurer.Test
             var workshops = new List<Workshop>
             {
                 CreateSampleWorkshop("Workshop1", "Leader1", "Art Studio"),
-                CreateSampleWorkshop("Workshop2", "Leader2", ""), // Empty location
-                CreateSampleWorkshop("Workshop3", "Leader3", null) // Null location
+                CreateSampleWorkshop("Workshop2", "Leader2", string.Empty), // Empty location
+                CreateSampleWorkshop("Workshop3", "Leader3", null), // Null location
             };
 
             // Act
@@ -212,12 +214,9 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.AreEqual(1, sections.Count);
+
             // Should only have one location column (Art Studio)
         }
-
-        #endregion
-
-        #region CreateDefaultTimeslots Tests
 
         [TestMethod]
         public void CreateDefaultTimeslots_ReturnsTimeslots()
@@ -290,12 +289,8 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Breakfast", timeslots[0].Label, "Breakfast should be the first timeslot");
         }
 
-        #endregion
-
-        #region Helper Methods
-
         /// <summary>
-        /// Creates a minimal test schema for testing purposes
+        /// Creates a minimal test schema for testing purposes.
         /// </summary>
         private EventSchema CreateTestSchema()
         {
@@ -315,12 +310,12 @@ namespace WinterAdventurer.Test
                         SheetName = "AfternoonPeriod",
                         DisplayName = "Afternoon Period"
                     }
-                }
+                },
             };
         }
 
         /// <summary>
-        /// Creates a sample workshop for testing purposes
+        /// Creates a sample workshop for testing purposes.
         /// </summary>
         private Workshop CreateSampleWorkshop(string name, string leader, string? location)
         {
@@ -331,10 +326,8 @@ namespace WinterAdventurer.Test
                 Location = location ?? string.Empty,
                 Period = new Period("MorningFirstPeriod"),
                 Duration = new WorkshopDuration(1, 4),
-                Selections = new List<WorkshopSelection>()
+                Selections = new List<WorkshopSelection>(),
             };
         }
-
-        #endregion
     }
 }

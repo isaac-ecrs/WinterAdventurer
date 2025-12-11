@@ -1,25 +1,18 @@
-﻿using System.Collections;
-using System.IO;
-using System.Linq;
+// <copyright file="ExcelUtilities.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Reflection;
+using Microsoft.Extensions.Logging;
+using MigraDoc.DocumentObjectModel;
+using Newtonsoft.Json;
 using OfficeOpenXml;
+using PdfSharp.Fonts;
+using WinterAdventurer.Library.EventSchemas;
+using WinterAdventurer.Library.Exceptions;
 using WinterAdventurer.Library.Extensions;
 using WinterAdventurer.Library.Models;
-using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Services;
-using WinterAdventurer.Library.Exceptions;
-using MigraDoc;
-using MigraDoc.DocumentObjectModel;
-using MigraDoc.DocumentObjectModel.Tables;
-using MigraDoc.DocumentObjectModel.Shapes;
-using System.Data.Common;
-using System.Xml;
-using PdfSharp.Fonts;
-using System.Diagnostics;
-using MigraDoc.DocumentObjectModel.Visitors;
-using PdfSharp.Pdf;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
 
 namespace WinterAdventurer.Library
 {
@@ -32,7 +25,7 @@ namespace WinterAdventurer.Library
     /// NOTE: This class now acts as a facade, delegating to specialized service classes while maintaining
     /// backward compatibility with existing code. For new code, consider using the service classes directly:
     /// - ExcelParser for Excel import
-    /// - PdfDocumentOrchestrator for PDF generation
+    /// - PdfDocumentOrchestrator for PDF generation.
     /// </summary>
     public partial class ExcelUtilities
     {
@@ -117,6 +110,7 @@ namespace WinterAdventurer.Library
                     {
                         throw new InvalidDataException("Failed to deserialize event schema");
                     }
+
                     return schema;
                 }
             }
@@ -138,6 +132,7 @@ namespace WinterAdventurer.Library
             catch (ExcelParsingException ex)
             {
                 LogErrorExcelImportFailure(ex);
+
                 // Double-wrap to maintain backward compatibility with old exception structure
                 // Old code: InvalidOperationException -> InvalidOperationException -> underlying exception
                 var innerException = new InvalidOperationException(ex.Message, ex);
@@ -255,27 +250,30 @@ namespace WinterAdventurer.Library
 
                         // Skip rows with no name
                         if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
+                        {
                             continue;
+                        }
 
                         // Generate fallback ID if missing
                         if (string.IsNullOrWhiteSpace(selectionId))
                         {
-                            selectionId = $"{firstName}{lastName}".Replace(" ", "");
-                            LogDebugGeneratedFallbackAttendeeId($"{firstName} {lastName}", selectionId);
+                            selectionId = $"{firstName}{lastName}".Replace(" ", string.Empty);
+                            LogDebugGeneratedFallbackAttendeeId(firstName ?? "FirstNameNull", lastName ?? "LastNameNull", selectionId);
                         }
 
                         attendees[selectionId] = new Attendee
                         {
                             ClassSelectionId = selectionId,
-                            FirstName = firstName ?? "",
-                            LastName = lastName ?? "",
-                            Email = email ?? "",
-                            Age = age ?? ""
+                            FirstName = firstName ?? string.Empty,
+                            LastName = lastName ?? string.Empty,
+                            Email = email ?? string.Empty,
+                            Age = age ?? string.Empty,
                         };
                     }
                     catch (Exception ex)
                     {
                         LogWarningFailedToParseAttendeeRow(ex, row, sheetConfig.SheetName);
+
                         // Continue processing other rows
                     }
                 }
@@ -360,13 +358,13 @@ namespace WinterAdventurer.Library
                                 else
                                 {
                                     // Fallback: try to get name from the row
-                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? "";
-                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? "";
+                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? string.Empty;
+                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? string.Empty;
                                     attendee = new Attendee
                                     {
                                         ClassSelectionId = selectionId ?? $"{firstName}{lastName}",
                                         FirstName = firstName,
-                                        LastName = lastName
+                                        LastName = lastName,
                                     };
                                 }
 
@@ -381,7 +379,7 @@ namespace WinterAdventurer.Library
                                     FullName = attendee.FullName,
                                     ChoiceNumber = choiceNumber,
                                     Duration = duration,
-                                    RegistrationId = registrationId
+                                    RegistrationId = registrationId,
                                 };
 
                                 // Create unique key for this workshop offering
@@ -400,13 +398,14 @@ namespace WinterAdventurer.Library
                                         Leader = leaderName,
                                         Period = period,
                                         Duration = duration,
-                                        Selections = new List<WorkshopSelection> { selection }
+                                        Selections = new List<WorkshopSelection> { selection },
                                     };
                                 }
                             }
                             catch (Exception ex)
                             {
                                 LogWarningFailedToParseWorkshopData(ex, row, workshopCol.ColumnName, sheet.Name);
+
                                 // Continue processing other workshop columns
                             }
                         }
@@ -414,6 +413,7 @@ namespace WinterAdventurer.Library
                     catch (Exception ex)
                     {
                         LogWarningFailedToProcessRow(ex, row, sheet.Name);
+
                         // Continue processing other rows
                     }
                 }
@@ -437,7 +437,7 @@ namespace WinterAdventurer.Library
         /// <param name="blankScheduleCount">Number of blank schedule pages to append for attendees that did not pre-register for classes.</param>
         /// <param name="eventName">Name of the event displayed in PDF headers and footers.</param>
         /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
-        public Document? CreatePdf(bool mergeWorkshopCells = true, List<Models.TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
+        public Document? CreatePdf(bool mergeWorkshopCells = true, List<TimeSlot>? timeslots = null, int blankScheduleCount = 0, string eventName = "Winter Adventure")
         {
             // Delegate to PdfDocumentOrchestrator service
             return _pdfOrchestrator.CreateWorkshopAndSchedulePdf(
@@ -455,7 +455,7 @@ namespace WinterAdventurer.Library
         /// <param name="eventName">Name of the event displayed in PDF title.</param>
         /// <param name="timeslots">Custom timeslots for schedule structure. If null, uses default timeslots from schema.</param>
         /// <returns>MigraDoc Document ready for rendering, or null if Workshops collection is empty.</returns>
-        public Document? CreateMasterSchedulePdf(string eventName = "Master Schedule", List<Models.TimeSlot>? timeslots = null)
+        public Document? CreateMasterSchedulePdf(string eventName = "Master Schedule", List<TimeSlot>? timeslots = null)
         {
             // Delegate to PdfDocumentOrchestrator service
             return _pdfOrchestrator.CreateMasterSchedulePdf(
@@ -470,143 +470,123 @@ namespace WinterAdventurer.Library
         [LoggerMessage(
             EventId = 1001,
             Level = LogLevel.Information,
-            Message = "Excel import completed successfully via ExcelParser, {workshopCount} workshops parsed"
-        )]
+            Message = "Excel import completed successfully via ExcelParser, {workshopCount} workshops parsed")]
         private partial void LogInformationExcelImportSuccess(int workshopCount);
 
         [LoggerMessage(
             EventId = 1002,
             Level = LogLevel.Error,
-            Message = "Failed to import Excel file"
-        )]
+            Message = "Failed to import Excel file")]
         private partial void LogErrorExcelImportFailure(Exception ex);
 
         [LoggerMessage(
             EventId = 1003,
             Level = LogLevel.Information,
-            Message = "Loaded schema for event: {eventName}"
-        )]
+            Message = "Loaded schema for event: {eventName}")]
         private partial void LogInformationSchemaLoaded(string eventName);
 
         [LoggerMessage(
             EventId = 1004,
             Level = LogLevel.Information,
-            Message = "Loaded {attendeeCount} attendees from ClassSelection sheet"
-        )]
+            Message = "Loaded {attendeeCount} attendees from ClassSelection sheet")]
         private partial void LogInformationLoadedAttendees(int attendeeCount);
 
         [LoggerMessage(
             EventId = 1005,
             Level = LogLevel.Warning,
-            Message = "No attendees found in ClassSelection sheet - workshop parsing may be incomplete"
-        )]
+            Message = "No attendees found in ClassSelection sheet - workshop parsing may be incomplete")]
         private partial void LogWarningNoAttendeesFound();
 
         [LoggerMessage(
             EventId = 1006,
             Level = LogLevel.Warning,
-            Message = "Could not find period sheet: {sheetName}"
-        )]
+            Message = "Could not find period sheet: {sheetName}")]
         private partial void LogWarningPeriodSheetNotFound(string sheetName);
 
         [LoggerMessage(
             EventId = 1007,
             Level = LogLevel.Debug,
-            Message = "Processing period sheet: {sheetName}"
-        )]
+            Message = "Processing period sheet: {sheetName}")]
         private partial void LogDebugProcessingPeriodSheet(string sheetName);
 
         [LoggerMessage(
             EventId = 1008,
             Level = LogLevel.Debug,
-            Message = "Found {workshopCount} workshops in {sheetName}"
-        )]
+            Message = "Found {workshopCount} workshops in {sheetName}")]
         private partial void LogDebugFoundWorkshopsInSheet(int workshopCount, string sheetName);
 
         [LoggerMessage(
             EventId = 1009,
             Level = LogLevel.Information,
-            Message = "Total workshops parsed: {workshopCount}"
-        )]
+            Message = "Total workshops parsed: {workshopCount}")]
         private partial void LogInformationTotalWorkshopsParsed(int workshopCount);
 
         [LoggerMessage(
             EventId = 1010,
             Level = LogLevel.Error,
-            Message = "Failed to parse workshops from Excel package"
-        )]
+            Message = "Failed to parse workshops from Excel package")]
         private partial void LogErrorFailedToParseWorkshops(Exception ex);
 
         // 1051-1100: LoadAttendees
         [LoggerMessage(
             EventId = 1051,
             Level = LogLevel.Warning,
-            Message = "ClassSelection sheet '{sheetName}' not found. Available sheets: {availableSheets}"
-        )]
+            Message = "ClassSelection sheet '{sheetName}' not found. Available sheets: {availableSheets}")]
         private partial void LogWarningClassSelectionSheetNotFound(string sheetName, string availableSheets);
 
         [LoggerMessage(
             EventId = 1052,
             Level = LogLevel.Warning,
-            Message = "ClassSelection sheet '{sheetName}' is empty"
-        )]
+            Message = "ClassSelection sheet '{sheetName}' is empty")]
         private partial void LogWarningClassSelectionSheetEmpty(string sheetName);
 
         [LoggerMessage(
             EventId = 1053,
             Level = LogLevel.Debug,
-            Message = "Generated fallback ID for attendee: {fullName} -> {selectionId}"
-        )]
-        private partial void LogDebugGeneratedFallbackAttendeeId(string fullName, string selectionId);
+            Message = "Generated fallback ID for attendee: {firstName} {lastName} -> {selectionId}")]
+        private partial void LogDebugGeneratedFallbackAttendeeId(string firstName, string lastName, string selectionId);
 
         [LoggerMessage(
             EventId = 1054,
             Level = LogLevel.Warning,
-            Message = "Failed to parse attendee data at row {row} in {sheetName}"
-        )]
+            Message = "Failed to parse attendee data at row {row} in {sheetName}")]
         private partial void LogWarningFailedToParseAttendeeRow(Exception ex, int row, string sheetName);
 
         [LoggerMessage(
             EventId = 1055,
             Level = LogLevel.Error,
-            Message = "Failed to load attendees from ClassSelection sheet"
-        )]
+            Message = "Failed to load attendees from ClassSelection sheet")]
         private partial void LogErrorFailedToLoadAttendees(Exception ex);
 
         // 1101-1150: CollectWorkshops
         [LoggerMessage(
             EventId = 1101,
             Level = LogLevel.Debug,
-            Message = "Sheet {sheetName} has no dimension (empty sheet)"
-        )]
+            Message = "Sheet {sheetName} has no dimension (empty sheet)")]
         private partial void LogDebugSheetEmpty(string sheetName);
 
         [LoggerMessage(
             EventId = 1102,
             Level = LogLevel.Debug,
-            Message = "Skipping empty workshop name at row {row}, column {column}"
-        )]
+            Message = "Skipping empty workshop name at row {row}, column {column}")]
         private partial void LogDebugSkippingEmptyWorkshopName(int row, string column);
 
         [LoggerMessage(
             EventId = 1103,
             Level = LogLevel.Warning,
-            Message = "Failed to parse workshop data at row {row}, column {column} in sheet {sheetName}"
-        )]
+            Message = "Failed to parse workshop data at row {row}, column {column} in sheet {sheetName}")]
         private partial void LogWarningFailedToParseWorkshopData(Exception ex, int row, string column, string sheetName);
 
         [LoggerMessage(
             EventId = 1104,
             Level = LogLevel.Warning,
-            Message = "Failed to process row {row} in sheet {sheetName}"
-        )]
+            Message = "Failed to process row {row} in sheet {sheetName}")]
         private partial void LogWarningFailedToProcessRow(Exception ex, int row, string sheetName);
 
         [LoggerMessage(
             EventId = 1105,
             Level = LogLevel.Error,
-            Message = "Failed to collect workshops from sheet {sheetName}"
-        )]
+            Message = "Failed to collect workshops from sheet {sheetName}")]
         private partial void LogErrorFailedToCollectWorkshops(Exception ex, string sheetName);
 
         #endregion

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+// <copyright file="Workshop.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace WinterAdventurer.Library.Models
@@ -71,7 +70,7 @@ namespace WinterAdventurer.Library.Models
         public List<WorkshopSelection> Selections { get; set; } = new List<WorkshopSelection>();
 
         /// <summary>
-        /// Location tags (e.g., "Downstairs") for display in participant schedules.
+        /// Gets or sets location tags (e.g., "Downstairs") for display in participant schedules.
         /// Used to highlight special location characteristics like floor level.
         /// </summary>
         public List<LocationTag>? Tags { get; set; } = null;
@@ -92,5 +91,5 @@ namespace WinterAdventurer.Library.Models
         {
             return JsonConvert.SerializeObject(this);
         }
-    }    
+    }
 }

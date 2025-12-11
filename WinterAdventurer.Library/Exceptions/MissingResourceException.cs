@@ -1,4 +1,6 @@
-using System;
+// <copyright file="MissingResourceException.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.Library.Exceptions
 {
@@ -9,31 +11,34 @@ namespace WinterAdventurer.Library.Exceptions
     public class MissingResourceException : PdfGenerationException
     {
         /// <summary>
-        /// Name of the missing resource.
+        /// Gets or sets name of the missing resource.
         /// </summary>
         public string ResourceName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Initializes a new instance of the MissingResourceException class.
+        /// Initializes a new instance of the <see cref="MissingResourceException"/> class.
         /// </summary>
-        public MissingResourceException() : base()
+        public MissingResourceException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the MissingResourceException class with a specified error message.
+        /// Initializes a new instance of the <see cref="MissingResourceException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public MissingResourceException(string message) : base(message)
+        public MissingResourceException(string message)
+            : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the MissingResourceException class with a specified error message and inner exception.
+        /// Initializes a new instance of the <see cref="MissingResourceException"/> class with a specified error message and inner exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public MissingResourceException(string message, Exception innerException) : base(message, innerException)
+        public MissingResourceException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

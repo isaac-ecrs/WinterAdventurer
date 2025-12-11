@@ -1,5 +1,8 @@
+// <copyright file="PdfGenerationTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using WinterAdventurer.Library;
 using WinterAdventurer.Test.Helpers;
@@ -21,8 +24,6 @@ namespace WinterAdventurer.Test
             _excelUtilities = new ExcelUtilities(NullLogger<ExcelUtilities>.Instance);
             ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
         }
-
-        #region Workshop Roster Tests
 
         [TestMethod]
         public void CreatePdf_WorkshopRoster_ContainsWorkshopName()
@@ -163,7 +164,7 @@ namespace WinterAdventurer.Test
             var text = PdfTestHelper.ExtractAllText(pdfBytes);
 
             // Assert - verify Alice (Adams) appears before Bob (Baker) when sorted by last name
-            var normalizedText = text.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "");
+            var normalizedText = text.Replace(" ", string.Empty).Replace("\t", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
             var aliceIndex = normalizedText.IndexOf("AliceAdams", StringComparison.OrdinalIgnoreCase);
             var bobIndex = normalizedText.IndexOf("BobBaker", StringComparison.OrdinalIgnoreCase);
 
@@ -211,7 +212,8 @@ namespace WinterAdventurer.Test
             PdfTestHelper.AssertContainsText(pdfBytes, "Painting", "Workshop roster");
 
             // Should have section breaks between workshops
-            Assert.IsTrue(text.Contains("Morning First Period") || text.Contains("MorningFirstPeriod"),
+            Assert.IsTrue(
+                text.Contains("Morning First Period") || text.Contains("MorningFirstPeriod"),
                 "PDF should indicate period information");
         }
 
@@ -310,10 +312,6 @@ namespace WinterAdventurer.Test
             PdfTestHelper.AssertContainsText(pdfBytes, "Enrolled Participants", "Workshop roster");
         }
 
-        #endregion
-
-        #region Individual Schedule Tests
-
         [TestMethod]
         public void CreatePdf_IndividualSchedule_ContainsParticipantName()
         {
@@ -372,10 +370,6 @@ namespace WinterAdventurer.Test
                 "Individual schedule should contain day/time structure");
         }
 
-        #endregion
-
-        #region Logo Tests
-
         [TestMethod]
         public void CreatePdf_AllPages_ContainLogo()
         {
@@ -394,10 +388,6 @@ namespace WinterAdventurer.Test
             int imageCount = PdfTestHelper.CountImages(pdfBytes, pageNumber: 1);
             Assert.IsTrue(imageCount > 0, "First page should contain at least one image (logo)");
         }
-
-        #endregion
-
-        #region Blank Schedule Tests
 
         [TestMethod]
         public void CreatePdf_BlankSchedules_GeneratesCorrectCount()
@@ -426,7 +416,8 @@ namespace WinterAdventurer.Test
 
             // Assert - PDF should have pages for blank schedules
             int pageCount = PdfTestHelper.GetPageCount(pdfBytes);
-            Assert.IsTrue(pageCount >= blankScheduleCount,
+            Assert.IsTrue(
+                pageCount >= blankScheduleCount,
                 $"PDF should have at least {blankScheduleCount} pages for blank schedules");
         }
 
@@ -456,10 +447,6 @@ namespace WinterAdventurer.Test
             // Assert - Blank schedules should have name field placeholder
             PdfTestHelper.AssertContainsText(pdfBytes, "Name:", "Blank schedule");
         }
-
-        #endregion
-
-        #region Master Schedule Tests
 
         [TestMethod]
         public void CreateMasterSchedulePdf_ContainsAllWorkshops()
@@ -515,10 +502,6 @@ namespace WinterAdventurer.Test
             // Assert - Location should appear as column header
             PdfTestHelper.AssertContainsText(pdfBytes, "Art Studio", "Master schedule");
         }
-
-        #endregion
-
-        #region Helper Methods
 
         /// <summary>
         /// Creates a minimal valid Excel package with one workshop and one attendee.
@@ -580,45 +563,6 @@ namespace WinterAdventurer.Test
             periodSheet.Cells[3, 5].Value = "2";
             periodSheet.Cells[3, 6].Value = "Woodworking (Jane Doe)";
             periodSheet.Cells[3, 7].Value = "1";
-
-            return package;
-        }
-
-        /// <summary>
-        /// Creates an Excel package with multiple participants in same workshop (sorted names).
-        /// </summary>
-        private ExcelPackage CreateExcelWithMultipleParticipants()
-        {
-            var package = new ExcelPackage();
-
-            // Add ClassSelection sheet with 3 attendees (alphabetically)
-            var classSelection = package.Workbook.Worksheets.Add("ClassSelection");
-            AddClassSelectionHeaders(classSelection);
-
-            // Add in non-alphabetical order to test sorting
-            classSelection.Cells[2, 1].Value = "SEL001";
-            classSelection.Cells[2, 2].Value = "Carol";
-            classSelection.Cells[2, 3].Value = "Carter";
-
-            classSelection.Cells[3, 1].Value = "SEL002";
-            classSelection.Cells[3, 2].Value = "Alice";
-            classSelection.Cells[3, 3].Value = "Adams";
-
-            classSelection.Cells[4, 1].Value = "SEL003";
-            classSelection.Cells[4, 2].Value = "Bob";
-            classSelection.Cells[4, 3].Value = "Baker";
-
-            // Add period sheet - all select same workshop
-            var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
-            AddPeriodSheetHeaders(periodSheet);
-
-            for (int i = 1; i <= 3; i++)
-            {
-                periodSheet.Cells[i + 1, 1].Value = $"SEL{i:D3}";
-                periodSheet.Cells[i + 1, 5].Value = i.ToString();
-                periodSheet.Cells[i + 1, 6].Value = "Pottery (John Smith)";
-                periodSheet.Cells[i + 1, 7].Value = "1"; // All first choice
-            }
 
             return package;
         }
@@ -740,7 +684,5 @@ namespace WinterAdventurer.Test
             sheet.Cells[1, 8].Value = "_2dayClassesFirst2Days";
             sheet.Cells[1, 9].Value = "_2dayClassesSecond2Days";
         }
-
-        #endregion
     }
 }

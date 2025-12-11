@@ -1,6 +1,9 @@
+// <copyright file="TagService.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using WinterAdventurer.Data;
-using Microsoft.Extensions.Logging;
 
 namespace WinterAdventurer.Services;
 
@@ -55,6 +58,7 @@ public interface ITagService
     /// <param name="locationName">The name of the location to tag.</param>
     /// <param name="tagName">The name of the tag to assign.</param>
     /// <exception cref="InvalidOperationException">Thrown when the location or tag is not found.</exception>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     Task AssignTagToLocationAsync(string locationName, string tagName);
 
     /// <summary>
@@ -130,7 +134,7 @@ public partial class TagService : ITagService
         {
             Name = name,
             Color = color,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
         _context.Tags.Add(tag);
@@ -154,7 +158,7 @@ public partial class TagService : ITagService
             return false;
         }
 
-        if (tag.Locations.Any())
+        if (tag.Locations.Count > 0)
         {
             LogWarningCannotDeleteTagAssignedToLocations(name, tag.Locations.Count);
             throw new InvalidOperationException(

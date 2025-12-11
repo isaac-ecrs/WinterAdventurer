@@ -1,8 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
+// <copyright file="IndividualScheduleGenerator.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
-using Microsoft.Extensions.Logging;
 using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Models;
 
@@ -16,9 +18,10 @@ namespace WinterAdventurer.Library.Services
     {
         private readonly EventSchema _schema;
         private readonly MasterScheduleGenerator _masterScheduleGenerator;
+        private static readonly string[] LeaderDelimiter = new[] { " and " };
 
         /// <summary>
-        /// Initializes a new instance of the IndividualScheduleGenerator class.
+        /// Initializes a new instance of the <see cref="IndividualScheduleGenerator"/> class.
         /// </summary>
         /// <param name="schema">Event schema configuration defining period structure.</param>
         /// <param name="masterScheduleGenerator">Master schedule generator for blank schedule templates.</param>
@@ -26,7 +29,8 @@ namespace WinterAdventurer.Library.Services
         public IndividualScheduleGenerator(
             EventSchema schema,
             MasterScheduleGenerator masterScheduleGenerator,
-            ILogger<IndividualScheduleGenerator> logger) : base(logger)
+            ILogger<IndividualScheduleGenerator> logger)
+            : base(logger)
         {
             _schema = schema ?? throw new ArgumentNullException(nameof(schema));
             _masterScheduleGenerator = masterScheduleGenerator ?? throw new ArgumentNullException(nameof(masterScheduleGenerator));
@@ -46,12 +50,12 @@ namespace WinterAdventurer.Library.Services
             List<Workshop> workshops,
             string eventName,
             bool mergeWorkshopCells = true,
-            List<Models.TimeSlot>? timeslots = null)
+            List<TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
             // If no timeslots provided, create default minimal set
-            if (timeslots == null || !timeslots.Any())
+            if (timeslots == null || timeslots.Count == 0)
             {
                 timeslots = CreateDefaultTimeslots();
             }
@@ -67,6 +71,7 @@ namespace WinterAdventurer.Library.Services
                     {
                         attendeeSchedules[selection.ClassSelectionId] = new List<WorkshopSelection>();
                     }
+
                     attendeeSchedules[selection.ClassSelectionId].Add(selection);
                 }
             }
@@ -276,7 +281,7 @@ namespace WinterAdventurer.Library.Services
                                     if (workshop.Leader.Contains(" and "))
                                     {
                                         // Extract the other leader's name
-                                        var leaders = workshop.Leader.Split(new[] { " and " }, StringSplitOptions.None);
+                                        var leaders = workshop.Leader.Split(LeaderDelimiter, StringSplitOptions.None);
                                         var otherLeader = leaders.FirstOrDefault(l => l.Trim() != attendee.FullName)?.Trim();
 
                                         if (!string.IsNullOrEmpty(otherLeader))
@@ -289,6 +294,7 @@ namespace WinterAdventurer.Library.Services
                                             leaderPara.AddText($"with {otherLeader}");
                                         }
                                     }
+
                                     // If solo leader, don't show anything
                                 }
                                 else
@@ -315,11 +321,9 @@ namespace WinterAdventurer.Library.Services
                                     locationPara.AddText(workshop.Location);
 
                                     // Add tags in lowercase and not bold
-                                    if (workshop.Tags != null && workshop.Tags.Any())
+                                    if (workshop.Tags != null && workshop.Tags.Count > 0)
                                     {
-                                        var tagNames = string.Join(", ", workshop.Tags
-                                            .OrderBy(t => t.Name)
-                                            .Select(t => t.Name.ToLower()));
+                                        var tagNames = BuildTagListString(workshop.Tags);
                                         var tagText = locationPara.AddFormattedText($" ({tagNames})");
                                         tagText.Font.Bold = false;
                                     }
@@ -353,6 +357,16 @@ namespace WinterAdventurer.Library.Services
             return sections;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Converting to lowercase for display, not sorting or comparison")]
+        private string BuildTagListString(List<LocationTag> tags)
+        {
+            var tagString = string.Join(", ", tags
+                                    .OrderBy(t => t.Name)
+                                        .Select(t => t.Name.ToLowerInvariant()));
+
+            return tagString;
+        }
+
         /// <summary>
         /// Generates blank schedule templates for attendees who did not preregister for classes.
         /// Each schedule includes a name field and empty master schedule grid to be filled in manually.
@@ -362,7 +376,7 @@ namespace WinterAdventurer.Library.Services
         /// <param name="count">Number of blank schedule copies to generate.</param>
         /// <param name="timeslots">Timeslots defining schedule structure. If null, uses default timeslots from schema.</param>
         /// <returns>List of MigraDoc Section objects containing blank schedules.</returns>
-        public List<Section> GenerateBlankSchedules(List<Workshop> workshops, string eventName, int count, List<Models.TimeSlot>? timeslots = null)
+        public List<Section> GenerateBlankSchedules(List<Workshop> workshops, string eventName, int count, List<TimeSlot>? timeslots = null)
         {
             LogInformationGenerateBlankSchedulesCalled(count);
             var sections = new List<Section>();
@@ -409,15 +423,13 @@ namespace WinterAdventurer.Library.Services
         [LoggerMessage(
             EventId = 5001,
             Level = LogLevel.Information,
-            Message = "GenerateBlankSchedules called with count={count}"
-        )]
+            Message = "GenerateBlankSchedules called with count={count}")]
         private partial void LogInformationGenerateBlankSchedulesCalled(int count);
 
         [LoggerMessage(
             EventId = 5002,
             Level = LogLevel.Information,
-            Message = "Generated {sectionCount} blank schedule sections"
-        )]
+            Message = "Generated {sectionCount} blank schedule sections")]
         private partial void LogInformationGeneratedBlankScheduleSections(int sectionCount);
 
         #endregion
@@ -463,37 +475,37 @@ namespace WinterAdventurer.Library.Services
         /// Includes Breakfast, all period sheets from schema, Lunch, and Evening Program.
         /// </summary>
         /// <returns>List of TimeSlot objects representing the event's daily schedule structure.</returns>
-        public List<Models.TimeSlot> CreateDefaultTimeslots()
+        public List<TimeSlot> CreateDefaultTimeslots()
         {
-            var timeslots = new List<Models.TimeSlot>();
+            var timeslots = new List<TimeSlot>();
 
             // Add periods from schema
             foreach (var period in _schema.PeriodSheets)
             {
-                timeslots.Add(new Models.TimeSlot
+                timeslots.Add(new TimeSlot
                 {
                     Label = period.DisplayName,
-                    IsPeriod = true
+                    IsPeriod = true,
                 });
             }
 
             // Add default non-period activities
-            timeslots.Insert(0, new Models.TimeSlot
+            timeslots.Insert(0, new TimeSlot
             {
                 Label = "Breakfast",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
-            timeslots.Add(new Models.TimeSlot
+            timeslots.Add(new TimeSlot
             {
                 Label = "Lunch",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
-            timeslots.Add(new Models.TimeSlot
+            timeslots.Add(new TimeSlot
             {
                 Label = "Evening Program",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             return timeslots;

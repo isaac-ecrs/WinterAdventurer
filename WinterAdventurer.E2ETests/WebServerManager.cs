@@ -1,3 +1,7 @@
+// <copyright file="WebServerManager.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -17,24 +21,24 @@ public static class WebServerManager
         "..",
         "..",
         "..",
-        "WinterAdventurer"
-    );
+        "WinterAdventurer");
 
     /// <summary>
-    /// Port to run the test server on. Can be overridden via E2E_PORT environment variable.
+    /// Gets port to run the test server on. Can be overridden via E2E_PORT environment variable.
     /// </summary>
     public static int Port => int.TryParse(Environment.GetEnvironmentVariable("E2E_PORT"), out var port)
         ? port
         : 5004;
 
     /// <summary>
-    /// Base URL for the running test server.
+    /// Gets base URL for the running test server.
     /// </summary>
     public static string BaseUrl => $"http://localhost:{Port}";
 
     /// <summary>
     /// Starts the web server and waits for it to become responsive.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public static async Task StartServerAsync()
     {
         // Check if something is already running on the port
@@ -69,7 +73,7 @@ public static class WebServerManager
             {
                 ["ASPNETCORE_URLS"] = BaseUrl,
                 ["ASPNETCORE_ENVIRONMENT"] = "Development"
-            }
+            },
         };
 
         _serverProcess = Process.Start(startInfo);

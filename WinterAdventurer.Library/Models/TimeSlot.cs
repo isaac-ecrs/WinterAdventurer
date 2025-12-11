@@ -1,3 +1,7 @@
+// <copyright file="TimeSlot.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 namespace WinterAdventurer.Library.Models
 {
     /// <summary>
@@ -37,7 +41,7 @@ namespace WinterAdventurer.Library.Models
         public bool IsPeriod { get; set; } = false;
 
         /// <summary>
-        /// Formats time slot as readable 12-hour time range for display in schedules.
+        /// Gets formats time slot as readable 12-hour time range for display in schedules.
         /// Supports both fixed-duration activities and open-ended time slots (displays "?" for unknown end time).
         /// </summary>
         public string TimeRange
@@ -55,7 +59,8 @@ namespace WinterAdventurer.Library.Models
                     var startDateTime = DateTime.Today.Add(StartTime.Value);
                     return $"{startDateTime:h:mm tt} - ?";
                 }
-                return "";
+
+                return string.Empty;
             }
         }
     }

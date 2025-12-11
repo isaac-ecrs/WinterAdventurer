@@ -1,3 +1,7 @@
+// <copyright file="LocationServiceTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WinterAdventurer.Data;
@@ -21,8 +25,6 @@ namespace WinterAdventurer.Test
         {
             return new LoggerFactory().CreateLogger<LocationService>();
         }
-
-        #region Location Tests
 
         [TestMethod]
         public async Task GetAllLocationNamesAsync_WhenEmpty_ReturnsEmptyList()
@@ -48,8 +50,7 @@ namespace WinterAdventurer.Test
             context.Locations.AddRange(
                 new Location { Name = "Chapel" },
                 new Location { Name = "Dining Hall" },
-                new Location { Name = "Auditorium" }
-            );
+                new Location { Name = "Auditorium" });
             await context.SaveChangesAsync();
 
             var logger = CreateLogger();
@@ -155,8 +156,7 @@ namespace WinterAdventurer.Test
 
             // Act & Assert
             await Assert.ThrowsExactlyAsync<ArgumentException>(
-                async () => await service.AddOrGetLocationAsync("")
-            );
+                async () => await service.AddOrGetLocationAsync(string.Empty));
         }
 
         [TestMethod]
@@ -169,8 +169,7 @@ namespace WinterAdventurer.Test
 
             // Act & Assert
             await Assert.ThrowsExactlyAsync<ArgumentException>(
-                async () => await service.AddOrGetLocationAsync(null!)
-            );
+                async () => await service.AddOrGetLocationAsync(null!));
         }
 
         [TestMethod]
@@ -210,10 +209,6 @@ namespace WinterAdventurer.Test
             Assert.IsFalse(result);
         }
 
-        #endregion
-
-        #region WorkshopLocationMapping Tests
-
         [TestMethod]
         public async Task GetWorkshopLocationMappingAsync_WhenExists_ReturnsLocationName()
         {
@@ -222,7 +217,7 @@ namespace WinterAdventurer.Test
             context.WorkshopLocationMappings.Add(new WorkshopLocationMapping
             {
                 WorkshopName = "Pottery",
-                LocationName = "Art Studio"
+                LocationName = "Art Studio",
             });
             await context.SaveChangesAsync();
 
@@ -279,7 +274,7 @@ namespace WinterAdventurer.Test
             {
                 WorkshopName = "Pottery",
                 LocationName = "Old Location",
-                LastUpdated = DateTime.UtcNow.AddDays(-1)
+                LastUpdated = DateTime.UtcNow.AddDays(-1),
             };
             context.WorkshopLocationMappings.Add(existingMapping);
             await context.SaveChangesAsync();
@@ -311,8 +306,7 @@ namespace WinterAdventurer.Test
             context.WorkshopLocationMappings.AddRange(
                 new WorkshopLocationMapping { WorkshopName = "Pottery", LocationName = "Art Studio" },
                 new WorkshopLocationMapping { WorkshopName = "Woodworking", LocationName = "Workshop" },
-                new WorkshopLocationMapping { WorkshopName = "Cooking", LocationName = "Kitchen" }
-            );
+                new WorkshopLocationMapping { WorkshopName = "Cooking", LocationName = "Kitchen" });
             await context.SaveChangesAsync();
 
             var logger = CreateLogger();
@@ -344,10 +338,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(0, result.Count);
         }
 
-        #endregion
-
-        #region TimeSlot Tests
-
         [TestMethod]
         public async Task GetAllTimeSlotsAsync_WhenEmpty_ReturnsEmptyList()
         {
@@ -372,8 +362,7 @@ namespace WinterAdventurer.Test
             context.TimeSlots.AddRange(
                 new TimeSlot { Id = "1", Label = "Morning", StartTime = new TimeSpan(9, 0, 0), EndTime = new TimeSpan(12, 0, 0), IsPeriod = true },
                 new TimeSlot { Id = "2", Label = "Lunch", StartTime = new TimeSpan(12, 0, 0), EndTime = new TimeSpan(13, 0, 0), IsPeriod = false },
-                new TimeSlot { Id = "3", Label = "Afternoon", StartTime = new TimeSpan(13, 0, 0), EndTime = new TimeSpan(17, 0, 0), IsPeriod = true }
-            );
+                new TimeSlot { Id = "3", Label = "Afternoon", StartTime = new TimeSpan(13, 0, 0), EndTime = new TimeSpan(17, 0, 0), IsPeriod = true });
             await context.SaveChangesAsync();
 
             var logger = CreateLogger();
@@ -396,7 +385,7 @@ namespace WinterAdventurer.Test
                 Id = "test-id",
                 Label = "Morning",
                 StartTime = new TimeSpan(9, 0, 0),
-                EndTime = new TimeSpan(12, 0, 0)
+                EndTime = new TimeSpan(12, 0, 0),
             });
             await context.SaveChangesAsync();
 
@@ -441,7 +430,7 @@ namespace WinterAdventurer.Test
                 Label = "Morning",
                 StartTime = new TimeSpan(9, 0, 0),
                 EndTime = new TimeSpan(12, 0, 0),
-                IsPeriod = true
+                IsPeriod = true,
             };
 
             // Act
@@ -468,7 +457,7 @@ namespace WinterAdventurer.Test
                 Label = "Old Label",
                 StartTime = new TimeSpan(9, 0, 0),
                 EndTime = new TimeSpan(12, 0, 0),
-                IsPeriod = false
+                IsPeriod = false,
             };
             context.TimeSlots.Add(existingSlot);
             await context.SaveChangesAsync();
@@ -482,7 +471,7 @@ namespace WinterAdventurer.Test
                 Label = "Updated Label",
                 StartTime = new TimeSpan(10, 0, 0),
                 EndTime = new TimeSpan(14, 0, 0),
-                IsPeriod = true
+                IsPeriod = true,
             };
 
             // Act
@@ -508,7 +497,7 @@ namespace WinterAdventurer.Test
             context.TimeSlots.Add(new TimeSlot
             {
                 Id = "test-slot",
-                Label = "Morning"
+                Label = "Morning",
             });
             await context.SaveChangesAsync();
 
@@ -549,8 +538,7 @@ namespace WinterAdventurer.Test
             context.TimeSlots.AddRange(
                 new TimeSlot { Id = "1", Label = "Morning" },
                 new TimeSlot { Id = "2", Label = "Lunch" },
-                new TimeSlot { Id = "3", Label = "Afternoon" }
-            );
+                new TimeSlot { Id = "3", Label = "Afternoon" });
             await context.SaveChangesAsync();
 
             var logger = CreateLogger();
@@ -569,11 +557,11 @@ namespace WinterAdventurer.Test
         {
             // Arrange
             using var context = CreateInMemoryContext();
+
             // Add some existing timeslots
             context.TimeSlots.AddRange(
                 new TimeSlot { Id = "old-1", Label = "Old Slot 1" },
-                new TimeSlot { Id = "old-2", Label = "Old Slot 2" }
-            );
+                new TimeSlot { Id = "old-2", Label = "Old Slot 2" });
             await context.SaveChangesAsync();
 
             var logger = CreateLogger();
@@ -582,7 +570,7 @@ namespace WinterAdventurer.Test
             var newTimeSlots = new List<TimeSlot>
             {
                 new TimeSlot { Id = "new-1", Label = "New Morning", StartTime = new TimeSpan(9, 0, 0), EndTime = new TimeSpan(12, 0, 0) },
-                new TimeSlot { Id = "new-2", Label = "New Afternoon", StartTime = new TimeSpan(13, 0, 0), EndTime = new TimeSpan(17, 0, 0) }
+                new TimeSlot { Id = "new-2", Label = "New Afternoon", StartTime = new TimeSpan(13, 0, 0), EndTime = new TimeSpan(17, 0, 0) },
             };
 
             // Act
@@ -596,8 +584,6 @@ namespace WinterAdventurer.Test
             Assert.IsFalse(allSlots.Any(t => t.Id == "old-1"));
             Assert.IsFalse(allSlots.Any(t => t.Id == "old-2"));
         }
-
-        #endregion
 
         // Note: Unique constraint tests are omitted because EF Core InMemory provider
         // doesn't enforce unique indexes. These constraints are defined in ApplicationDbContext

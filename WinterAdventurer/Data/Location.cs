@@ -1,9 +1,13 @@
+// <copyright file="Location.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
 
 namespace WinterAdventurer.Data;
 
 /// <summary>
-/// Represents a location where workshops can be held
+/// Represents a location where workshops can be held.
 /// </summary>
 public class Location
 {

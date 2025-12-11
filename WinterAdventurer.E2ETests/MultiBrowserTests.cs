@@ -1,3 +1,7 @@
+// <copyright file="MultiBrowserTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 namespace WinterAdventurer.E2ETests;
 
 /// <summary>
@@ -10,7 +14,7 @@ namespace WinterAdventurer.E2ETests;
 ///
 /// Example:
 ///   BROWSER=chromium dotnet test
-///   BROWSER=firefox dotnet test
+///   BROWSER=firefox dotnet test.
 /// </summary>
 [TestClass]
 public class MultiBrowserTests : E2ETestBase
@@ -19,6 +23,7 @@ public class MultiBrowserTests : E2ETestBase
     /// Tests that file upload works correctly across browsers.
     /// This is a critical workflow that may behave differently in different browsers.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
     [TestMethod]
     public async Task FileUpload_UploadsSuccessfully()
     {
@@ -40,6 +45,7 @@ public class MultiBrowserTests : E2ETestBase
     /// Tests that PDF generation and download works across browsers.
     /// Download behavior can vary significantly between browsers.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
     [TestMethod]
     public async Task PdfGeneration_Success()
     {
@@ -58,7 +64,8 @@ public class MultiBrowserTests : E2ETestBase
         // Assert - Verify download started
         var download = await downloadTask;
         Assert.IsNotNull(download, "PDF download should be triggered");
-        Assert.IsTrue(download.SuggestedFilename.EndsWith(".pdf"),
+        Assert.IsTrue(
+            download.SuggestedFilename.EndsWith(".pdf"),
             $"Download should be a PDF file, got: {download.SuggestedFilename}");
     }
 
@@ -66,6 +73,7 @@ public class MultiBrowserTests : E2ETestBase
     /// Tests that interactive UI elements (autocomplete, inputs) work across browsers.
     /// MudBlazor components may render differently in different browsers.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous unit test.</placeholder></returns>
     [TestMethod]
     public async Task WorkshopInteraction_FunctionsCorrectly()
     {

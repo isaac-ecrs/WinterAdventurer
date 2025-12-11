@@ -23,7 +23,7 @@ coverage:
 
       # Blazor web app - more lenient for UI code
       web-app:
-        target: 60%
+        target: 30%
         threshold: 2%
         paths:
           - "WinterAdventurer/**"

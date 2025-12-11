@@ -1,3 +1,7 @@
+// <copyright file="DbSeeder.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 
 namespace WinterAdventurer.Data;
@@ -9,8 +13,10 @@ namespace WinterAdventurer.Data;
 /// This class ensures the database contains a standard set of locations and tags when the application starts.
 /// Seeding operations are idempotent - they only add data that doesn't already exist.
 /// </remarks>
-public static class DbSeeder
+public partial class DbSeeder
 {
+    private readonly ILogger<DbSeeder> _logger;
+
     /// <summary>
     /// Default locations to seed into the database on first run.
     /// </summary>
@@ -26,7 +32,7 @@ public static class DbSeeder
         ("Craft Room", "Downstairs"),
         ("Elm Room", null),
         ("Rec Hall", "Downstairs"),
-        ("Library", null)
+        ("Library", null),
     };
 
     /// <summary>
@@ -38,8 +44,13 @@ public static class DbSeeder
     /// </remarks>
     private static readonly (string Name, string Color)[] DefaultTags = new[]
     {
-        ("Downstairs", "#FF5722")  // Orange color for downstairs tag
+        ("Downstairs", "#FF5722"),  // Orange color for downstairs tag
     };
+
+    public DbSeeder(ILogger<DbSeeder> logger)
+    {
+        _logger = logger;
+    }
 
     /// <summary>
     /// Seeds the database with default tags and locations if they don't already exist.
@@ -51,10 +62,10 @@ public static class DbSeeder
     /// This method is idempotent and safe to call on every application startup.
     /// It first seeds tags, then locations, and finally assigns tag-location relationships.
     /// </remarks>
-    public static async Task SeedDefaultDataAsync(ApplicationDbContext context, ILogger logger)
+    public async Task SeedDefaultDataAsync(ApplicationDbContext context)
     {
-        await SeedDefaultTagsAsync(context, logger);
-        await SeedDefaultLocationsAsync(context, logger);
+        await SeedDefaultTagsAsync(context);
+        await SeedDefaultLocationsAsync(context);
     }
 
     /// <summary>
@@ -67,7 +78,7 @@ public static class DbSeeder
     /// Checks existing tag names before adding new tags to prevent duplicates.
     /// Logs the number and names of newly seeded tags.
     /// </remarks>
-    private static async Task SeedDefaultTagsAsync(ApplicationDbContext context, ILogger logger)
+    private async Task SeedDefaultTagsAsync(ApplicationDbContext context)
     {
         // Get existing tag names
         var existingTagNames = await context.Tags
@@ -81,7 +92,7 @@ public static class DbSeeder
 
         if (tagsToAdd.Count == 0)
         {
-            logger.LogInformation("All default tags already exist in database");
+            LogInformationAllDefaultTagsExist();
             return;
         }
 
@@ -90,16 +101,21 @@ public static class DbSeeder
         {
             Name = tag.Name,
             Color = tag.Color,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         }).ToList();
 
         // Add and save
         context.Tags.AddRange(newTags);
         await context.SaveChangesAsync();
 
-        logger.LogInformation("Seeded {Count} default tags: {Tags}",
-            newTags.Count,
-            string.Join(", ", tagsToAdd.Select(t => t.Name)));
+        string seededTags = string.Empty;
+
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            seededTags = string.Join(", ", tagsToAdd.Select(t => t.Name));
+        }
+
+        LogInformationSeededTagsCount(newTags.Count, seededTags);
     }
 
     /// <summary>
@@ -113,7 +129,7 @@ public static class DbSeeder
     /// After seeding locations, calls <see cref="AssignDefaultTagsToLocationsAsync"/> to establish tag relationships.
     /// Logs the number and names of newly seeded locations.
     /// </remarks>
-    private static async Task SeedDefaultLocationsAsync(ApplicationDbContext context, ILogger logger)
+    private async Task SeedDefaultLocationsAsync(ApplicationDbContext context)
     {
         // Get existing location names
         var existingLocationNames = await context.Locations
@@ -127,7 +143,7 @@ public static class DbSeeder
 
         if (locationsToAdd.Count == 0)
         {
-            logger.LogInformation("All default locations already exist in database");
+            LogInformationAllDefaultLocationsExist();
         }
         else
         {
@@ -135,20 +151,25 @@ public static class DbSeeder
             var newLocations = locationsToAdd.Select(loc => new Location
             {
                 Name = loc.Name,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             }).ToList();
 
             // Add and save locations first
             context.Locations.AddRange(newLocations);
             await context.SaveChangesAsync();
 
-            logger.LogInformation("Seeded {Count} default locations: {Locations}",
-                newLocations.Count,
-                string.Join(", ", locationsToAdd.Select(l => l.Name)));
+            string seededLocations = string.Empty;
+
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                seededLocations = string.Join(", ", locationsToAdd.Select(l => l.Name));
+            }
+
+            LogInformationSeededLocationsCount(newLocations.Count, seededLocations);
         }
 
         // Assign tags to locations
-        await AssignDefaultTagsToLocationsAsync(context, logger);
+        await AssignDefaultTagsToLocationsAsync(context);
     }
 
     /// <summary>
@@ -162,7 +183,7 @@ public static class DbSeeder
     /// Only creates relationships that don't already exist, making this operation idempotent.
     /// Logs the number of new tag assignments created.
     /// </remarks>
-    private static async Task AssignDefaultTagsToLocationsAsync(ApplicationDbContext context, ILogger logger)
+    private async Task AssignDefaultTagsToLocationsAsync(ApplicationDbContext context)
     {
         // Load all locations and tags with their relationships
         var locations = await context.Locations
@@ -192,11 +213,47 @@ public static class DbSeeder
         if (assignmentsAdded > 0)
         {
             await context.SaveChangesAsync();
-            logger.LogInformation("Assigned {Count} default tags to locations", assignmentsAdded);
+            LogInformationAssignedDefaultTagsToLocations(assignmentsAdded);
         }
         else
         {
-            logger.LogInformation("All default tag assignments already exist");
+            LogInformationAllDefaultTagAssignmentsExist();
         }
     }
+
+    [LoggerMessage(
+            EventId = 9001,
+            Level = LogLevel.Information,
+            Message = "All default tags already exist in database")]
+    private partial void LogInformationAllDefaultTagsExist();
+
+    [LoggerMessage(
+            EventId = 9002,
+            Level = LogLevel.Information,
+            Message = "Seeded {count} default tags: {tags}")]
+    private partial void LogInformationSeededTagsCount(int count, string tags);
+
+    [LoggerMessage(
+            EventId = 9003,
+            Level = LogLevel.Information,
+            Message = "All default locations already exist in database")]
+    private partial void LogInformationAllDefaultLocationsExist();
+
+    [LoggerMessage(
+            EventId = 9004,
+            Level = LogLevel.Information,
+            Message = "Seeded {Count} default locations: {Locations}")]
+    private partial void LogInformationSeededLocationsCount(int count, string locations);
+
+    [LoggerMessage(
+            EventId = 9005,
+            Level = LogLevel.Information,
+            Message = "Assigned {Count} default tags to locations")]
+    private partial void LogInformationAssignedDefaultTagsToLocations(int count);
+
+    [LoggerMessage(
+            EventId = 9006,
+            Level = LogLevel.Information,
+            Message = "All default tag assignments already exist in database")]
+    private partial void LogInformationAllDefaultTagAssignmentsExist();
 }

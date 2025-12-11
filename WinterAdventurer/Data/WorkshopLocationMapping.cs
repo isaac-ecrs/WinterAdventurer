@@ -1,9 +1,13 @@
+// <copyright file="WorkshopLocationMapping.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
 
 namespace WinterAdventurer.Data;
 
 /// <summary>
-/// Maps workshop names to their assigned locations for persistence across sessions
+/// Maps workshop names to their assigned locations for persistence across sessions.
 /// </summary>
 public class WorkshopLocationMapping
 {

@@ -1,3 +1,7 @@
+// <copyright file="SheetHelperTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using OfficeOpenXml;
 using WinterAdventurer.Library;
 
@@ -20,8 +24,6 @@ namespace WinterAdventurer.Test
             setupAction?.Invoke(sheet);
             return sheet;
         }
-
-        #region Constructor and Initialization Tests
 
         [TestMethod]
         public void SheetHelper_WithValidSheet_InitializesCorrectly()
@@ -64,10 +66,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsNotNull(helper);
         }
-
-        #endregion
-
-        #region GetColumnIndex Tests
 
         [TestMethod]
         public void GetColumnIndex_WithExactMatch_ReturnsCorrectIndex()
@@ -164,10 +162,6 @@ namespace WinterAdventurer.Test
             Assert.IsNull(indexUpper);
         }
 
-        #endregion
-
-        #region GetColumnIndexByPattern Tests
-
         [TestMethod]
         public void GetColumnIndexByPattern_WithPartialMatch_FindsColumn()
         {
@@ -242,10 +236,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(1, index);
         }
 
-        #endregion
-
-        #region GetCellValue Tests
-
         [TestMethod]
         public void GetCellValue_WithValidHeaderAndRow_ReturnsValue()
         {
@@ -309,6 +299,7 @@ namespace WinterAdventurer.Test
             var sheet = CreateTestSheet(s =>
             {
                 s.Cells[1, 1].Value = "Name";
+
                 // Row 2, col 1 is empty
             });
             var helper = new SheetHelper(sheet);
@@ -319,10 +310,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsNull(value);
         }
-
-        #endregion
-
-        #region GetCellValueByPattern Tests
 
         [TestMethod]
         public void GetCellValueByPattern_WithMatch_ReturnsValue()
@@ -362,10 +349,6 @@ namespace WinterAdventurer.Test
             Assert.IsNull(value);
         }
 
-        #endregion
-
-        #region GetCellValueByIndex Tests
-
         [TestMethod]
         public void GetCellValueByIndex_WithValidCoordinates_ReturnsValue()
         {
@@ -399,10 +382,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsNull(value);
         }
-
-        #endregion
-
-        #region Integration and Edge Cases
 
         [TestMethod]
         public void SheetHelper_RealWorldScenario_WorksCorrectly()
@@ -553,7 +532,5 @@ namespace WinterAdventurer.Test
             Assert.IsNull(name);
             Assert.IsNull(age);
         }
-
-        #endregion
     }
 }

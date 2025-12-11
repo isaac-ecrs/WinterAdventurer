@@ -1,5 +1,8 @@
+// <copyright file="SheetHelper.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using OfficeOpenXml;
-using System.Linq;
 
 namespace WinterAdventurer.Library
 {
@@ -9,6 +12,7 @@ namespace WinterAdventurer.Library
         private ExcelWorksheet _sheet;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SheetHelper"/> class.
         /// Initializes SheetHelper by building a map of column headers to column indexes.
         /// This enables efficient column lookups by name or pattern throughout Excel parsing.
         /// </summary>
@@ -16,7 +20,10 @@ namespace WinterAdventurer.Library
         public SheetHelper(ExcelWorksheet sheet)
         {
             _sheet = sheet;
-            if (sheet?.Dimension == null) return;
+            if (sheet?.Dimension == null)
+            {
+                return;
+            }
 
             // Build a map of column header names to column indexes
             for (int col = 1; col <= sheet.Dimension.Columns; col++)

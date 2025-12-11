@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/stylecop.json",
+  "settings": {
+    "documentationRules": {
+      "companyName": "ECRS",
+      "copyrightText": "Copyright (c) {companyName}." 
+    },
+    "orderingRules": {
+      "usingDirectivesPlacement": "outsideNamespace",
+      "systemUsingDirectivesFirst": true
+    }
+  }
+}

@@ -1,3 +1,7 @@
+// <copyright file="ThemeService.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.JSInterop;
 
 namespace WinterAdventurer.Services;
@@ -71,7 +75,10 @@ public class ThemeService
     public async Task ToggleThemeAsync()
     {
         // Prevent rapid toggling during transition
-        if (_isTransitioning) return;
+        if (_isTransitioning)
+        {
+            return;
+        }
 
         _isTransitioning = true;
         OnThemeChanged?.Invoke(); // Trigger overlay fade-in

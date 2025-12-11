@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+// <copyright file="MSTestSettings.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
-// Configure test parallelization - disabled for E2E tests to avoid browser conflicts
 [assembly: Parallelize(Workers = 0, Scope = ExecutionScope.ClassLevel)]

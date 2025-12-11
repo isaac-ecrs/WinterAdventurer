@@ -1,6 +1,9 @@
-using System.Collections.Generic;
-using MigraDoc.DocumentObjectModel;
+// <copyright file="PdfDocumentOrchestrator.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging;
+using MigraDoc.DocumentObjectModel;
 using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Library.Services
@@ -17,7 +20,7 @@ namespace WinterAdventurer.Library.Services
         private readonly ILogger<PdfDocumentOrchestrator> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the PdfDocumentOrchestrator class.
+        /// Initializes a new instance of the <see cref="PdfDocumentOrchestrator"/> class.
         /// </summary>
         /// <param name="rosterGenerator">Generator for workshop rosters.</param>
         /// <param name="scheduleGenerator">Generator for individual participant schedules.</param>
@@ -49,11 +52,11 @@ namespace WinterAdventurer.Library.Services
             List<Workshop> workshops,
             string eventName = "Winter Adventure",
             bool mergeWorkshopCells = true,
-            List<Models.TimeSlot>? timeslots = null,
+            List<TimeSlot>? timeslots = null,
             int blankScheduleCount = 0)
         {
             // Allow creating PDF with just blank schedules if workshops is empty
-            if ((workshops == null || !workshops.Any()) && blankScheduleCount == 0)
+            if ((workshops == null || workshops.Count == 0) && blankScheduleCount == 0)
             {
                 LogWarningCannotCreatePdf();
                 return null;
@@ -62,7 +65,7 @@ namespace WinterAdventurer.Library.Services
             var document = new Document();
 
             // Add workshop rosters (only if workshops exist)
-            if (workshops != null && workshops.Any())
+            if (workshops != null && workshops.Count > 0)
             {
                 var rosterSections = _rosterGenerator.GenerateRosterSections(workshops, eventName, timeslots);
                 foreach (var section in rosterSections)
@@ -86,6 +89,7 @@ namespace WinterAdventurer.Library.Services
             if (blankScheduleCount > 0)
             {
                 LogInformationGeneratingBlankSchedules(blankScheduleCount);
+
                 // Pass workshops so blank schedules can include location columns
                 var blankSections = _scheduleGenerator.GenerateBlankSchedules(workshops ?? new List<Workshop>(), eventName, blankScheduleCount, timeslots);
                 LogInformationGeneratedBlankSchedules(blankSections.Count);
@@ -110,9 +114,9 @@ namespace WinterAdventurer.Library.Services
         public Document? CreateMasterSchedulePdf(
             List<Workshop> workshops,
             string eventName = "Master Schedule",
-            List<Models.TimeSlot>? timeslots = null)
+            List<TimeSlot>? timeslots = null)
         {
-            if (workshops == null || !workshops.Any())
+            if (workshops == null || workshops.Count == 0)
             {
                 LogWarningCannotCreateMasterSchedulePdf();
                 return null;
@@ -134,29 +138,25 @@ namespace WinterAdventurer.Library.Services
         [LoggerMessage(
             EventId = 3001,
             Level = LogLevel.Warning,
-            Message = "Cannot create PDF - workshops collection is empty and no blank schedules requested"
-        )]
+            Message = "Cannot create PDF - workshops collection is empty and no blank schedules requested")]
         private partial void LogWarningCannotCreatePdf();
 
         [LoggerMessage(
             EventId = 3002,
             Level = LogLevel.Information,
-            Message = "Generating {blankScheduleCount} blank schedules"
-        )]
+            Message = "Generating {blankScheduleCount} blank schedules")]
         private partial void LogInformationGeneratingBlankSchedules(int blankScheduleCount);
 
         [LoggerMessage(
             EventId = 3003,
             Level = LogLevel.Information,
-            Message = "Generated {blankScheduleSectionCount} blank schedule sections"
-        )]
+            Message = "Generated {blankScheduleSectionCount} blank schedule sections")]
         private partial void LogInformationGeneratedBlankSchedules(int blankScheduleSectionCount);
 
         [LoggerMessage(
             EventId = 3004,
             Level = LogLevel.Warning,
-            Message = "Cannot create master schedule PDF - workshops collection is empty"
-        )]
+            Message = "Cannot create master schedule PDF - workshops collection is empty")]
         private partial void LogWarningCannotCreateMasterSchedulePdf();
 
         #endregion

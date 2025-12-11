@@ -1,13 +1,15 @@
-using WinterAdventurer.Library.EventSchemas;
+// <copyright file="EventSchemaTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Newtonsoft.Json.Linq;
+using WinterAdventurer.Library.EventSchemas;
 
 namespace WinterAdventurer.Test
 {
     [TestClass]
     public class EventSchemaTests
     {
-        #region ClassSelectionSheetConfig.GetColumnName Tests
-
         [TestMethod]
         public void GetColumnName_WithSimpleString_ReturnsString()
         {
@@ -29,7 +31,7 @@ namespace WinterAdventurer.Test
             var config = new ClassSelectionSheetConfig();
             var patternObj = new JObject
             {
-                ["pattern"] = "WinterAdventureClassRegist_Id"
+                ["pattern"] = "WinterAdventureClassRegist_Id",
             };
             config.Columns["registrationId"] = patternObj;
 
@@ -60,7 +62,7 @@ namespace WinterAdventurer.Test
             var config = new ClassSelectionSheetConfig();
             var patternObj = new JObject
             {
-                ["pattern"] = null
+                ["pattern"] = null,
             };
             config.Columns["testKey"] = patternObj;
 
@@ -78,7 +80,7 @@ namespace WinterAdventurer.Test
             var config = new ClassSelectionSheetConfig();
             var obj = new JObject
             {
-                ["someOtherProperty"] = "value"
+                ["someOtherProperty"] = "value",
             };
             config.Columns["testKey"] = obj;
 
@@ -94,13 +96,13 @@ namespace WinterAdventurer.Test
         {
             // Arrange
             var config = new ClassSelectionSheetConfig();
-            config.Columns["emptyKey"] = "";
+            config.Columns["emptyKey"] = string.Empty;
 
             // Act
             var result = config.GetColumnName("emptyKey");
 
             // Assert
-            Assert.AreEqual("", result);
+            Assert.AreEqual(string.Empty, result);
         }
 
         [TestMethod]
@@ -124,10 +126,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Email_Pattern", result3);
         }
 
-        #endregion
-
-        #region PeriodSheetConfig.GetColumnName Tests
-
         [TestMethod]
         public void PeriodSheet_GetColumnName_WithSimpleString_ReturnsString()
         {
@@ -149,7 +147,7 @@ namespace WinterAdventurer.Test
             var config = new PeriodSheetConfig();
             var patternObj = new JObject
             {
-                ["pattern"] = "MorningPeriod_Choice"
+                ["pattern"] = "MorningPeriod_Choice",
             };
             config.Columns["choiceNumber"] = patternObj;
 
@@ -187,10 +185,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(string.Empty, result); // Dictionary keys are case-sensitive
         }
 
-        #endregion
-
-        #region EventSchema Property Tests
-
         [TestMethod]
         public void EventSchema_DefaultConstructor_InitializesProperties()
         {
@@ -214,7 +208,7 @@ namespace WinterAdventurer.Test
             var classConfig = new ClassSelectionSheetConfig { SheetName = "ClassSelection" };
             var periodConfigs = new List<PeriodSheetConfig>
             {
-                new PeriodSheetConfig { SheetName = "Morning", DisplayName = "Morning Period" }
+                new PeriodSheetConfig { SheetName = "Morning", DisplayName = "Morning Period" },
             };
             var workshopFormat = new WorkshopFormatConfig { Pattern = @"(.+)\s*\((.+)\)" };
 
@@ -233,10 +227,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Morning", schema.PeriodSheets[0].SheetName);
             Assert.AreEqual(@"(.+)\s*\((.+)\)", schema.WorkshopFormat.Pattern);
         }
-
-        #endregion
-
-        #region ClassSelectionSheetConfig Property Tests
 
         [TestMethod]
         public void ClassSelectionSheetConfig_DefaultConstructor_InitializesProperties()
@@ -261,7 +251,7 @@ namespace WinterAdventurer.Test
                 {
                     ["firstName"] = "First Name",
                     ["lastName"] = "Last Name"
-                }
+                },
             };
 
             // Assert
@@ -269,10 +259,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(2, config.Columns.Count);
             Assert.AreEqual("First Name", config.Columns["firstName"]);
         }
-
-        #endregion
-
-        #region PeriodSheetConfig Property Tests
 
         [TestMethod]
         public void PeriodSheetConfig_DefaultConstructor_InitializesProperties()
@@ -295,7 +281,7 @@ namespace WinterAdventurer.Test
             // Arrange & Act
             var workshopColumns = new List<WorkshopColumnConfig>
             {
-                new WorkshopColumnConfig { ColumnName = "4-Day Workshop", StartDay = 1, EndDay = 4 }
+                new WorkshopColumnConfig { ColumnName = "4-Day Workshop", StartDay = 1, EndDay = 4 },
             };
 
             var config = new PeriodSheetConfig
@@ -303,7 +289,7 @@ namespace WinterAdventurer.Test
                 SheetName = "MorningFirstPeriod",
                 DisplayName = "Morning - First Period",
                 Columns = new Dictionary<string, object> { ["selectionId"] = "ID" },
-                WorkshopColumns = workshopColumns
+                WorkshopColumns = workshopColumns,
             };
 
             // Assert
@@ -313,10 +299,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(1, config.WorkshopColumns.Count);
             Assert.AreEqual("4-Day Workshop", config.WorkshopColumns[0].ColumnName);
         }
-
-        #endregion
-
-        #region WorkshopColumnConfig Property Tests
 
         [TestMethod]
         public void WorkshopColumnConfig_DefaultConstructor_InitializesProperties()
@@ -338,7 +320,7 @@ namespace WinterAdventurer.Test
             {
                 ColumnName = "Days 1-2 Workshop",
                 StartDay = 1,
-                EndDay = 2
+                EndDay = 2,
             };
 
             // Assert
@@ -346,10 +328,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(1, config.StartDay);
             Assert.AreEqual(2, config.EndDay);
         }
-
-        #endregion
-
-        #region WorkshopFormatConfig Property Tests
 
         [TestMethod]
         public void WorkshopFormatConfig_DefaultConstructor_InitializesProperties()
@@ -369,14 +347,12 @@ namespace WinterAdventurer.Test
             var config = new WorkshopFormatConfig
             {
                 Pattern = @"(.+)\s*\((.+)\)",
-                Description = "Workshop Name (Leader Name)"
+                Description = "Workshop Name (Leader Name)",
             };
 
             // Assert
             Assert.AreEqual(@"(.+)\s*\((.+)\)", config.Pattern);
             Assert.AreEqual("Workshop Name (Leader Name)", config.Description);
         }
-
-        #endregion
     }
 }

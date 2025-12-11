@@ -1,12 +1,12 @@
-using Microsoft.Playwright;
-using Microsoft.Playwright.MSTest;
+// <copyright file="TourTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.E2ETests;
 
 [TestClass]
 public class TourTests : E2ETestBase
 {
-
     [TestMethod]
     public async Task Tour_AssignLocationsStep_ShouldHighlightLocationField()
     {
@@ -35,7 +35,7 @@ public class TourTests : E2ETestBase
         }
 
         // Wait for the tour popover to appear
-        await Page.WaitForSelectorAsync(".driver-popover", new() { Timeout = 5000 });
+        await Page.WaitForSelectorAsync(".driver-popover", new () { Timeout = 5000 });
 
         // Act: Navigate through tour steps
         // Step 0: Welcome - click "Next" or "Start tour"
@@ -79,7 +79,8 @@ public class TourTests : E2ETestBase
 
         // Should have at least some different indices (not all the same)
         var uniqueIndices = cardIndices.Distinct().Count();
-        Assert.IsTrue(uniqueIndices > 1,
+        Assert.IsTrue(
+            uniqueIndices > 1,
             $"All {cardIndices.Length} elements have the same CardIndex! Expected sequential indices.");
 
         // Should start from 0

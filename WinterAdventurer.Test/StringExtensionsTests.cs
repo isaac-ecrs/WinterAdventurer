@@ -1,3 +1,7 @@
+// <copyright file="StringExtensionsTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using WinterAdventurer.Library.Extensions;
 
 namespace WinterAdventurer.Test
@@ -5,8 +9,6 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class StringExtensionsTests
     {
-        #region ToProper Tests
-
         [TestMethod]
         public void ToProper_WithLowercaseWords_CapitalizesEachWord()
         {
@@ -89,13 +91,13 @@ namespace WinterAdventurer.Test
         public void ToProper_WithEmptyString_ReturnsEmptyString()
         {
             // Arrange
-            string input = "";
+            string input = string.Empty;
 
             // Act
             string result = input.ToProper();
 
             // Assert
-            Assert.AreEqual("", result);
+            Assert.AreEqual(string.Empty, result);
         }
 
         [TestMethod]
@@ -150,10 +152,6 @@ namespace WinterAdventurer.Test
             // Note: Current implementation only capitalizes after spaces, not hyphens
             Assert.AreEqual("Mary-jane Watson", result);
         }
-
-        #endregion
-
-        #region ExtractFromParentheses Tests
 
         [TestMethod]
         public void ExtractFromParentheses_PullFromInside_ExtractsContent()
@@ -288,10 +286,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Pottery", resultOutside);
         }
 
-        #endregion
-
-        #region GetLeaderName Tests
-
         [TestMethod]
         public void GetLeaderName_WithValidFormat_ExtractsLeader()
         {
@@ -330,10 +324,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.AreEqual("John Smith & Jane Doe", result);
         }
-
-        #endregion
-
-        #region GetWorkshopName Tests
 
         [TestMethod]
         public void GetWorkshopName_WithValidFormat_ExtractsWorkshopName()
@@ -387,10 +377,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Art & Craft: Pottery", result);
         }
 
-        #endregion
-
-        #region Edge Cases and Integration
-
         [TestMethod]
         public void ExtractFromParentheses_ComplexRealWorldExample_ParsesCorrectly()
         {
@@ -418,7 +404,5 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.AreEqual("John's Pottery Class", result);
         }
-
-        #endregion
     }
 }

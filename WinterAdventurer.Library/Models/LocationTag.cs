@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// <copyright file="LocationTag.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.Library.Models
 {

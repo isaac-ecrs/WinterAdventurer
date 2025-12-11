@@ -1,4 +1,7 @@
-﻿using System;
+// <copyright file="20251130055601_InitialCreate.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -18,7 +21,7 @@ namespace WinterAdventurer.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -33,7 +36,7 @@ namespace WinterAdventurer.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Color = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -50,7 +53,7 @@ namespace WinterAdventurer.Migrations
                     EndTime = table.Column<TimeSpan>(type: "TEXT", nullable: true),
                     IsPeriod = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    LastUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -65,7 +68,7 @@ namespace WinterAdventurer.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     WorkshopName = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
                     LocationName = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    LastUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -77,7 +80,7 @@ namespace WinterAdventurer.Migrations
                 columns: table => new
                 {
                     LocationId = table.Column<int>(type: "INTEGER", nullable: false),
-                    TagId = table.Column<int>(type: "INTEGER", nullable: false)
+                    TagId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
