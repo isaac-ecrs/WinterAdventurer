@@ -97,6 +97,10 @@ try
     // Add Excel utilities service
     builder.Services.AddScoped<ExcelUtilities>();
 
+    // Add Home component services
+    builder.Services.AddScoped<IHomeStateService, HomeStateService>();
+    builder.Services.AddScoped<ITimeslotOperationService, TimeslotOperationService>();
+
     // Configure PDF font resolver (must be set once at startup)
     GlobalFontSettings.FontResolver = new CustomFontResolver();
 
