@@ -110,7 +110,7 @@ public interface ILocationService
 /// Provides CRUD operations for locations, workshop-location mappings, and time slots,
 /// with comprehensive logging for debugging and audit purposes.
 /// </summary>
-public class LocationService : ILocationService
+public partial class LocationService : ILocationService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<LocationService> _logger;
@@ -129,34 +129,34 @@ public class LocationService : ILocationService
     /// <inheritdoc />
     public async Task<List<string>> GetAllLocationNamesAsync()
     {
-        _logger.LogDebug("Loading all location names from database");
+        LogLoadingAllLocationNames();
         var locations = await _context.Locations
             .OrderBy(l => l.Name)
             .Select(l => l.Name)
             .ToListAsync();
-        _logger.LogDebug("Loaded {Count} locations", locations.Count);
+        LogLoadedLocations(locations.Count);
         return locations;
     }
 
     /// <inheritdoc />
     public async Task<List<Location>> GetAllLocationsWithTagsAsync()
     {
-        _logger.LogDebug("Loading all locations with tags from database");
+        LogLoadingAllLocationsWithTags();
         var locations = await _context.Locations
             .Include(l => l.Tags)
             .OrderBy(l => l.Name)
             .ToListAsync();
-        _logger.LogDebug("Loaded {Count} locations with tags", locations.Count);
+        LogLoadedLocationsWithTags(locations.Count);
         return locations;
     }
 
     /// <inheritdoc />
     public async Task<Location?> GetLocationByNameAsync(string name)
     {
-        _logger.LogDebug("Looking up location by name: '{Name}'", name);
+        LogLookingUpLocationByName(name);
         var location = await _context.Locations
             .FirstOrDefaultAsync(l => l.Name == name);
-        _logger.LogDebug("Location lookup result: {Found}", location != null ? "FOUND" : "NOT FOUND");
+        LogLocationLookupResult(location != null ? "FOUND" : "NOT FOUND");
         return location;
     }
 
@@ -165,55 +165,54 @@ public class LocationService : ILocationService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            _logger.LogWarning("Attempted to add empty/null location name");
+            LogWarningAttemptedToAddEmptyLocationName();
             throw new ArgumentException("Location name cannot be empty", nameof(name));
         }
 
-        _logger.LogInformation("AddOrGetLocation called for: '{Name}'", name);
+        LogInformationAddOrGetLocationCalled(name);
 
         var existing = await GetLocationByNameAsync(name);
         if (existing != null)
         {
-            _logger.LogDebug("Location '{Name}' already exists with ID {Id}", name, existing.Id);
+            LogLocationAlreadyExists(name, existing.Id);
             return existing;
         }
 
         var location = new Location { Name = name };
         _context.Locations.Add(location);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("NEW LOCATION SAVED: '{Name}' (ID: {Id})", name, location.Id);
+        LogNewLocationSaved(name, location.Id);
         return location;
     }
 
     /// <inheritdoc />
     public async Task<bool> DeleteLocationAsync(string name)
     {
-        _logger.LogInformation("DeleteLocation called for: '{Name}'", name);
+        LogDeleteLocationCalled(name);
 
         var location = await GetLocationByNameAsync(name);
         if (location == null)
         {
-            _logger.LogWarning("Cannot delete location '{Name}': Not found", name);
+            LogWarningCannotDeleteLocationNotFound(name);
             return false;
         }
 
         _context.Locations.Remove(location);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("LOCATION DELETED: '{Name}' (ID: {Id})", name, location.Id);
+        LogLocationDeleted(name, location.Id);
         return true;
     }
 
     /// <inheritdoc />
     public async Task<string?> GetWorkshopLocationMappingAsync(string workshopName)
     {
-        _logger.LogDebug("Looking up location mapping for workshop: '{WorkshopName}'", workshopName);
+        LogLookingUpWorkshopLocationMapping(workshopName);
 
         var mapping = await _context.WorkshopLocationMappings
             .FirstOrDefaultAsync(m => m.WorkshopName == workshopName);
 
         var result = mapping?.LocationName;
-        _logger.LogDebug("Workshop '{WorkshopName}' mapping result: {Location}",
-            workshopName, result ?? "NOT FOUND");
+        LogWorkshopMappingResult(workshopName, result ?? "NOT FOUND");
 
         return result;
     }
@@ -221,8 +220,7 @@ public class LocationService : ILocationService
     /// <inheritdoc />
     public async Task SaveWorkshopLocationMappingAsync(string workshopName, string locationName)
     {
-        _logger.LogInformation("Saving workshop-location mapping: '{WorkshopName}' -> '{LocationName}'",
-            workshopName, locationName);
+        LogSavingWorkshopLocationMapping(workshopName, locationName);
 
         var existing = await _context.WorkshopLocationMappings
             .FirstOrDefaultAsync(m => m.WorkshopName == workshopName);
@@ -231,7 +229,7 @@ public class LocationService : ILocationService
         {
             existing.LocationName = locationName;
             existing.LastUpdated = DateTime.UtcNow;
-            _logger.LogDebug("Updated existing mapping for '{WorkshopName}'", workshopName);
+            LogUpdatedExistingMapping(workshopName);
         }
         else
         {
@@ -241,48 +239,47 @@ public class LocationService : ILocationService
                 LocationName = locationName
             };
             _context.WorkshopLocationMappings.Add(mapping);
-            _logger.LogDebug("Created new mapping for '{WorkshopName}'", workshopName);
+            LogCreatedNewMapping(workshopName);
         }
 
         await _context.SaveChangesAsync();
-        _logger.LogInformation("MAPPING SAVED: '{WorkshopName}' -> '{LocationName}'",
-            workshopName, locationName);
+        LogMappingSaved(workshopName, locationName);
     }
 
     /// <inheritdoc />
     public async Task<Dictionary<string, string>> GetAllWorkshopLocationMappingsAsync()
     {
-        _logger.LogDebug("Loading all workshop-location mappings from database");
+        LogLoadingAllWorkshopLocationMappings();
 
         var mappings = await _context.WorkshopLocationMappings
             .ToDictionaryAsync(m => m.WorkshopName, m => m.LocationName);
 
-        _logger.LogDebug("Loaded {Count} workshop-location mappings", mappings.Count);
+        LogLoadedWorkshopLocationMappings(mappings.Count);
         return mappings;
     }
 
     /// <inheritdoc />
     public async Task<List<TimeSlot>> GetAllTimeSlotsAsync()
     {
-        _logger.LogDebug("Loading all timeslots from database");
+        LogLoadingAllTimeSlots();
         var timeSlots = await _context.TimeSlots.ToListAsync();
-        _logger.LogDebug("Loaded {Count} timeslots", timeSlots.Count);
+        LogLoadedTimeSlots(timeSlots.Count);
         return timeSlots;
     }
 
     /// <inheritdoc />
     public async Task<TimeSlot?> GetTimeSlotByIdAsync(string id)
     {
-        _logger.LogDebug("Looking up timeslot by ID: '{Id}'", id);
+        LogLookingUpTimeSlotById(id);
         var timeSlot = await _context.TimeSlots.FirstOrDefaultAsync(t => t.Id == id);
-        _logger.LogDebug("TimeSlot lookup result: {Found}", timeSlot != null ? "FOUND" : "NOT FOUND");
+        LogTimeSlotLookupResult(timeSlot != null ? "FOUND" : "NOT FOUND");
         return timeSlot;
     }
 
     /// <inheritdoc />
     public async Task<TimeSlot> SaveTimeSlotAsync(TimeSlot timeSlot)
     {
-        _logger.LogInformation("Saving timeslot: '{Label}' (ID: {Id})", timeSlot.Label, timeSlot.Id);
+        LogSavingTimeSlot(timeSlot.Label, timeSlot.Id);
 
         var existing = await GetTimeSlotByIdAsync(timeSlot.Id);
         if (existing != null)
@@ -293,52 +290,52 @@ public class LocationService : ILocationService
             existing.EndTime = timeSlot.EndTime;
             existing.IsPeriod = timeSlot.IsPeriod;
             existing.LastUpdated = DateTime.UtcNow;
-            _logger.LogDebug("Updated existing timeslot '{Label}'", timeSlot.Label);
+            LogUpdatedExistingTimeSlot(timeSlot.Label);
         }
         else
         {
             // Add new
             _context.TimeSlots.Add(timeSlot);
-            _logger.LogDebug("Added new timeslot '{Label}'", timeSlot.Label);
+            LogAddedNewTimeSlot(timeSlot.Label);
         }
 
         await _context.SaveChangesAsync();
-        _logger.LogInformation("TIMESLOT SAVED: '{Label}' (ID: {Id})", timeSlot.Label, timeSlot.Id);
+        LogTimeSlotSaved(timeSlot.Label, timeSlot.Id);
         return existing ?? timeSlot;
     }
 
     /// <inheritdoc />
     public async Task<bool> DeleteTimeSlotAsync(string id)
     {
-        _logger.LogInformation("DeleteTimeSlot called for ID: '{Id}'", id);
+        LogDeleteTimeSlotCalled(id);
 
         var timeSlot = await GetTimeSlotByIdAsync(id);
         if (timeSlot == null)
         {
-            _logger.LogWarning("Cannot delete timeslot '{Id}': Not found", id);
+            LogWarningCannotDeleteTimeSlotNotFound(id);
             return false;
         }
 
         _context.TimeSlots.Remove(timeSlot);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("TIMESLOT DELETED: '{Label}' (ID: {Id})", timeSlot.Label, id);
+        LogTimeSlotDeleted(timeSlot.Label, id);
         return true;
     }
 
     /// <inheritdoc />
     public async Task ClearAllTimeSlotsAsync()
     {
-        _logger.LogInformation("Clearing all timeslots from database");
+        LogClearingAllTimeSlots();
         var allTimeSlots = await _context.TimeSlots.ToListAsync();
         _context.TimeSlots.RemoveRange(allTimeSlots);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("CLEARED {Count} timeslots", allTimeSlots.Count);
+        LogClearedTimeSlots(allTimeSlots.Count);
     }
 
     /// <inheritdoc />
     public async Task SaveAllTimeSlotsAsync(List<TimeSlot> timeSlots)
     {
-        _logger.LogInformation("Saving {Count} timeslots to database", timeSlots.Count);
+        LogSavingAllTimeSlots(timeSlots.Count);
 
         // Clear existing and add all new ones
         await ClearAllTimeSlotsAsync();
@@ -350,6 +347,121 @@ public class LocationService : ILocationService
         }
 
         await _context.SaveChangesAsync();
-        _logger.LogInformation("SAVED {Count} timeslots to database", timeSlots.Count);
+        LogSavedAllTimeSlots(timeSlots.Count);
     }
+
+    #region Logging
+
+    // Location Operations: 7001-7099
+    [LoggerMessage(EventId = 7001, Level = LogLevel.Debug, Message = "Loading all location names from database")]
+    partial void LogLoadingAllLocationNames();
+
+    [LoggerMessage(EventId = 7002, Level = LogLevel.Debug, Message = "Loaded {Count} locations")]
+    partial void LogLoadedLocations(int count);
+
+    [LoggerMessage(EventId = 7003, Level = LogLevel.Debug, Message = "Loading all locations with tags from database")]
+    partial void LogLoadingAllLocationsWithTags();
+
+    [LoggerMessage(EventId = 7004, Level = LogLevel.Debug, Message = "Loaded {Count} locations with tags")]
+    partial void LogLoadedLocationsWithTags(int count);
+
+    [LoggerMessage(EventId = 7005, Level = LogLevel.Debug, Message = "Looking up location by name: '{Name}'")]
+    partial void LogLookingUpLocationByName(string name);
+
+    [LoggerMessage(EventId = 7006, Level = LogLevel.Debug, Message = "Location lookup result: {Found}")]
+    partial void LogLocationLookupResult(string found);
+
+    [LoggerMessage(EventId = 7007, Level = LogLevel.Warning, Message = "Attempted to add empty/null location name")]
+    partial void LogWarningAttemptedToAddEmptyLocationName();
+
+    [LoggerMessage(EventId = 7008, Level = LogLevel.Information, Message = "AddOrGetLocation called for: '{Name}'")]
+    partial void LogInformationAddOrGetLocationCalled(string name);
+
+    [LoggerMessage(EventId = 7009, Level = LogLevel.Debug, Message = "Location '{Name}' already exists with ID {Id}")]
+    partial void LogLocationAlreadyExists(string name, int id);
+
+    [LoggerMessage(EventId = 7010, Level = LogLevel.Information, Message = "NEW LOCATION SAVED: '{Name}' (ID: {Id})")]
+    partial void LogNewLocationSaved(string name, int id);
+
+    [LoggerMessage(EventId = 7011, Level = LogLevel.Information, Message = "DeleteLocation called for: '{Name}'")]
+    partial void LogDeleteLocationCalled(string name);
+
+    [LoggerMessage(EventId = 7012, Level = LogLevel.Warning, Message = "Cannot delete location '{Name}': Not found")]
+    partial void LogWarningCannotDeleteLocationNotFound(string name);
+
+    [LoggerMessage(EventId = 7013, Level = LogLevel.Information, Message = "LOCATION DELETED: '{Name}' (ID: {Id})")]
+    partial void LogLocationDeleted(string name, int id);
+
+    // Workshop-Location Mapping Operations: 7100-7199
+    [LoggerMessage(EventId = 7100, Level = LogLevel.Debug, Message = "Looking up location mapping for workshop: '{WorkshopName}'")]
+    partial void LogLookingUpWorkshopLocationMapping(string workshopName);
+
+    [LoggerMessage(EventId = 7101, Level = LogLevel.Debug, Message = "Workshop '{WorkshopName}' mapping result: {Location}")]
+    partial void LogWorkshopMappingResult(string workshopName, string location);
+
+    [LoggerMessage(EventId = 7102, Level = LogLevel.Information, Message = "Saving workshop-location mapping: '{WorkshopName}' -> '{LocationName}'")]
+    partial void LogSavingWorkshopLocationMapping(string workshopName, string locationName);
+
+    [LoggerMessage(EventId = 7103, Level = LogLevel.Debug, Message = "Updated existing mapping for '{WorkshopName}'")]
+    partial void LogUpdatedExistingMapping(string workshopName);
+
+    [LoggerMessage(EventId = 7104, Level = LogLevel.Debug, Message = "Created new mapping for '{WorkshopName}'")]
+    partial void LogCreatedNewMapping(string workshopName);
+
+    [LoggerMessage(EventId = 7105, Level = LogLevel.Information, Message = "MAPPING SAVED: '{WorkshopName}' -> '{LocationName}'")]
+    partial void LogMappingSaved(string workshopName, string locationName);
+
+    [LoggerMessage(EventId = 7106, Level = LogLevel.Debug, Message = "Loading all workshop-location mappings from database")]
+    partial void LogLoadingAllWorkshopLocationMappings();
+
+    [LoggerMessage(EventId = 7107, Level = LogLevel.Debug, Message = "Loaded {Count} workshop-location mappings")]
+    partial void LogLoadedWorkshopLocationMappings(int count);
+
+    // TimeSlot Operations: 7200-7299
+    [LoggerMessage(EventId = 7200, Level = LogLevel.Debug, Message = "Loading all timeslots from database")]
+    partial void LogLoadingAllTimeSlots();
+
+    [LoggerMessage(EventId = 7201, Level = LogLevel.Debug, Message = "Loaded {Count} timeslots")]
+    partial void LogLoadedTimeSlots(int count);
+
+    [LoggerMessage(EventId = 7202, Level = LogLevel.Debug, Message = "Looking up timeslot by ID: '{Id}'")]
+    partial void LogLookingUpTimeSlotById(string id);
+
+    [LoggerMessage(EventId = 7203, Level = LogLevel.Debug, Message = "TimeSlot lookup result: {Found}")]
+    partial void LogTimeSlotLookupResult(string found);
+
+    [LoggerMessage(EventId = 7204, Level = LogLevel.Information, Message = "Saving timeslot: '{Label}' (ID: {Id})")]
+    partial void LogSavingTimeSlot(string label, string id);
+
+    [LoggerMessage(EventId = 7205, Level = LogLevel.Debug, Message = "Updated existing timeslot '{Label}'")]
+    partial void LogUpdatedExistingTimeSlot(string label);
+
+    [LoggerMessage(EventId = 7206, Level = LogLevel.Debug, Message = "Added new timeslot '{Label}'")]
+    partial void LogAddedNewTimeSlot(string label);
+
+    [LoggerMessage(EventId = 7207, Level = LogLevel.Information, Message = "TIMESLOT SAVED: '{Label}' (ID: {Id})")]
+    partial void LogTimeSlotSaved(string label, string id);
+
+    [LoggerMessage(EventId = 7208, Level = LogLevel.Information, Message = "DeleteTimeSlot called for ID: '{Id}'")]
+    partial void LogDeleteTimeSlotCalled(string id);
+
+    [LoggerMessage(EventId = 7209, Level = LogLevel.Warning, Message = "Cannot delete timeslot '{Id}': Not found")]
+    partial void LogWarningCannotDeleteTimeSlotNotFound(string id);
+
+    [LoggerMessage(EventId = 7210, Level = LogLevel.Information, Message = "TIMESLOT DELETED: '{Label}' (ID: {Id})")]
+    partial void LogTimeSlotDeleted(string label, string id);
+
+    [LoggerMessage(EventId = 7211, Level = LogLevel.Information, Message = "Clearing all timeslots from database")]
+    partial void LogClearingAllTimeSlots();
+
+    [LoggerMessage(EventId = 7212, Level = LogLevel.Information, Message = "CLEARED {Count} timeslots")]
+    partial void LogClearedTimeSlots(int count);
+
+    [LoggerMessage(EventId = 7213, Level = LogLevel.Information, Message = "Saving {Count} timeslots to database")]
+    partial void LogSavingAllTimeSlots(int count);
+
+    [LoggerMessage(EventId = 7214, Level = LogLevel.Information, Message = "SAVED {Count} timeslots to database")]
+    partial void LogSavedAllTimeSlots(int count);
+
+    #endregion
 }

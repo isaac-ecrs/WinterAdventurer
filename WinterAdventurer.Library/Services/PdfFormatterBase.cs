@@ -11,7 +11,7 @@ namespace WinterAdventurer.Library.Services
     /// Abstract base class providing shared PDF formatting utilities for document generation.
     /// Contains common functionality for adding logos, footers, facility maps, and setting margins.
     /// </summary>
-    public abstract class PdfFormatterBase
+    public abstract partial class PdfFormatterBase
     {
         /// <summary>
         /// Logger instance for diagnostic information, warnings, and error reporting during PDF generation.
@@ -115,7 +115,7 @@ namespace WinterAdventurer.Library.Services
             catch (Exception ex)
             {
                 // Log error but don't fail PDF generation
-                _logger.LogWarning(ex, "Error adding logo to PDF section (type: {DocumentType})", documentType);
+                LogWarningErrorAddingLogo(ex, documentType);
             }
         }
 
@@ -171,8 +171,26 @@ namespace WinterAdventurer.Library.Services
             catch (Exception ex)
             {
                 // Log error but don't fail PDF generation
-                _logger.LogWarning(ex, "Error adding facility map to PDF section");
+                LogWarningErrorAddingFacilityMap(ex);
             }
         }
+
+        #region Logging
+
+        [LoggerMessage(
+            EventId = 6001,
+            Level = LogLevel.Warning,
+            Message = "Error adding logo to PDF section (type: {documentType})"
+        )]
+        private partial void LogWarningErrorAddingLogo(Exception ex, string documentType);
+
+        [LoggerMessage(
+            EventId = 6002,
+            Level = LogLevel.Warning,
+            Message = "Error adding facility map to PDF section"
+        )]
+        private partial void LogWarningErrorAddingFacilityMap(Exception ex);
+
+        #endregion
     }
 }
