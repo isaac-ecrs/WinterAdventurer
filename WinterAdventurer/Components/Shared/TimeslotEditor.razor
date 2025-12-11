@@ -4,9 +4,12 @@
 <MudPaper Class="pa-4 mb-4">
     <MudText Typo="Typo.h5" Class="mb-3">Configure Schedule Times</MudText>
 
-    @foreach (var timeslot in Timeslots)
-    {
-        <MudGrid @key="@timeslot.Id">
+    <div class="timeslot-container" data-version="@containerVersion">
+        @for (int i = 0; i < Timeslots.Count; i++)
+        {
+            var timeslot = Timeslots[i];
+            var delayMs = $"{i * 50}ms";
+            <MudGrid class="timeslot-row" @key="@timeslot.Id" style="@($"animation-delay: {delayMs}")">
             <MudItem xs="4">
                 <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
             </MudItem>
@@ -34,8 +37,9 @@
                               Disabled="@timeslot.IsPeriod"
                               OnClick="() => RemoveTimeslot(timeslot)" />
             </MudItem>
-        </MudGrid>
-    }
+            </MudGrid>
+        }
+    </div>
 
     <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Text" OnClick="AddTimeslot">
         Add Non-Period Time Slot (e.g., Lunch, Break)
@@ -73,12 +77,35 @@
     public EventCallback OnSaveTimeslots { get; set; }
 
     /// <summary>
+    /// External version from parent for triggering animations when periods change
+    /// </summary>
+    [Parameter]
+    public int Version { get; set; }
+
+    /// <summary>
+    /// Version counter for triggering container animations when rows are added/removed
+    /// </summary>
+    private int containerVersion = 1;
+
+    /// <summary>
+    /// Syncs external version changes from parent component
+    /// </summary>
+    protected override void OnParametersSet()
+    {
+        if (Version != containerVersion)
+        {
+            containerVersion = Version;
+        }
+    }
+
+    /// <summary>
     /// Adds a new custom (non-period) timeslot to the list
     /// </summary>
     private async Task AddTimeslot()
     {
         var newSlot = new TimeSlotViewModel { IsPeriod = false };
         Timeslots.Add(newSlot);
+        containerVersion++; // Trigger animation
         await OnTimeslotsChanged.InvokeAsync();
     }
 
@@ -90,6 +117,7 @@
         if (!timeslot.IsPeriod)
         {
             Timeslots.Remove(timeslot);
+            containerVersion++; // Trigger animation
             await OnTimeslotsChanged.InvokeAsync();
         }
     }
