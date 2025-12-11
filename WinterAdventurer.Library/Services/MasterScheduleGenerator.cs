@@ -39,7 +39,7 @@ namespace WinterAdventurer.Library.Services
             var sections = new List<Section>();
 
             // If no timeslots provided, create default set
-            if (timeslots == null || !timeslots.Any())
+            if (timeslots == null || timeslots.Count == 0)
             {
                 timeslots = CreateDefaultTimeslots();
             }
@@ -47,7 +47,7 @@ namespace WinterAdventurer.Library.Services
             // Get unique locations sorted alphabetically
             var locations = GetUniqueLocations(workshops);
 
-            if (!locations.Any())
+            if (locations.Count == 0)
             {
                 // No locations assigned, skip master schedule
                 return sections;

@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Globalization;
 
 namespace WinterAdventurer.Library
 {
@@ -19,25 +20,25 @@ namespace WinterAdventurer.Library
         /// <returns>FontResolverInfo containing the font face name to load from embedded resources.</returns>
         public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
-            var name = familyName.ToLower();
+            var name = familyName.ToUpper(CultureInfo.InvariantCulture);
 
             switch (name)
             {
-                case "noto":
-                case "notosans":
-                case "arial":
+                case "NOTO":
+                case "NOTOSANS":
+                case "ARIAL":
                     if (isBold)
                     {
                         return new FontResolverInfo("NotoSans-Bold");
                     }
                     return new FontResolverInfo("NotoSans-Regular");
-                case "oswald":
+                case "OSWALD":
                     if (isBold)
                     {
                         return new FontResolverInfo("Oswald-Bold");
                     }
                     return new FontResolverInfo("Oswald-Regular");
-                case "roboto":
+                case "ROBOTO":
                     if (isBold)
                     {
                         return new FontResolverInfo("Roboto-Bold");
@@ -80,19 +81,19 @@ namespace WinterAdventurer.Library
         /// <returns>Full embedded resource name, or null if face name is not recognized.</returns>
         private string? GetFontResourceName(string faceName)
         {
-            switch (faceName.ToLower())
+            switch (faceName.ToUpperInvariant())
             {
-                case "notosans-regular":
+                case "NOTOSANS-REGULAR":
                     return "WinterAdventurer.Library.Resources.Fonts.Noto_Sans.static.NotoSans-Regular.ttf";
-                case "notosans-bold":
+                case "NOTOSANS-BOLD":
                     return "WinterAdventurer.Library.Resources.Fonts.Noto_Sans.static.NotoSans-Bold.ttf";
-                case "oswald-regular":
+                case "OSWALD-REGULAR":
                     return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Regular.ttf";
-                case "oswald-bold":
+                case "OSWALD-BOLD":
                     return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Bold.ttf";
-                case "roboto-regular":
+                case "ROBOTO-REGUAR":
                     return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Regular.ttf";
-                case "roboto-bold":
+                case "ROBOTO-BOLD":
                     return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Bold.ttf";
                 default:
                     return null;

@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AnalysisMode>Recommended</AnalysisMode>
 
     <!-- Suppress overly strict design rules for DTOs/models while keeping security/performance rules -->
     <!-- CA1002: Don't expose List<T> - overly strict for data models -->

@@ -16,6 +16,7 @@ namespace WinterAdventurer.Library.Services
     {
         private readonly EventSchema _schema;
         private readonly MasterScheduleGenerator _masterScheduleGenerator;
+        private static readonly string[] LeaderDelimiter = new[] { " and " };
 
         /// <summary>
         /// Initializes a new instance of the IndividualScheduleGenerator class.
@@ -51,7 +52,7 @@ namespace WinterAdventurer.Library.Services
             var sections = new List<Section>();
 
             // If no timeslots provided, create default minimal set
-            if (timeslots == null || !timeslots.Any())
+            if (timeslots == null || timeslots.Count == 0)
             {
                 timeslots = CreateDefaultTimeslots();
             }
@@ -276,7 +277,7 @@ namespace WinterAdventurer.Library.Services
                                     if (workshop.Leader.Contains(" and "))
                                     {
                                         // Extract the other leader's name
-                                        var leaders = workshop.Leader.Split(new[] { " and " }, StringSplitOptions.None);
+                                        var leaders = workshop.Leader.Split(LeaderDelimiter, StringSplitOptions.None);
                                         var otherLeader = leaders.FirstOrDefault(l => l.Trim() != attendee.FullName)?.Trim();
 
                                         if (!string.IsNullOrEmpty(otherLeader))
@@ -315,11 +316,9 @@ namespace WinterAdventurer.Library.Services
                                     locationPara.AddText(workshop.Location);
 
                                     // Add tags in lowercase and not bold
-                                    if (workshop.Tags != null && workshop.Tags.Any())
+                                    if (workshop.Tags != null && workshop.Tags.Count > 0)
                                     {
-                                        var tagNames = string.Join(", ", workshop.Tags
-                                            .OrderBy(t => t.Name)
-                                            .Select(t => t.Name.ToLower()));
+                                        var tagNames = BuildTagListString(workshop.Tags);
                                         var tagText = locationPara.AddFormattedText($" ({tagNames})");
                                         tagText.Font.Bold = false;
                                     }
@@ -351,6 +350,16 @@ namespace WinterAdventurer.Library.Services
             }
 
             return sections;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Converting to lowercase for display, not sorting or comparison")]
+        private string BuildTagListString(List<LocationTag> tags)
+        {
+            var tagString = string.Join(", ", tags
+                                    .OrderBy(t => t.Name)
+                                        .Select(t => t.Name.ToLowerInvariant()));
+
+            return tagString;
         }
 
         /// <summary>

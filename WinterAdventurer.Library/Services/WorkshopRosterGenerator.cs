@@ -102,7 +102,7 @@ namespace WinterAdventurer.Library.Services
                     .ToList();
 
                 // First choice participants
-                if (firstChoiceAttendees.Any())
+                if (firstChoiceAttendees.Count > 0)
                 {
                     var firstChoiceHeader = section.AddParagraph();
                     firstChoiceHeader.Format.Font.Name = FontNames.NotoSans;
@@ -115,7 +115,7 @@ namespace WinterAdventurer.Library.Services
                 }
 
                 // Backup participants
-                if (backupAttendees.Any())
+                if (backupAttendees.Count > 0)
                 {
                     var backupHeader = section.AddParagraph();
                     backupHeader.Format.Font.Name = FontNames.NotoSans;

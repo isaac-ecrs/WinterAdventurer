@@ -53,7 +53,7 @@ namespace WinterAdventurer.Library.Services
             int blankScheduleCount = 0)
         {
             // Allow creating PDF with just blank schedules if workshops is empty
-            if ((workshops == null || !workshops.Any()) && blankScheduleCount == 0)
+            if ((workshops == null || workshops.Count == 0) && blankScheduleCount == 0)
             {
                 LogWarningCannotCreatePdf();
                 return null;
@@ -62,7 +62,7 @@ namespace WinterAdventurer.Library.Services
             var document = new Document();
 
             // Add workshop rosters (only if workshops exist)
-            if (workshops != null && workshops.Any())
+            if (workshops != null && workshops.Count > 0)
             {
                 var rosterSections = _rosterGenerator.GenerateRosterSections(workshops, eventName, timeslots);
                 foreach (var section in rosterSections)
@@ -112,7 +112,7 @@ namespace WinterAdventurer.Library.Services
             string eventName = "Master Schedule",
             List<Models.TimeSlot>? timeslots = null)
         {
-            if (workshops == null || !workshops.Any())
+            if (workshops == null || workshops.Count == 0)
             {
                 LogWarningCannotCreateMasterSchedulePdf();
                 return null;

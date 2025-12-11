@@ -261,7 +261,7 @@ namespace WinterAdventurer.Library
                         if (string.IsNullOrWhiteSpace(selectionId))
                         {
                             selectionId = $"{firstName}{lastName}".Replace(" ", "");
-                            LogDebugGeneratedFallbackAttendeeId($"{firstName} {lastName}", selectionId);
+                            LogDebugGeneratedFallbackAttendeeId(firstName ?? "FirstNameNull", lastName ?? "LastNameNull", selectionId);
                         }
 
                         attendees[selectionId] = new Attendee
@@ -555,9 +555,9 @@ namespace WinterAdventurer.Library
         [LoggerMessage(
             EventId = 1053,
             Level = LogLevel.Debug,
-            Message = "Generated fallback ID for attendee: {fullName} -> {selectionId}"
+            Message = "Generated fallback ID for attendee: {firstName} {lastName} -> {selectionId}"
         )]
-        private partial void LogDebugGeneratedFallbackAttendeeId(string fullName, string selectionId);
+        private partial void LogDebugGeneratedFallbackAttendeeId(string firstName, string lastName, string selectionId);
 
         [LoggerMessage(
             EventId = 1054,

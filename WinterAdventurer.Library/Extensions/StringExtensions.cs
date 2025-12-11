@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace WinterAdventurer.Library.Extensions
 {
@@ -16,6 +17,8 @@ namespace WinterAdventurer.Library.Extensions
         /// </summary>
         /// <param name="input">String to convert to proper case.</param>
         /// <returns>String with each word capitalized (first letter uppercase, remaining lowercase).</returns>
+        [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", 
+                     Justification = "This method is for proper-casing display text, not for culture-invariant comparisons or lookups. Lowercase is required for the output format.")]
         public static string ToProper(this string input)
         {
             var splitInput = input.Split(' ');
@@ -26,7 +29,7 @@ namespace WinterAdventurer.Library.Extensions
                 // Check for null, whitespace, or empty strings before accessing word[0]
                 if (!string.IsNullOrWhiteSpace(word) && word.Length > 0)
                 {
-                    combinedInput = combinedInput + " " + word[0].ToString().ToUpper() + word.Substring(1).ToLower();
+                    combinedInput = combinedInput + " " + word[0].ToString().ToUpperInvariant() + word.Substring(1).ToLowerInvariant();
                 }
             }
 
