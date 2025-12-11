@@ -280,17 +280,17 @@ namespace WinterAdventurer.Library.Services
                         // Generate fallback ID if missing
                         if (string.IsNullOrWhiteSpace(selectionId))
                         {
-                            selectionId = $"{firstName}{lastName}".Replace(" ", "");
+                            selectionId = $"{firstName}{lastName}".Replace(" ", String.Empty);
                             LogDebugGeneratedFallbackAttendeeId(firstName ?? "FirstNameNull", lastName ?? "LastNameNull", selectionId);
                         }
 
                         attendees[selectionId] = new Attendee
                         {
                             ClassSelectionId = selectionId,
-                            FirstName = firstName ?? "",
-                            LastName = lastName ?? "",
-                            Email = email ?? "",
-                            Age = age ?? ""
+                            FirstName = firstName ?? String.Empty,
+                            LastName = lastName ?? String.Empty,
+                            Email = email ?? String.Empty,
+                            Age = age ?? String.Empty
                         };
                     }
                     catch (Exception ex)
@@ -388,8 +388,8 @@ namespace WinterAdventurer.Library.Services
                                 else
                                 {
                                     // Fallback: try to get name from the row
-                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? "";
-                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? "";
+                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? String.Empty;
+                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? String.Empty;
                                     attendee = new Attendee
                                     {
                                         ClassSelectionId = selectionId ?? $"{firstName}{lastName}",

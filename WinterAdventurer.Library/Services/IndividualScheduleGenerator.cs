@@ -482,7 +482,7 @@ namespace WinterAdventurer.Library.Services
                 timeslots.Add(new Models.TimeSlot
                 {
                     Label = period.DisplayName,
-                    IsPeriod = true
+                    IsPeriod = true,
                 });
             }
 
@@ -490,19 +490,19 @@ namespace WinterAdventurer.Library.Services
             timeslots.Insert(0, new Models.TimeSlot
             {
                 Label = "Breakfast",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             timeslots.Add(new Models.TimeSlot
             {
                 Label = "Lunch",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             timeslots.Add(new Models.TimeSlot
             {
                 Label = "Evening Program",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             return timeslots;

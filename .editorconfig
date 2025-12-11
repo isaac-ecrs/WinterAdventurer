@@ -52,6 +52,28 @@ csharp_preserve_single_line_blocks = true
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
 
+# --------------------------------------------------------------------------
+# STYLECOP.ANALYZERS (SAxxxx) RULES 
+# --------------------------------------------------------------------------
+
+# Set default StyleCop severity. If not explicitly defined below, it will fall 
+# back to the general dotnet_analyzer_diagnostic.severity if set.
+
+# SA1000: Using directives should be placed correctly (e.g., inside/outside namespace)
+dotnet_diagnostic.SA1000.severity = error
+
+# SA1101: Prefix local calls with 'this.' (Disabling, as IDE0003 handles 'this' qualification)
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1516: Elements should be separated by single blank line (Disabling for cleaner code blocks)
+dotnet_diagnostic.SA1516.severity = none
+
+# SA1600: Elements should be documented (Require documentation for public members)
+dotnet_diagnostic.SA1600.severity = warning
+
+# SA1633: File must have a file header (Required for copyright/company name)
+dotnet_diagnostic.SA1633.severity = error
+
 # ===================================
 # ROSLYN ANALYZER RULES - STRINGENT CONFIGURATION
 # ===================================

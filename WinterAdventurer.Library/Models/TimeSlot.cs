@@ -55,7 +55,7 @@ namespace WinterAdventurer.Library.Models
                     var startDateTime = DateTime.Today.Add(StartTime.Value);
                     return $"{startDateTime:h:mm tt} - ?";
                 }
-                return "";
+                return Stirng.Empty;
             }
         }
     }
