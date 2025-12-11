@@ -55,3 +55,34 @@ h1:focus {
 .components-reconnect-dialog {
     display: none !important;
 }
+
+/* Theme transition animations */
+body, .mud-main-content, .mud-card, .mud-paper {
+    transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+}
+
+.theme-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--mud-palette-surface);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 300ms ease-in-out;
+}
+
+.theme-transition-overlay.active {
+    opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body, .mud-main-content, .mud-card, .mud-paper {
+        transition: none !important;
+    }
+    .theme-transition-overlay {
+        display: none;
+    }
+}

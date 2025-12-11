@@ -6,7 +6,8 @@
 @inject ILocationService LocationService
 @inject ILogger<WorkshopCard> Logger
 
-<MudCard>
+<div class="workshop-card-wrapper" style="animation-delay: @(CardIndex * 50)ms">
+    <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
             <MudTextField Typo="Typo.h4" @bind-Value="Workshop.Name" />
@@ -15,7 +16,8 @@
     <MudCardContent>
         <MudText>@Workshop.Selections.Count().ToString() Participants</MudText>
         <MudText>@Workshop.Period.DisplayName</MudText>
-        <div @onfocusout="OnLocationBlur"
+        <div class="@(locationJustChanged ? "location-field-changed" : "")"
+             @onfocusout="OnLocationBlur"
              @key="@($"loc-{Workshop.Name}-{LocationListVersion}")"
              id="@(CardIndex == 0 ? "first-workshop-location" : null)"
              data-card-index="@CardIndex"
@@ -67,7 +69,8 @@
                           @bind-Value="Workshop.Leader" />
         </div>
     </MudCardContent>
-</MudCard>
+    </MudCard>
+</div>
 
 @code {
     /// <summary>
@@ -117,6 +120,7 @@
 
     private string previousLocation = string.Empty;
     private Location? selectedLocation = null;
+    private bool locationJustChanged = false;
 
     protected override void OnParametersSet()
     {
@@ -219,6 +223,13 @@
 
         // Notify parent that location changed (parent will increment version and add to cache)
         await OnLocationChanged.InvokeAsync(Workshop);
+
+        // Show pulse animation
+        locationJustChanged = true;
+        StateHasChanged();
+        await Task.Delay(600);
+        locationJustChanged = false;
+        StateHasChanged();
     }
 
     /// <summary>

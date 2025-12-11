@@ -1,9 +1,7 @@
-using System.IO;
 using System.Reflection;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
 using Microsoft.Extensions.Logging;
-using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Library.Services
 {

@@ -64,11 +64,6 @@ namespace WinterAdventurer.Library
         /// </summary>
         private readonly PdfDocumentOrchestrator _pdfOrchestrator;
 
-        /// <summary>
-        /// Standard black color used throughout PDF document generation.
-        /// </summary>
-        readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
-
         public ExcelUtilities(ILogger<ExcelUtilities> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -327,10 +322,14 @@ namespace WinterAdventurer.Library
                         var registrationIdStr = helper.GetCellValueByPattern(row, periodConfig.GetColumnName("registrationId"));
 
                         if (!int.TryParse(choiceNumberStr, out int choiceNumber))
+                        {
                             choiceNumber = 1;
+                        }
 
                         if (!int.TryParse(registrationIdStr, out int registrationId))
+                        {
                             registrationId = 0;
+                        }
 
                         // Process each workshop column configured for this period
                         foreach (var workshopCol in periodConfig.WorkshopColumns)
@@ -338,7 +337,10 @@ namespace WinterAdventurer.Library
                             try
                             {
                                 var cellValue = helper.GetCellValue(row, workshopCol.ColumnName);
-                                if (string.IsNullOrWhiteSpace(cellValue)) continue;
+                                if (string.IsNullOrWhiteSpace(cellValue))
+                                {
+                                    continue;
+                                }
 
                                 var workshopName = cellValue.GetWorkshopName();
                                 var leaderName = cellValue.GetLeaderName();

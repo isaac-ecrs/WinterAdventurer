@@ -314,3 +314,86 @@
 .tour-error-content small {
     opacity: 0.8;
 }
+
+/* Enhanced spotlight animations */
+.driver-overlay {
+    transition: opacity 300ms ease-in-out !important;
+}
+
+/* Smooth popover transitions */
+.driver-popover {
+    animation: tourPopoverFadeIn 300ms ease-out;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+
+@keyframes tourPopoverFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced highlighted element styling with pulse */
+[data-tour-theme="light"] .driver-active-element {
+    outline: 2px solid #594ae2 !important;
+    outline-offset: 2px;
+    animation: tourHighlightPulse 2s ease-in-out infinite;
+}
+
+[data-tour-theme="dark"] .driver-active-element {
+    outline: 2px solid #b39ddb !important;
+    outline-offset: 2px;
+    animation: tourHighlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes tourHighlightPulse {
+    0%, 100% {
+        outline-width: 2px;
+        outline-offset: 2px;
+    }
+    50% {
+        outline-width: 3px;
+        outline-offset: 4px;
+    }
+}
+
+/* Smooth step transitions */
+.driver-popover-title,
+.driver-popover-description {
+    transition: opacity 200ms ease-in-out;
+}
+
+/* Arrow animation */
+.driver-popover-arrow {
+    transition: all 300ms ease-out;
+}
+
+/* Button press animations */
+.winter-adventurer-tour .driver-popover-navigation-btns button {
+    transition: background-color 300ms ease-in-out, transform 100ms ease-out;
+}
+
+.winter-adventurer-tour .driver-popover-navigation-btns button:active {
+    transform: scale(0.97);
+}
+
+/* Update existing button transitions from 0.2s to 300ms for consistency */
+[data-tour-theme="light"] .winter-adventurer-tour .driver-popover-navigation-btns button,
+[data-tour-theme="dark"] .winter-adventurer-tour .driver-popover-navigation-btns button {
+    transition: background-color 300ms ease-in-out, transform 100ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .driver-overlay,
+    .driver-popover,
+    .driver-active-element,
+    .driver-popover-arrow,
+    .driver-popover-navigation-btns button {
+        animation: none !important;
+        transition: none !important;
+    }
+}

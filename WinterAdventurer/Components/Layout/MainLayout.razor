@@ -1,5 +1,10 @@
 ﻿@inherits LayoutComponentBase
-@using MudBlazor;
+@using MudBlazor
+@using WinterAdventurer.Services
+@inject ThemeService ThemeService
+@implements IDisposable
+
+<div class="theme-transition-overlay @(ThemeService.IsTransitioning ? "active" : "")"></div>
 
 <MudLayout>
     <MudMainContent>
@@ -8,3 +13,20 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ThemeService.OnThemeChanged += HandleThemeChanged;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= HandleThemeChanged;
+    }
+}

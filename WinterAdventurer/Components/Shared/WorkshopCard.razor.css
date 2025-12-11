@@ -1,0 +1,75 @@
+/* Workshop card animations */
+.workshop-card-wrapper {
+    animation: fadeSlideIn 300ms ease-out backwards;
+    will-change: transform, opacity;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Staggered animation delays - applied via inline style */
+.workshop-card-wrapper[style*="animation-delay"] {
+    /* Delays set dynamically in component */
+}
+
+/* Location field highlight on change */
+.location-field-changed {
+    animation: highlightPulse 600ms ease-out;
+}
+
+@keyframes highlightPulse {
+    0%, 100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+    }
+}
+
+/* Card hover effect */
+.workshop-card-wrapper:hover {
+    transform: translateY(-2px);
+    transition: transform 150ms ease-out;
+}
+
+/* Smooth transitions for all interactive elements */
+.mud-input,
+.mud-autocomplete,
+.mud-text-field {
+    transition: all 200ms ease-in-out;
+}
+
+/* Delete animation */
+.workshop-card-deleting {
+    animation: fadeSlideOut 300ms ease-in forwards;
+}
+
+@keyframes fadeSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workshop-card-wrapper,
+    .workshop-card-wrapper:hover,
+    .location-field-changed,
+    .workshop-card-deleting {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}

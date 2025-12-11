@@ -6,7 +6,8 @@
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
                    StartIcon="@Icons.Material.Filled.CloudUpload"
-                   Disabled="@IsLoading">
+                   Disabled="@IsLoading"
+                   Class="file-upload-button">
             Upload Excel File
         </MudButton>
     </ActivatorContent>
@@ -14,8 +15,10 @@
 
 @if (IsLoading)
 {
-    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-    <MudText>Processing...</MudText>
+    <div class="loading-container">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Small" />
+        <MudText Class="loading-text">Processing...</MudText>
+    </div>
 }
 
 @code {

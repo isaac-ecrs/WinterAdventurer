@@ -6,7 +6,7 @@
 
     @foreach (var timeslot in Timeslots)
     {
-        <MudGrid Class="mb-2" @key="@timeslot.Id">
+        <MudGrid @key="@timeslot.Id">
             <MudItem xs="4">
                 <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
             </MudItem>

@@ -167,6 +167,14 @@ window.debugTourElements = function() {
     });
 };
 
+// Enhance tour animations
+window.enhanceTourAnimations = function() {
+    const popover = document.querySelector('.driver-popover');
+    if (popover) {
+        popover.style.transition = 'all 300ms ease-out';
+    }
+};
+
 // Guided tour using Driver.js
 window.startHomeTour = function() {
     console.log('startHomeTour called');
@@ -309,6 +317,14 @@ window.startHomeTour = function() {
                 console.log('Element found:', element);
                 console.log('Element ID:', element?.id);
                 console.log('Element classes:', element?.className);
+
+                // Enhance tour animations
+                enhanceTourAnimations();
+
+                // Smooth scroll to element
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
 
                 // If element not found, log what's actually in the DOM
                 if (!element && step.element) {

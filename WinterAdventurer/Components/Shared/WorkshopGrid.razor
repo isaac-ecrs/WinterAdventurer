@@ -50,6 +50,7 @@
         }
         <PdfGenerationButtons IsDisabled="IsDisabled"
                               IsLoading="IsLoading"
+                              ShowSuccess="ShowSuccess"
                               OnCreateMasterSchedule="OnCreateMasterSchedule" />
     </MudGrid>
 </EditForm>
@@ -108,6 +109,12 @@
     /// </summary>
     [Parameter]
     public bool IsLoading { get; set; }
+
+    /// <summary>
+    /// Indicates whether to show the success message after PDF generation
+    /// </summary>
+    [Parameter]
+    public bool ShowSuccess { get; set; }
 
     /// <summary>
     /// List of all available locations from the database (with tags loaded)
