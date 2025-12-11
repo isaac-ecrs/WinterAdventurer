@@ -484,7 +484,7 @@ namespace WinterAdventurer.Test.Components
                 .Add(p => p.CardIndex, 0));
 
             // Assert - Verify MudAutocomplete is rendered (it contains MudBlazor component classes)
-            Assert.Contains("mud-autocomplete", cut.Markup.ToLower());
+            Assert.Contains("MUD-AUTOCOMPLETE", cut.Markup.ToUpperInvariant());
             // Verify the location wrapper div exists
             var locationDiv = cut.Find("#first-workshop-location");
             Assert.IsNotNull(locationDiv);
@@ -504,7 +504,7 @@ namespace WinterAdventurer.Test.Components
                 .Add(p => p.CardIndex, 0));
 
             // Assert - Should have MudCard structure
-            Assert.Contains("mud-card", cut.Markup.ToLower());
+            Assert.Contains("MUD-CARD", cut.Markup.ToUpperInvariant());
         }
 
         [TestMethod]

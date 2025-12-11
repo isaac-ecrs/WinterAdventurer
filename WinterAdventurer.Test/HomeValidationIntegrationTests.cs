@@ -10,7 +10,7 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class HomeValidationIntegrationTests
     {
-        private ITimeslotValidationService _validationService = null!;
+        private TimeslotValidationService _validationService = null!;
 
         [TestInitialize]
         public void Setup()

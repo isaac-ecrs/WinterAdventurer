@@ -5,6 +5,7 @@
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AnalysisMode>Recommended</AnalysisMode>
 
     <!-- Suppress less critical analyzer warnings for E2E test infrastructure -->
     <!-- Keep security/critical rules, suppress design/style rules for test code -->

@@ -5,7 +5,7 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class TimeslotValidationServiceTests
     {
-        private ITimeslotValidationService _validationService = null!;
+        private TimeslotValidationService _validationService = null!;
 
         [TestInitialize]
         public void Setup()

@@ -82,7 +82,7 @@ namespace WinterAdventurer.Test
             var section = sections[0];
             // Workshop name should be in one of the paragraphs (as the first content paragraph after logo)
             var paragraphs = section.Elements.OfType<MigraDoc.DocumentObjectModel.Paragraph>().ToList();
-            Assert.IsTrue(paragraphs.Any(), "Section should contain paragraphs");
+            Assert.IsTrue(paragraphs.Count > 0, "Section should contain paragraphs");
 
             // Find the paragraph with workshop name (it should be bold and have the workshop name)
             var hasWorkshopName = paragraphs.Any(p =>
