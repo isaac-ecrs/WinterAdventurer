@@ -154,7 +154,7 @@ public partial class TagService : ITagService
             return false;
         }
 
-        if (tag.Locations.Any())
+        if (tag.Locations.Count > 0)
         {
             LogWarningCannotDeleteTagAssignedToLocations(name, tag.Locations.Count);
             throw new InvalidOperationException(

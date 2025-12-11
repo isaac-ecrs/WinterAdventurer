@@ -73,6 +73,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
         ?? defaultConnectionString));
 
+builder.Services.AddSingleton<DbSeeder>();
+
 // Add location service
 builder.Services.AddScoped<ILocationService, LocationService>();
 
@@ -103,7 +105,27 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     dbContext.Database.Migrate();
-    await DbSeeder.SeedDefaultDataAsync(dbContext, logger);
+}
+
+// Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    
+    // Get the DbSeeder instance from the container
+    var seeder = services.GetRequiredService<DbSeeder>(); 
+    
+    try
+    {
+        await context.Database.MigrateAsync(); // Ensure DB is updated
+        await seeder.SeedDefaultDataAsync(context); // Call the instance method
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
 }
 
 // Configure the HTTP request pipeline.
