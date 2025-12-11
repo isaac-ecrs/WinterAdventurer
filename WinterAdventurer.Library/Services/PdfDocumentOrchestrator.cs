@@ -9,7 +9,7 @@ namespace WinterAdventurer.Library.Services
     /// Coordinates PDF generation by orchestrating the roster, individual schedule, and master schedule generators.
     /// Creates complete MigraDoc documents by combining outputs from specialized generators.
     /// </summary>
-    public class PdfDocumentOrchestrator
+    public partial class PdfDocumentOrchestrator
     {
         private readonly WorkshopRosterGenerator _rosterGenerator;
         private readonly IndividualScheduleGenerator _scheduleGenerator;
@@ -55,7 +55,7 @@ namespace WinterAdventurer.Library.Services
             // Allow creating PDF with just blank schedules if workshops is empty
             if ((workshops == null || !workshops.Any()) && blankScheduleCount == 0)
             {
-                _logger.LogWarning("Cannot create PDF - workshops collection is empty and no blank schedules requested");
+                LogWarningCannotCreatePdf();
                 return null;
             }
 
@@ -85,10 +85,10 @@ namespace WinterAdventurer.Library.Services
             // Add blank schedules if requested
             if (blankScheduleCount > 0)
             {
-                _logger.LogInformation($"Generating {blankScheduleCount} blank schedules");
+                LogInformationGeneratingBlankSchedules(blankScheduleCount);
                 // Pass workshops so blank schedules can include location columns
                 var blankSections = _scheduleGenerator.GenerateBlankSchedules(workshops ?? new List<Workshop>(), eventName, blankScheduleCount, timeslots);
-                _logger.LogInformation($"Generated {blankSections.Count} blank schedule sections");
+                LogInformationGeneratedBlankSchedules(blankSections.Count);
 
                 foreach (var section in blankSections)
                 {
@@ -114,7 +114,7 @@ namespace WinterAdventurer.Library.Services
         {
             if (workshops == null || !workshops.Any())
             {
-                _logger.LogWarning("Cannot create master schedule PDF - workshops collection is empty");
+                LogWarningCannotCreateMasterSchedulePdf();
                 return null;
             }
 
@@ -128,5 +128,37 @@ namespace WinterAdventurer.Library.Services
 
             return document;
         }
+
+        #region Logging
+
+        [LoggerMessage(
+            EventId = 3001,
+            Level = LogLevel.Warning,
+            Message = "Cannot create PDF - workshops collection is empty and no blank schedules requested"
+        )]
+        private partial void LogWarningCannotCreatePdf();
+
+        [LoggerMessage(
+            EventId = 3002,
+            Level = LogLevel.Information,
+            Message = "Generating {blankScheduleCount} blank schedules"
+        )]
+        private partial void LogInformationGeneratingBlankSchedules(int blankScheduleCount);
+
+        [LoggerMessage(
+            EventId = 3003,
+            Level = LogLevel.Information,
+            Message = "Generated {blankScheduleSectionCount} blank schedule sections"
+        )]
+        private partial void LogInformationGeneratedBlankSchedules(int blankScheduleSectionCount);
+
+        [LoggerMessage(
+            EventId = 3004,
+            Level = LogLevel.Warning,
+            Message = "Cannot create master schedule PDF - workshops collection is empty"
+        )]
+        private partial void LogWarningCannotCreateMasterSchedulePdf();
+
+        #endregion
     }
 }

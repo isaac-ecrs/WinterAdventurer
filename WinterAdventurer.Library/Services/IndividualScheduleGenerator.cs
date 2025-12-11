@@ -12,7 +12,7 @@ namespace WinterAdventurer.Library.Services
     /// Generates individual schedule PDFs for participants showing their workshops in a visual calendar format.
     /// Creates landscape-oriented schedule pages with workshop details, leader info, and locations.
     /// </summary>
-    public class IndividualScheduleGenerator : PdfFormatterBase
+    public partial class IndividualScheduleGenerator : PdfFormatterBase
     {
         private readonly EventSchema _schema;
         private readonly MasterScheduleGenerator _masterScheduleGenerator;
@@ -364,7 +364,7 @@ namespace WinterAdventurer.Library.Services
         /// <returns>List of MigraDoc Section objects containing blank schedules.</returns>
         public List<Section> GenerateBlankSchedules(List<Workshop> workshops, string eventName, int count, List<Models.TimeSlot>? timeslots = null)
         {
-            _logger.LogInformation($"GenerateBlankSchedules called with count={count}");
+            LogInformationGenerateBlankSchedulesCalled(count);
             var sections = new List<Section>();
 
             // Generate multiple copies of the master schedule for blank schedules
@@ -400,9 +400,27 @@ namespace WinterAdventurer.Library.Services
                 }
             }
 
-            _logger.LogInformation($"Generated {sections.Count} blank schedule sections");
+            LogInformationGeneratedBlankScheduleSections(sections.Count);
             return sections;
         }
+
+        #region Logging
+
+        [LoggerMessage(
+            EventId = 5001,
+            Level = LogLevel.Information,
+            Message = "GenerateBlankSchedules called with count={count}"
+        )]
+        private partial void LogInformationGenerateBlankSchedulesCalled(int count);
+
+        [LoggerMessage(
+            EventId = 5002,
+            Level = LogLevel.Information,
+            Message = "Generated {sectionCount} blank schedule sections"
+        )]
+        private partial void LogInformationGeneratedBlankScheduleSections(int sectionCount);
+
+        #endregion
 
         /// <summary>
         /// Adds a merged row to schedule table for non-period activities that span all days.

@@ -71,7 +71,7 @@ public interface ITagService
 /// Provides CRUD operations for tags and manages tag-to-location relationships,
 /// with comprehensive logging and validation.
 /// </summary>
-public class TagService : ITagService
+public partial class TagService : ITagService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<TagService> _logger;
@@ -90,21 +90,21 @@ public class TagService : ITagService
     /// <inheritdoc />
     public async Task<List<Tag>> GetAllTagsAsync()
     {
-        _logger.LogDebug("Loading all tags from database");
+        LogLoadingAllTags();
         var tags = await _context.Tags
             .OrderBy(t => t.Name)
             .ToListAsync();
-        _logger.LogDebug("Loaded {Count} tags", tags.Count);
+        LogLoadedTags(tags.Count);
         return tags;
     }
 
     /// <inheritdoc />
     public async Task<Tag?> GetTagByNameAsync(string name)
     {
-        _logger.LogDebug("Looking up tag by name: '{Name}'", name);
+        LogLookingUpTagByName(name);
         var tag = await _context.Tags
             .FirstOrDefaultAsync(t => t.Name == name);
-        _logger.LogDebug("Tag lookup result: {Found}", tag != null ? "FOUND" : "NOT FOUND");
+        LogTagLookupResult(tag != null ? "FOUND" : "NOT FOUND");
         return tag;
     }
 
@@ -113,16 +113,16 @@ public class TagService : ITagService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            _logger.LogWarning("Attempted to create tag with empty/null name");
+            LogWarningAttemptedToCreateEmptyTag();
             throw new ArgumentException("Tag name cannot be empty", nameof(name));
         }
 
-        _logger.LogInformation("CreateTag called for: '{Name}' (color: {Color})", name, color ?? "none");
+        LogCreateTagCalled(name, color ?? "none");
 
         var existing = await GetTagByNameAsync(name);
         if (existing != null)
         {
-            _logger.LogWarning("Tag '{Name}' already exists with ID {Id}", name, existing.Id);
+            LogWarningTagAlreadyExists(name, existing.Id);
             throw new InvalidOperationException($"Tag '{name}' already exists");
         }
 
@@ -135,14 +135,14 @@ public class TagService : ITagService
 
         _context.Tags.Add(tag);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("NEW TAG CREATED: '{Name}' (ID: {Id})", name, tag.Id);
+        LogNewTagCreated(name, tag.Id);
         return tag;
     }
 
     /// <inheritdoc />
     public async Task<bool> DeleteTagAsync(string name)
     {
-        _logger.LogInformation("DeleteTag called for: '{Name}'", name);
+        LogDeleteTagCalled(name);
 
         var tag = await _context.Tags
             .Include(t => t.Locations)
@@ -150,28 +150,27 @@ public class TagService : ITagService
 
         if (tag == null)
         {
-            _logger.LogWarning("Cannot delete tag '{Name}': Not found", name);
+            LogWarningCannotDeleteTagNotFound(name);
             return false;
         }
 
         if (tag.Locations.Any())
         {
-            _logger.LogWarning("Cannot delete tag '{Name}': Assigned to {Count} locations",
-                name, tag.Locations.Count);
+            LogWarningCannotDeleteTagAssignedToLocations(name, tag.Locations.Count);
             throw new InvalidOperationException(
                 $"Cannot delete tag '{name}' - it is assigned to {tag.Locations.Count} location(s)");
         }
 
         _context.Tags.Remove(tag);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("TAG DELETED: '{Name}' (ID: {Id})", name, tag.Id);
+        LogTagDeleted(name, tag.Id);
         return true;
     }
 
     /// <inheritdoc />
     public async Task<List<Tag>> GetTagsForLocationAsync(string locationName)
     {
-        _logger.LogDebug("Loading tags for location: '{LocationName}'", locationName);
+        LogLoadingTagsForLocation(locationName);
 
         var location = await _context.Locations
             .Include(l => l.Tags)
@@ -179,20 +178,19 @@ public class TagService : ITagService
 
         if (location == null)
         {
-            _logger.LogWarning("Location '{LocationName}' not found", locationName);
+            LogWarningLocationNotFoundInGetTags(locationName);
             return new List<Tag>();
         }
 
         var tags = location.Tags.OrderBy(t => t.Name).ToList();
-        _logger.LogDebug("Location '{LocationName}' has {Count} tags", locationName, tags.Count);
+        LogLocationHasTags(locationName, tags.Count);
         return tags;
     }
 
     /// <inheritdoc />
     public async Task AssignTagToLocationAsync(string locationName, string tagName)
     {
-        _logger.LogInformation("Assigning tag '{TagName}' to location '{LocationName}'",
-            tagName, locationName);
+        LogAssigningTagToLocation(tagName, locationName);
 
         var location = await _context.Locations
             .Include(l => l.Tags)
@@ -200,35 +198,32 @@ public class TagService : ITagService
 
         if (location == null)
         {
-            _logger.LogWarning("Location '{LocationName}' not found", locationName);
+            LogWarningLocationNotFoundInAssign(locationName);
             throw new InvalidOperationException($"Location '{locationName}' not found");
         }
 
         var tag = await GetTagByNameAsync(tagName);
         if (tag == null)
         {
-            _logger.LogWarning("Tag '{TagName}' not found", tagName);
+            LogWarningTagNotFound(tagName);
             throw new InvalidOperationException($"Tag '{tagName}' not found");
         }
 
         if (location.Tags.Any(t => t.Id == tag.Id))
         {
-            _logger.LogDebug("Tag '{TagName}' already assigned to '{LocationName}'",
-                tagName, locationName);
+            LogTagAlreadyAssigned(tagName, locationName);
             return; // Already assigned
         }
 
         location.Tags.Add(tag);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("TAG ASSIGNED: '{TagName}' -> '{LocationName}'",
-            tagName, locationName);
+        LogTagAssigned(tagName, locationName);
     }
 
     /// <inheritdoc />
     public async Task<bool> RemoveTagFromLocationAsync(string locationName, string tagName)
     {
-        _logger.LogInformation("Removing tag '{TagName}' from location '{LocationName}'",
-            tagName, locationName);
+        LogRemovingTagFromLocation(tagName, locationName);
 
         var location = await _context.Locations
             .Include(l => l.Tags)
@@ -236,22 +231,98 @@ public class TagService : ITagService
 
         if (location == null)
         {
-            _logger.LogWarning("Location '{LocationName}' not found", locationName);
+            LogWarningLocationNotFoundInRemove(locationName);
             return false;
         }
 
         var tag = location.Tags.FirstOrDefault(t => t.Name == tagName);
         if (tag == null)
         {
-            _logger.LogWarning("Tag '{TagName}' not assigned to '{LocationName}'",
-                tagName, locationName);
+            LogWarningTagNotAssigned(tagName, locationName);
             return false;
         }
 
         location.Tags.Remove(tag);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("TAG REMOVED: '{TagName}' from '{LocationName}'",
-            tagName, locationName);
+        LogTagRemoved(tagName, locationName);
         return true;
     }
+
+    #region Logging
+
+    // Tag CRUD Operations: 8001-8099
+    [LoggerMessage(EventId = 8001, Level = LogLevel.Debug, Message = "Loading all tags from database")]
+    partial void LogLoadingAllTags();
+
+    [LoggerMessage(EventId = 8002, Level = LogLevel.Debug, Message = "Loaded {Count} tags")]
+    partial void LogLoadedTags(int count);
+
+    [LoggerMessage(EventId = 8003, Level = LogLevel.Debug, Message = "Looking up tag by name: '{Name}'")]
+    partial void LogLookingUpTagByName(string name);
+
+    [LoggerMessage(EventId = 8004, Level = LogLevel.Debug, Message = "Tag lookup result: {Found}")]
+    partial void LogTagLookupResult(string found);
+
+    [LoggerMessage(EventId = 8005, Level = LogLevel.Warning, Message = "Attempted to create tag with empty/null name")]
+    partial void LogWarningAttemptedToCreateEmptyTag();
+
+    [LoggerMessage(EventId = 8006, Level = LogLevel.Information, Message = "CreateTag called for: '{Name}' (color: {Color})")]
+    partial void LogCreateTagCalled(string name, string color);
+
+    [LoggerMessage(EventId = 8007, Level = LogLevel.Warning, Message = "Tag '{Name}' already exists with ID {Id}")]
+    partial void LogWarningTagAlreadyExists(string name, int id);
+
+    [LoggerMessage(EventId = 8008, Level = LogLevel.Information, Message = "NEW TAG CREATED: '{Name}' (ID: {Id})")]
+    partial void LogNewTagCreated(string name, int id);
+
+    [LoggerMessage(EventId = 8009, Level = LogLevel.Information, Message = "DeleteTag called for: '{Name}'")]
+    partial void LogDeleteTagCalled(string name);
+
+    [LoggerMessage(EventId = 8010, Level = LogLevel.Warning, Message = "Cannot delete tag '{Name}': Not found")]
+    partial void LogWarningCannotDeleteTagNotFound(string name);
+
+    [LoggerMessage(EventId = 8011, Level = LogLevel.Warning, Message = "Cannot delete tag '{Name}': Assigned to {Count} locations")]
+    partial void LogWarningCannotDeleteTagAssignedToLocations(string name, int count);
+
+    [LoggerMessage(EventId = 8012, Level = LogLevel.Information, Message = "TAG DELETED: '{Name}' (ID: {Id})")]
+    partial void LogTagDeleted(string name, int id);
+
+    // Tag-Location Relationship Operations: 8100-8199
+    [LoggerMessage(EventId = 8100, Level = LogLevel.Debug, Message = "Loading tags for location: '{LocationName}'")]
+    partial void LogLoadingTagsForLocation(string locationName);
+
+    [LoggerMessage(EventId = 8101, Level = LogLevel.Warning, Message = "Location '{LocationName}' not found")]
+    partial void LogWarningLocationNotFoundInGetTags(string locationName);
+
+    [LoggerMessage(EventId = 8102, Level = LogLevel.Debug, Message = "Location '{LocationName}' has {Count} tags")]
+    partial void LogLocationHasTags(string locationName, int count);
+
+    [LoggerMessage(EventId = 8103, Level = LogLevel.Information, Message = "Assigning tag '{TagName}' to location '{LocationName}'")]
+    partial void LogAssigningTagToLocation(string tagName, string locationName);
+
+    [LoggerMessage(EventId = 8104, Level = LogLevel.Warning, Message = "Location '{LocationName}' not found")]
+    partial void LogWarningLocationNotFoundInAssign(string locationName);
+
+    [LoggerMessage(EventId = 8105, Level = LogLevel.Warning, Message = "Tag '{TagName}' not found")]
+    partial void LogWarningTagNotFound(string tagName);
+
+    [LoggerMessage(EventId = 8106, Level = LogLevel.Debug, Message = "Tag '{TagName}' already assigned to '{LocationName}'")]
+    partial void LogTagAlreadyAssigned(string tagName, string locationName);
+
+    [LoggerMessage(EventId = 8107, Level = LogLevel.Information, Message = "TAG ASSIGNED: '{TagName}' -> '{LocationName}'")]
+    partial void LogTagAssigned(string tagName, string locationName);
+
+    [LoggerMessage(EventId = 8108, Level = LogLevel.Information, Message = "Removing tag '{TagName}' from location '{LocationName}'")]
+    partial void LogRemovingTagFromLocation(string tagName, string locationName);
+
+    [LoggerMessage(EventId = 8109, Level = LogLevel.Warning, Message = "Location '{LocationName}' not found")]
+    partial void LogWarningLocationNotFoundInRemove(string locationName);
+
+    [LoggerMessage(EventId = 8110, Level = LogLevel.Warning, Message = "Tag '{TagName}' not assigned to '{LocationName}'")]
+    partial void LogWarningTagNotAssigned(string tagName, string locationName);
+
+    [LoggerMessage(EventId = 8111, Level = LogLevel.Information, Message = "TAG REMOVED: '{TagName}' from '{LocationName}'")]
+    partial void LogTagRemoved(string tagName, string locationName);
+
+    #endregion
 }
