@@ -1,3 +1,7 @@
+// <copyright file="TimeSlot.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
 
 namespace WinterAdventurer.Data;
@@ -20,7 +24,7 @@ public class TimeSlot
     public TimeSpan? EndTime { get; set; }
 
     /// <summary>
-    /// True if this is a period from the Excel file, false if user-added (lunch, break, etc.)
+    /// Gets or sets a value indicating whether true if this is a period from the Excel file, false if user-added (lunch, break, etc.)
     /// </summary>
     public bool IsPeriod { get; set; } = false;
 

@@ -1,5 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PdfSharp.Fonts;
+// <copyright file="CustomFontResolverTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using WinterAdventurer.Library;
 
 namespace WinterAdventurer.Test
@@ -14,8 +16,6 @@ namespace WinterAdventurer.Test
         {
             _resolver = new CustomFontResolver();
         }
-
-        #region ResolveTypeface Tests - NotoSans
 
         [TestMethod]
         public void ResolveTypeface_NotoSansRegular_ReturnsCorrectFontInfo()
@@ -72,10 +72,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("NotoSans-Bold", result.FaceName);
         }
 
-        #endregion
-
-        #region ResolveTypeface Tests - Oswald
-
         [TestMethod]
         public void ResolveTypeface_OswaldRegular_ReturnsCorrectFontInfo()
         {
@@ -97,10 +93,6 @@ namespace WinterAdventurer.Test
             Assert.IsNotNull(result);
             Assert.AreEqual("Oswald-Bold", result.FaceName);
         }
-
-        #endregion
-
-        #region ResolveTypeface Tests - Roboto
 
         [TestMethod]
         public void ResolveTypeface_RobotoRegular_ReturnsCorrectFontInfo()
@@ -124,10 +116,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Roboto-Bold", result.FaceName);
         }
 
-        #endregion
-
-        #region ResolveTypeface Tests - Case Insensitivity
-
         [TestMethod]
         public void ResolveTypeface_UppercaseFontName_ResolvesCaseInsensitively()
         {
@@ -150,10 +138,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Oswald-Bold", result.FaceName);
         }
 
-        #endregion
-
-        #region ResolveTypeface Tests - Unknown Fonts
-
         [TestMethod]
         public void ResolveTypeface_UnknownFont_FallsBackToNotoSans()
         {
@@ -162,13 +146,10 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.IsNotNull(result);
+
             // Should fall back to NotoSans-Regular
             Assert.AreEqual("NotoSans-Regular", result.FaceName);
         }
-
-        #endregion
-
-        #region ResolveTypeface Tests - Italic Flag
 
         [TestMethod]
         public void ResolveTypeface_ItalicFlag_IgnoredForNow()
@@ -183,10 +164,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("NotoSans-Bold", boldResult.FaceName);
         }
 
-        #endregion
-
-        #region GetFont Tests
-
         [TestMethod]
         public void GetFont_NotoSansRegular_ReturnsNonEmptyByteArray()
         {
@@ -196,6 +173,7 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsNotNull(result);
             Assert.IsNotEmpty(result, "Font byte array should not be empty");
+
             // TTF files typically start with specific byte sequences
             Assert.IsTrue(result.Length > 100, "Font file should be reasonably sized");
         }
@@ -276,10 +254,6 @@ namespace WinterAdventurer.Test
             Assert.IsNotEmpty(result);
         }
 
-        #endregion
-
-        #region Font Data Validation Tests
-
         [TestMethod]
         public void GetFont_MultipleCalls_ReturnsSameData()
         {
@@ -315,7 +289,5 @@ namespace WinterAdventurer.Test
             // Regular and Bold should be different font files
             Assert.AreNotEqual(regular.Length, bold.Length);
         }
-
-        #endregion
     }
 }

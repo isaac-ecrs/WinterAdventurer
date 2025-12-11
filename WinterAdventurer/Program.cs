@@ -1,3 +1,7 @@
+// <copyright file="Program.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using PdfSharp.Fonts;
@@ -44,17 +48,18 @@ try
             options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
             options.HandshakeTimeout = TimeSpan.FromSeconds(30);
             options.MaximumReceiveMessageSize = 128 * 1024; // 128KB for large PDFs
-    });
+        });
 
     // Configure circuit options for idle timeout handling
     // Single-user workflow: keep circuits alive for extended periods
     builder.Services.AddServerSideBlazor()
         .AddCircuitOptions(options =>
         {
-        // Keep disconnected circuits for 5 hours (single-user scenario)
-        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromHours(5);
-        // Only one user at a time, so low retention count is fine
-        options.DisconnectedCircuitMaxRetained = 10;
+            // Keep disconnected circuits for 5 hours (single-user scenario)
+            options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromHours(5);
+
+            // Only one user at a time, so low retention count is fine
+            options.DisconnectedCircuitMaxRetained = 10;
         });
     builder.Services.AddMudServices();
 
@@ -62,8 +67,7 @@ try
     // Use user's LocalApplicationData folder to ensure writable location for single-file executables
     var dataDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "WinterAdventurer"
-    );
+        "WinterAdventurer");
     Directory.CreateDirectory(dataDirectory);
 
     var defaultConnectionString = $"Data Source={Path.Combine(dataDirectory, "winteradventurer.db")}";
@@ -132,6 +136,7 @@ try
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Error", createScopeForErrors: true);
+
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }

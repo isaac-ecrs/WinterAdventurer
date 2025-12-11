@@ -1,8 +1,11 @@
+// <copyright file="WorkshopCardTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MudBlazor;
 using MudBlazor.Services;
 using WinterAdventurer.Components.Shared;
@@ -68,13 +71,13 @@ namespace WinterAdventurer.Test.Components
             {
                 FirstName = "Alice",
                 LastName = "Johnson",
-                ChoiceNumber = 1
+                ChoiceNumber = 1,
             });
             workshop.Selections.Add(new WorkshopSelection
             {
                 FirstName = "Bob",
                 LastName = "Smith",
-                ChoiceNumber = 1
+                ChoiceNumber = 1,
             });
 
             // Act
@@ -180,7 +183,7 @@ namespace WinterAdventurer.Test.Components
             workshop.Location = "Art Studio";
             var locations = new List<Location>
             {
-                new Location { Id = 1, Name = "Art Studio" }
+                new Location { Id = 1, Name = "Art Studio" },
             };
 
             // Act
@@ -204,7 +207,7 @@ namespace WinterAdventurer.Test.Components
             workshop.Location = string.Empty;
             var locations = new List<Location>
             {
-                new Location { Id = 1, Name = "Art Studio" }
+                new Location { Id = 1, Name = "Art Studio" },
             };
 
             // Act
@@ -227,7 +230,7 @@ namespace WinterAdventurer.Test.Components
             {
                 new Location { Id = 1, Name = "Art Studio" },
                 new Location { Id = 2, Name = "Workshop Room" },
-                new Location { Id = 3, Name = "Craft Hall" }
+                new Location { Id = 3, Name = "Craft Hall" },
             };
 
             // Act
@@ -256,7 +259,7 @@ namespace WinterAdventurer.Test.Components
             var locations = new List<Location>
             {
                 new Location { Id = 1, Name = "Art Studio" },
-                new Location { Id = 2, Name = "Workshop Room" }
+                new Location { Id = 2, Name = "Workshop Room" },
             };
 
             // Act
@@ -281,7 +284,7 @@ namespace WinterAdventurer.Test.Components
 
             var locations = new List<Location>
             {
-                new Location { Id = 1, Name = "Art Studio" }
+                new Location { Id = 1, Name = "Art Studio" },
             };
 
             // Act
@@ -311,7 +314,7 @@ namespace WinterAdventurer.Test.Components
 
             var locations = new List<Location>
             {
-                new Location { Id = 1, Name = "Art Studio" }
+                new Location { Id = 1, Name = "Art Studio" },
             };
 
             // Act
@@ -340,7 +343,7 @@ namespace WinterAdventurer.Test.Components
                     {
                         new Tag { Id = 1, Name = "Downstairs", Color = "#FF0000" }
                     }
-                }
+                },
             };
 
             // Act
@@ -365,7 +368,7 @@ namespace WinterAdventurer.Test.Components
                 {
                     FirstName = $"First{i}",
                     LastName = $"Last{i}",
-                    ChoiceNumber = 1
+                    ChoiceNumber = 1,
                 });
             }
 
@@ -405,7 +408,7 @@ namespace WinterAdventurer.Test.Components
             var workshop = CreateTestWorkshop("Pottery", "John Smith");
             var locations = new List<Location>
             {
-                new Location { Id = 1, Name = "Art Studio" }
+                new Location { Id = 1, Name = "Art Studio" },
             };
 
             // Act - Render with version 0
@@ -421,7 +424,6 @@ namespace WinterAdventurer.Test.Components
             // Update to version 1
             // cut.SetParametersAndRender(parameters => parameters
             //     .Add(p => p.LocationListVersion, 1));
-
             var updatedMarkup = cut.Markup;
 
             // Assert - Markup should contain new version key
@@ -473,7 +475,7 @@ namespace WinterAdventurer.Test.Components
             var workshop = CreateTestWorkshop("Pottery", "John Smith");
             var locations = new List<Location>
             {
-                new Location { Id = 1, Name = "Art Studio" }
+                new Location { Id = 1, Name = "Art Studio" },
             };
 
             // Act
@@ -485,6 +487,7 @@ namespace WinterAdventurer.Test.Components
 
             // Assert - Verify MudAutocomplete is rendered (it contains MudBlazor component classes)
             Assert.Contains("MUD-AUTOCOMPLETE", cut.Markup.ToUpperInvariant());
+
             // Verify the location wrapper div exists
             var locationDiv = cut.Find("#first-workshop-location");
             Assert.IsNotNull(locationDiv);
@@ -572,13 +575,13 @@ namespace WinterAdventurer.Test.Components
             {
                 FirstName = "Alice",
                 LastName = "Johnson",
-                ChoiceNumber = 1
+                ChoiceNumber = 1,
             });
             workshop.Selections.Add(new WorkshopSelection
             {
                 FirstName = "Bob",
                 LastName = "Smith",
-                ChoiceNumber = 2 // Backup choice
+                ChoiceNumber = 2, // Backup choice
             });
 
             // Act
@@ -620,7 +623,7 @@ namespace WinterAdventurer.Test.Components
                 Leader = leader,
                 Period = new Period("MorningFirstPeriod"),
                 Duration = new WorkshopDuration(1, 4),
-                Selections = new List<WorkshopSelection>()
+                Selections = new List<WorkshopSelection>(),
             };
         }
     }
@@ -631,87 +634,105 @@ namespace WinterAdventurer.Test.Components
     /// </summary>
     internal class MockLocationService : ILocationService
     {
-        private readonly List<Location> _locations = new();
-        private readonly Dictionary<string, string> _workshopMappings = new();
+        private readonly List<Location> _locations = new ();
+        private readonly Dictionary<string, string> _workshopMappings = new ();
 
+        /// <inheritdoc/>
         public Task<List<string>> GetAllLocationNamesAsync()
         {
             return Task.FromResult(_locations.Select(l => l.Name).ToList());
         }
 
+        /// <inheritdoc/>
         public Task<List<Location>> GetAllLocationsWithTagsAsync()
         {
             return Task.FromResult(_locations.ToList());
         }
 
+        /// <inheritdoc/>
         public Task<Location?> GetLocationByNameAsync(string name)
         {
             return Task.FromResult(_locations.FirstOrDefault(l => l.Name == name));
         }
 
+        /// <inheritdoc/>
         public Task<Location> AddOrGetLocationAsync(string locationName)
         {
             var existing = _locations.FirstOrDefault(l => l.Name == locationName);
             if (existing != null)
+            {
                 return Task.FromResult(existing);
+            }
 
             var newLocation = new Location { Id = _locations.Count + 1, Name = locationName };
             _locations.Add(newLocation);
             return Task.FromResult(newLocation);
         }
 
+        /// <inheritdoc/>
         public Task<bool> DeleteLocationAsync(string locationName)
         {
             var location = _locations.FirstOrDefault(l => l.Name == locationName);
             if (location == null)
+            {
                 return Task.FromResult(false);
+            }
 
             _locations.Remove(location);
             return Task.FromResult(true);
         }
 
+        /// <inheritdoc/>
         public Task<string?> GetWorkshopLocationMappingAsync(string workshopName)
         {
             _workshopMappings.TryGetValue(workshopName, out var location);
             return Task.FromResult(location);
         }
 
+        /// <inheritdoc/>
         public Task SaveWorkshopLocationMappingAsync(string workshopName, string locationName)
         {
             _workshopMappings[workshopName] = locationName;
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public Task<Dictionary<string, string>> GetAllWorkshopLocationMappingsAsync()
         {
             return Task.FromResult(new Dictionary<string, string>(_workshopMappings));
         }
 
+        /// <inheritdoc/>
         public Task<List<DataTimeSlot>> GetAllTimeSlotsAsync()
         {
             return Task.FromResult(new List<DataTimeSlot>());
         }
 
+        /// <inheritdoc/>
         public Task<DataTimeSlot?> GetTimeSlotByIdAsync(string id)
         {
             return Task.FromResult<DataTimeSlot?>(null);
         }
 
+        /// <inheritdoc/>
         public Task<DataTimeSlot> SaveTimeSlotAsync(DataTimeSlot timeSlot)
         {
             return Task.FromResult(timeSlot);
         }
 
+        /// <inheritdoc/>
         public Task<bool> DeleteTimeSlotAsync(string id)
         {
             return Task.FromResult(true);
         }
 
+        /// <inheritdoc/>
         public Task ClearAllTimeSlotsAsync()
         {
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public Task SaveAllTimeSlotsAsync(List<DataTimeSlot> timeSlots)
         {
             return Task.CompletedTask;

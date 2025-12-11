@@ -1,5 +1,8 @@
+// <copyright file="TourServiceTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.JSInterop;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Services;
 
 namespace WinterAdventurer.Test;
@@ -10,8 +13,6 @@ namespace WinterAdventurer.Test;
 [TestClass]
 public class TourServiceTests
 {
-    #region HasCompletedTourAsync Tests
-
     [TestMethod]
     public async Task HasCompletedTourAsync_TourCompleted_ReturnsTrue()
     {
@@ -90,10 +91,6 @@ public class TourServiceTests
         Assert.IsFalse(settingsResult);
     }
 
-    #endregion
-
-    #region StartHomeTourAsync Tests
-
     [TestMethod]
     public async Task StartHomeTourAsync_CallsJavaScript()
     {
@@ -119,10 +116,6 @@ public class TourServiceTests
         // Act & Assert - should not throw
         await service.StartHomeTourAsync();
     }
-
-    #endregion
-
-    #region ResetAndStartTourAsync Tests
 
     [TestMethod]
     public async Task ResetAndStartTourAsync_HomeTour_RemovesCompletionAndStarts()
@@ -168,10 +161,6 @@ public class TourServiceTests
         await service.ResetAndStartTourAsync("home");
     }
 
-    #endregion
-
-    #region Integration Tests
-
     [TestMethod]
     public async Task TourService_CompleteWorkflow_CheckStartResetAndCheck()
     {
@@ -199,14 +188,10 @@ public class TourServiceTests
         Assert.IsTrue(jsRuntime.StartHomeTourCalled);
     }
 
-    #endregion
-
-    #region Mock JSRuntime
-
     public class MockJSRuntime : IJSRuntime
     {
-        private readonly Dictionary<string, string?> _localStorage = new();
-        public HashSet<string> RemovedKeys { get; } = new();
+        private readonly Dictionary<string, string?> _localStorage = new ();
+        public HashSet<string> RemovedKeys { get; } = new ();
         public bool ThrowOnLocalStorageAccess { get; set; }
         public bool ThrowOnStartHomeTour { get; set; }
         public bool StartHomeTourCalled { get; set; }
@@ -221,14 +206,17 @@ public class TourServiceTests
             return _localStorage.TryGetValue(key, out var value) ? value : null;
         }
 
-        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
+        /// <inheritdoc/>
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[] ? args)
         {
             if (identifier == "localStorage.getItem")
             {
                 if (ThrowOnLocalStorageAccess)
+                {
                     throw new JSException("localStorage not available");
+                }
 
-                var key = args?[0]?.ToString() ?? "";
+                var key = args?[0]?.ToString() ?? string.Empty;
                 var value = GetLocalStorageValue(key);
                 return new ValueTask<TValue>((TValue)(object)value!);
             }
@@ -236,9 +224,11 @@ public class TourServiceTests
             if (identifier == "localStorage.removeItem")
             {
                 if (ThrowOnLocalStorageAccess)
+                {
                     throw new JSException("localStorage not available");
+                }
 
-                var key = args?[0]?.ToString() ?? "";
+                var key = args?[0]?.ToString() ?? string.Empty;
                 RemovedKeys.Add(key);
                 _localStorage.Remove(key);
                 return default;
@@ -247,7 +237,9 @@ public class TourServiceTests
             if (identifier == "startHomeTour")
             {
                 if (ThrowOnStartHomeTour)
+                {
                     throw new JSException("startHomeTour failed");
+                }
 
                 StartHomeTourCalled = true;
                 return default;
@@ -256,13 +248,12 @@ public class TourServiceTests
             return default;
         }
 
-        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
+        /// <inheritdoc/>
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[] ? args)
         {
             return InvokeAsync<TValue>(identifier, args);
         }
     }
-
-    #endregion
 }
 
 /// <summary>
@@ -278,9 +269,11 @@ internal static class TourServiceTestExtensions
             if (mockRuntime != null)
             {
                 if (mockRuntime.ThrowOnLocalStorageAccess)
+                {
                     throw new JSException("localStorage not available");
+                }
 
-                var key = args[0]?.ToString() ?? "";
+                var key = args[0]?.ToString() ?? string.Empty;
                 mockRuntime.RemovedKeys.Add(key);
             }
         }
@@ -290,7 +283,9 @@ internal static class TourServiceTestExtensions
             if (mockRuntime != null)
             {
                 if (mockRuntime.ThrowOnStartHomeTour)
+                {
                     throw new JSException("startHomeTour failed");
+                }
 
                 mockRuntime.StartHomeTourCalled = true;
             }

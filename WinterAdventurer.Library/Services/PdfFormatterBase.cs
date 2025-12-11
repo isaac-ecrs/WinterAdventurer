@@ -26,7 +26,7 @@ namespace WinterAdventurer.Library.Services
         protected readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
 
         /// <summary>
-        /// Initializes a new instance of the PdfFormatterBase class.
+        /// Initializes a new instance of the <see cref="PdfFormatterBase"/> class.
         /// </summary>
         /// <param name="logger">Logger for diagnostic output.</param>
         protected PdfFormatterBase(ILogger logger)
@@ -37,7 +37,7 @@ namespace WinterAdventurer.Library.Services
         /// <summary>
         /// Sets standard 0.5 inch margins on all sides of a PDF section.
         /// </summary>
-        /// <param name="section">The section to configure</param>
+        /// <param name="section">The section to configure.</param>
         protected void SetStandardMargins(Section section)
         {
             section.PageSetup.TopMargin = PdfLayoutConstants.Margins.Standard;
@@ -123,7 +123,7 @@ namespace WinterAdventurer.Library.Services
         }
 
         /// <summary>
-        /// Adds a footer to the section with the event name centered at the bottom
+        /// Adds a footer to the section with the event name centered at the bottom.
         /// </summary>
         protected void AddEventNameFooter(Section section, string eventName)
         {
@@ -183,15 +183,13 @@ namespace WinterAdventurer.Library.Services
         [LoggerMessage(
             EventId = 6001,
             Level = LogLevel.Warning,
-            Message = "Error adding logo to PDF section (type: {documentType})"
-        )]
+            Message = "Error adding logo to PDF section (type: {documentType})")]
         private partial void LogWarningErrorAddingLogo(Exception ex, string documentType);
 
         [LoggerMessage(
             EventId = 6002,
             Level = LogLevel.Warning,
-            Message = "Error adding facility map to PDF section"
-        )]
+            Message = "Error adding facility map to PDF section")]
         private partial void LogWarningErrorAddingFacilityMap(Exception ex);
 
         #endregion

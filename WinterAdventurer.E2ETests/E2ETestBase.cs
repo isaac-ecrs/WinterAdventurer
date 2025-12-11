@@ -1,3 +1,7 @@
+// <copyright file="E2ETestBase.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using OfficeOpenXml;
@@ -11,7 +15,7 @@ namespace WinterAdventurer.E2ETests;
 public abstract class E2ETestBase : PageTest
 {
     /// <summary>
-    /// Base URL for the application under test.
+    /// Gets base URL for the application under test.
     /// Managed by WebServerManager which handles server startup/shutdown.
     /// Port can be overridden via E2E_PORT environment variable (default: 5004).
     /// URL can be overridden via E2E_BASE_URL environment variable (for external servers).
@@ -21,6 +25,7 @@ public abstract class E2ETestBase : PageTest
     /// <summary>
     /// Test initialization. Navigates to base URL and clears any previous test state.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     [TestInitialize]
     public async Task BaseSetup()
     {
@@ -34,6 +39,7 @@ public abstract class E2ETestBase : PageTest
     /// </summary>
     /// <param name="package">Excel package to upload.</param>
     /// <param name="waitForWorkshops">If true, waits for workshops to load after upload.</param>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     protected async Task UploadTestExcelFile(ExcelPackage package, bool waitForWorkshops = true)
     {
         // Save package to temporary file
@@ -81,6 +87,7 @@ public abstract class E2ETestBase : PageTest
     /// Clears the tour completion state from localStorage.
     /// Prevents tour from interfering with E2E tests.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     protected async Task ClearTourState()
     {
         await Page.EvaluateAsync("localStorage.removeItem('tour_home_completed')");
@@ -91,10 +98,11 @@ public abstract class E2ETestBase : PageTest
     /// </summary>
     /// <param name="expectedCount">Minimum number of workshops expected. Defaults to 1.</param>
     /// <param name="timeoutMs">Timeout in milliseconds. Defaults to 5000ms.</param>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     protected async Task WaitForWorkshopsLoaded(int expectedCount = 1, int timeoutMs = 5000)
     {
         // Wait for workshop grid to appear
-        await Page.WaitForSelectorAsync("#workshop-grid", new() { Timeout = timeoutMs });
+        await Page.WaitForSelectorAsync("#workshop-grid", new () { Timeout = timeoutMs });
 
         // Wait for at least the expected number of workshop cards
         var selector = ".mud-card";

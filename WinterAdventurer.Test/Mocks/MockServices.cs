@@ -1,3 +1,7 @@
+// <copyright file="MockServices.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MigraDoc.DocumentObjectModel;
@@ -13,7 +17,7 @@ namespace WinterAdventurer.Test.Mocks;
 /// </summary>
 public class MockExcelUtilities : ExcelUtilities
 {
-    public List<Workshop> MockWorkshops { get; set; } = new();
+    public List<Workshop> MockWorkshops { get; set; } = new ();
     public bool ThrowOnImport { get; set; }
     public bool ThrowOnCreatePdf { get; set; }
     public Document? DocumentToReturn { get; set; }
@@ -27,11 +31,13 @@ public class MockExcelUtilities : ExcelUtilities
     public int LastBlankScheduleCount { get; private set; }
     public string LastEventName { get; private set; } = string.Empty;
 
-    public MockExcelUtilities() : base(NullLogger<ExcelUtilities>.Instance)
+    public MockExcelUtilities()
+        : base(NullLogger<ExcelUtilities>.Instance)
     {
     }
 
-    public MockExcelUtilities(ILogger<ExcelUtilities> logger) : base(logger)
+    public MockExcelUtilities(ILogger<ExcelUtilities> logger)
+        : base(logger)
     {
     }
 
@@ -103,6 +109,7 @@ public class MockTimeslotValidationService : ITimeslotValidationService
     public int ValidateCallCount { get; private set; }
     public IEnumerable<TimeSlotDto>? LastTimeslotsValidated { get; private set; }
 
+    /// <inheritdoc/>
     public ValidationResult ValidateTimeslots(IEnumerable<TimeSlotDto> timeslots)
     {
         ValidateCallCount++;
@@ -125,8 +132,8 @@ public class MockTimeslotValidationService : ITimeslotValidationService
 public class MockTourService
 {
     public bool TourCompletedValue { get; set; }
-    public List<string> StartedTours { get; } = new();
-    public Dictionary<string, int> ResetTours { get; } = new();
+    public List<string> StartedTours { get; } = new ();
+    public Dictionary<string, int> ResetTours { get; } = new ();
 
     public Task<bool> HasCompletedTourAsync(string tourId)
     {
@@ -145,6 +152,7 @@ public class MockTourService
         {
             ResetTours[tourId] = 0;
         }
+
         ResetTours[tourId]++;
 
         if (tourId == "home")

@@ -1,3 +1,7 @@
+// <copyright file="TourService.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.JSInterop;
 
 namespace WinterAdventurer.Services;
@@ -40,6 +44,7 @@ public class TourService
     /// Starts the home page guided tour using Driver.js.
     /// Tour will automatically mark itself as completed upon finish or skip.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public async Task StartHomeTourAsync()
     {
         try
@@ -59,6 +64,7 @@ public class TourService
     /// Used when user manually requests to see the tour again.
     /// </summary>
     /// <param name="tourId">Identifier for the tour to reset (e.g., "home").</param>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public async Task ResetAndStartTourAsync(string tourId)
     {
         try

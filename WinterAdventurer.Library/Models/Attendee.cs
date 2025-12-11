@@ -1,5 +1,7 @@
-using System;
-using System.Collections.Generic;
+// <copyright file="Attendee.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Newtonsoft.Json;
 
 namespace WinterAdventurer.Library.Models

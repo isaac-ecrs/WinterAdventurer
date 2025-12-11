@@ -1,3 +1,7 @@
+// <copyright file="FontNames.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 namespace WinterAdventurer.Library
 {
     /// <summary>
@@ -8,19 +12,19 @@ namespace WinterAdventurer.Library
     {
         /// <summary>
         /// Noto Sans font family - clean, readable sans-serif font
-        /// Used for body text, subheaders, and general content
+        /// Used for body text, subheaders, and general content.
         /// </summary>
         public const string NotoSans = "NotoSans";
 
         /// <summary>
         /// Oswald font family - condensed sans-serif font
-        /// Used for prominent titles and headers
+        /// Used for prominent titles and headers.
         /// </summary>
         public const string Oswald = "Oswald";
 
         /// <summary>
         /// Roboto font family - modern sans-serif font
-        /// Used for participant lists and detailed information
+        /// Used for participant lists and detailed information.
         /// </summary>
         public const string Roboto = "Roboto";
     }

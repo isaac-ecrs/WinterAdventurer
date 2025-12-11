@@ -1,3 +1,7 @@
+// <copyright file="Program.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MigraDoc.Rendering;
@@ -122,7 +126,7 @@ try
 
         var renderer = new PdfDocumentRenderer();
         renderer.Document = document;
-        document!.Styles["Normal"]!.Font.Name = "NotoSans";
+        document!.Styles["Normal"] !.Font.Name = "NotoSans";
 
         Console.WriteLine("Rendering PDF document...");
         renderer.RenderDocument();
@@ -140,6 +144,7 @@ catch (InvalidDataException ex)
     {
         Console.WriteLine($"  Details: {ex.InnerException.Message}");
     }
+
     Environment.Exit(1);
 }
 catch (FileNotFoundException ex)
@@ -156,6 +161,7 @@ catch (InvalidOperationException ex)
     {
         Console.WriteLine($"  Details: {ex.InnerException.Message}");
     }
+
     Environment.Exit(1);
 }
 catch (Exception ex)
@@ -166,6 +172,7 @@ catch (Exception ex)
     {
         Console.WriteLine($"  Inner Exception: {ex.InnerException.Message}");
     }
+
     Console.WriteLine($"\nStack Trace:\n{ex.StackTrace}");
     Environment.Exit(1);
 }
@@ -194,7 +201,7 @@ static List<TimeSlot> LoadTimeslots(string timeslotsPath)
         var json = File.ReadAllText(timeslotsPath);
         var options = new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
         var data = JsonSerializer.Deserialize<TimeslotFileFormat>(json, options);
@@ -211,7 +218,7 @@ static List<TimeSlot> LoadTimeslots(string timeslotsPath)
             Label = t.Label ?? string.Empty,
             StartTime = t.StartTime,
             EndTime = t.EndTime,
-            IsPeriod = t.IsPeriod
+            IsPeriod = t.IsPeriod,
         }).ToList();
 
         // Validate timeslots
@@ -222,7 +229,7 @@ static List<TimeSlot> LoadTimeslots(string timeslotsPath)
             Label = t.Label,
             StartTime = t.StartTime,
             EndTime = t.EndTime,
-            IsPeriod = t.IsPeriod
+            IsPeriod = t.IsPeriod,
         });
 
         var validationResult = validator.ValidateTimeslots(timeslotDtos);

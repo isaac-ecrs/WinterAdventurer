@@ -1,6 +1,9 @@
+// <copyright file="DbSeederTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Data;
 
 namespace WinterAdventurer.Test;
@@ -38,8 +41,6 @@ public class DbSeederTests
         _context.Database.EnsureDeleted();
         _context.Dispose();
     }
-
-    #region SeedDefaultDataAsync Tests
 
     [TestMethod]
     public async Task SeedDefaultDataAsync_EmptyDatabase_SeedsDefaultLocationsAndTags()
@@ -80,7 +81,7 @@ public class DbSeederTests
             "Craft Room",
             "Elm Room",
             "Rec Hall",
-            "Library"
+            "Library",
         };
 
         // Act
@@ -164,7 +165,7 @@ public class DbSeederTests
         {
             Name = "Downstairs",
             Color = "#FF5722",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
@@ -183,7 +184,7 @@ public class DbSeederTests
         _context.Locations.Add(new Location
         {
             Name = "Dining Room",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
@@ -273,10 +274,6 @@ public class DbSeederTests
         Assert.AreEqual("Rec Hall", locationNames[1]);
     }
 
-    #endregion
-
-    #region Edge Cases
-
     [TestMethod]
     public async Task SeedDefaultDataAsync_CustomLocationExists_DoesNotConflict()
     {
@@ -284,7 +281,7 @@ public class DbSeederTests
         _context.Locations.Add(new Location
         {
             Name = "Custom Workshop",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
@@ -308,7 +305,7 @@ public class DbSeederTests
         {
             Name = "Accessible",
             Color = "#00FF00",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         });
         await _context.SaveChangesAsync();
 
@@ -323,6 +320,4 @@ public class DbSeederTests
         var totalTags = await _context.Tags.CountAsync();
         Assert.IsTrue(totalTags >= 2, "Should have at least 1 default + 1 custom tag");
     }
-
-    #endregion
 }

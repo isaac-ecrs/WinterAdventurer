@@ -1,8 +1,10 @@
+// <copyright file="ExcelParsingTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using WinterAdventurer.Library;
-using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Test
 {
@@ -21,8 +23,6 @@ namespace WinterAdventurer.Test
             _excelUtilities = new ExcelUtilities(NullLogger<ExcelUtilities>.Instance);
             ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
         }
-
-        #region ImportExcel Tests
 
         [TestMethod]
         public void ImportExcel_WithNullStream_ThrowsInvalidOperationException()
@@ -129,10 +129,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Jane Doe", pottery!.Leader);
         }
 
-        #endregion
-
-        #region ParseWorkshops Tests
-
         [TestMethod]
         public void ParseWorkshops_WithEmptyClassSelectionSheet_ReturnsEmptyWorkshopList()
         {
@@ -140,8 +136,8 @@ namespace WinterAdventurer.Test
             using var package = new ExcelPackage();
             var classSelection = package.Workbook.Worksheets.Add("ClassSelection");
             AddClassSelectionHeaders(classSelection);
-            // No attendee rows added
 
+            // No attendee rows added
             var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
             AddPeriodSheetHeaders(periodSheet);
 
@@ -166,6 +162,7 @@ namespace WinterAdventurer.Test
 
             var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
             AddPeriodSheetHeaders(periodSheet);
+
             // No workshop rows added
 
             // Act
@@ -205,10 +202,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Woodworking", workshops[0].Name);
         }
 
-        #endregion
-
-        #region LoadAttendees Tests (via ParseWorkshops)
-
         [TestMethod]
         public void LoadAttendees_WithMissingSelectionId_GeneratesFallbackId()
         {
@@ -218,7 +211,7 @@ namespace WinterAdventurer.Test
             AddClassSelectionHeaders(classSelection);
 
             // Add attendee WITHOUT selection ID - LoadAttendees will generate "BobSmith" as fallback
-            classSelection.Cells[2, 1].Value = ""; // Empty selection ID
+            classSelection.Cells[2, 1].Value = string.Empty; // Empty selection ID
             classSelection.Cells[2, 2].Value = "Bob";
             classSelection.Cells[2, 3].Value = "Smith";
             classSelection.Cells[2, 4].Value = "bob@example.com";
@@ -226,6 +219,7 @@ namespace WinterAdventurer.Test
 
             var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
             AddPeriodSheetHeaders(periodSheet);
+
             // Use the fallback ID that LoadAttendees generated
             periodSheet.Cells[2, 1].Value = "BobSmith"; // Must match the generated fallback ID
             periodSheet.Cells[2, 2].Value = "Bob";
@@ -292,10 +286,6 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(workshop.Selections.Any(s => s.FirstName == "Bob"));
             Assert.IsTrue(workshop.Selections.Any(s => s.FirstName == "Carol"));
         }
-
-        #endregion
-
-        #region CollectWorkshops Tests (via ParseWorkshops)
 
         [TestMethod]
         public void CollectWorkshops_WithMultipleDurations_CreatesDistinctWorkshops()
@@ -524,7 +514,7 @@ namespace WinterAdventurer.Test
 
             // Second row has empty workshop cell
             periodSheet.Cells[3, 1].Value = "SEL002";
-            periodSheet.Cells[3, 6].Value = ""; // Empty workshop
+            periodSheet.Cells[3, 6].Value = string.Empty; // Empty workshop
             periodSheet.Cells[3, 7].Value = "1";
 
             // Act
@@ -536,12 +526,8 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Alice", workshops[0].Selections[0].FirstName);
         }
 
-        #endregion
-
-        #region Helper Methods
-
         /// <summary>
-        /// Creates a minimal valid Excel package with one workshop and one attendee
+        /// Creates a minimal valid Excel package with one workshop and one attendee.
         /// </summary>
         private ExcelPackage CreateMinimalValidExcelPackage()
         {
@@ -569,7 +555,7 @@ namespace WinterAdventurer.Test
         }
 
         /// <summary>
-        /// Creates an Excel package with multiple workshops
+        /// Creates an Excel package with multiple workshops.
         /// </summary>
         private ExcelPackage CreateExcelPackageWithMultipleWorkshops()
         {
@@ -602,7 +588,7 @@ namespace WinterAdventurer.Test
         }
 
         /// <summary>
-        /// Adds standard ClassSelection sheet headers matching the schema
+        /// Adds standard ClassSelection sheet headers matching the schema.
         /// </summary>
         private void AddClassSelectionHeaders(ExcelWorksheet sheet)
         {
@@ -614,7 +600,7 @@ namespace WinterAdventurer.Test
         }
 
         /// <summary>
-        /// Adds standard period sheet headers matching the schema
+        /// Adds standard period sheet headers matching the schema.
         /// </summary>
         private void AddPeriodSheetHeaders(ExcelWorksheet sheet)
         {
@@ -628,7 +614,5 @@ namespace WinterAdventurer.Test
             sheet.Cells[1, 8].Value = "_2dayClassesFirst2Days";
             sheet.Cells[1, 9].Value = "_2dayClassesSecond2Days";
         }
-
-        #endregion
     }
 }

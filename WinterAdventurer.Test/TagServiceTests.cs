@@ -1,6 +1,9 @@
+// <copyright file="TagServiceTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Data;
 using WinterAdventurer.Services;
 
@@ -39,8 +42,6 @@ public class TagServiceTests
         _context.Dispose();
     }
 
-    #region GetAllTagsAsync Tests
-
     [TestMethod]
     public async Task GetAllTagsAsync_NoTags_ReturnsEmptyList()
     {
@@ -59,8 +60,7 @@ public class TagServiceTests
         _context.Tags.AddRange(
             new Tag { Name = "Zebra", Color = "#000000", CreatedAt = DateTime.UtcNow },
             new Tag { Name = "Alpha", Color = "#111111", CreatedAt = DateTime.UtcNow },
-            new Tag { Name = "Mike", Color = "#222222", CreatedAt = DateTime.UtcNow }
-        );
+            new Tag { Name = "Mike", Color = "#222222", CreatedAt = DateTime.UtcNow });
         await _context.SaveChangesAsync();
 
         // Act
@@ -72,10 +72,6 @@ public class TagServiceTests
         Assert.AreEqual("Mike", result[1].Name);
         Assert.AreEqual("Zebra", result[2].Name);
     }
-
-    #endregion
-
-    #region GetTagByNameAsync Tests
 
     [TestMethod]
     public async Task GetTagByNameAsync_TagExists_ReturnsTag()
@@ -103,10 +99,6 @@ public class TagServiceTests
         // Assert
         Assert.IsNull(result);
     }
-
-    #endregion
-
-    #region CreateTagAsync Tests
 
     [TestMethod]
     public async Task CreateTagAsync_ValidName_CreatesTag()
@@ -150,7 +142,7 @@ public class TagServiceTests
     {
         // Act & Assert
         await Assert.ThrowsExactlyAsync<ArgumentException>(
-            async () => await _tagService.CreateTagAsync(""));
+            async () => await _tagService.CreateTagAsync(string.Empty));
     }
 
     [TestMethod]
@@ -171,10 +163,6 @@ public class TagServiceTests
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(
             async () => await _tagService.CreateTagAsync("DuplicateTag"));
     }
-
-    #endregion
-
-    #region DeleteTagAsync Tests
 
     [TestMethod]
     public async Task DeleteTagAsync_TagExists_DeletesAndReturnsTrue()
@@ -242,10 +230,6 @@ public class TagServiceTests
         }
     }
 
-    #endregion
-
-    #region GetTagsForLocationAsync Tests
-
     [TestMethod]
     public async Task GetTagsForLocationAsync_LocationExists_ReturnsTags()
     {
@@ -263,6 +247,7 @@ public class TagServiceTests
 
         // Assert
         Assert.AreEqual(2, result.Count);
+
         // Should be sorted alphabetically
         Assert.AreEqual("Alpha", result[0].Name);
         Assert.AreEqual("Zebra", result[1].Name);
@@ -294,10 +279,6 @@ public class TagServiceTests
         Assert.IsNotNull(result);
         Assert.AreEqual(0, result.Count);
     }
-
-    #endregion
-
-    #region AssignTagToLocationAsync Tests
 
     [TestMethod]
     public async Task AssignTagToLocationAsync_ValidTagAndLocation_AssignsTag()
@@ -367,10 +348,6 @@ public class TagServiceTests
         Assert.IsNotNull(updatedLocation);
         Assert.AreEqual(1, updatedLocation.Tags.Count);
     }
-
-    #endregion
-
-    #region RemoveTagFromLocationAsync Tests
 
     [TestMethod]
     public async Task RemoveTagFromLocationAsync_ValidAssignment_RemovesAndReturnsTrue()
@@ -444,10 +421,6 @@ public class TagServiceTests
         Assert.AreEqual("Tag2", updatedLocation.Tags.First().Name);
     }
 
-    #endregion
-
-    #region Integration Tests
-
     [TestMethod]
     public async Task TagService_CompleteWorkflow_CreatesTagsAssignsToLocationAndDeletes()
     {
@@ -457,8 +430,9 @@ public class TagServiceTests
         await _context.SaveChangesAsync();
 
         // Create tags
-        var tag1 = await _tagService.CreateTagAsync("Downstairs", "#FF5722");
-        var tag2 = await _tagService.CreateTagAsync("Accessible", "#4CAF50");
+        _ = await _tagService.CreateTagAsync("Downstairs", "#FF5722");
+
+        _ = await _tagService.CreateTagAsync("Accessible", "#4CAF50");
 
         // Assign tags to location
         await _tagService.AssignTagToLocationAsync("Workshop", "Downstairs");
@@ -486,6 +460,4 @@ public class TagServiceTests
         Assert.AreEqual(1, allTags.Count);
         Assert.AreEqual("Accessible", allTags[0].Name);
     }
-
-    #endregion
 }

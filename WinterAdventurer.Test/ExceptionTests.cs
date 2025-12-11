@@ -1,4 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+// <copyright file="ExceptionTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using WinterAdventurer.Library.Exceptions;
 
 namespace WinterAdventurer.Test
@@ -10,8 +13,6 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class ExceptionTests
     {
-        #region ExcelParsingException Tests
-
         [TestMethod]
         public void ExcelParsingException_DefaultConstructor_CreatesException()
         {
@@ -61,7 +62,7 @@ namespace WinterAdventurer.Test
             {
                 SheetName = "ClassSelection",
                 RowNumber = 5,
-                ColumnName = "Name_First"
+                ColumnName = "Name_First",
             };
 
             // Assert
@@ -69,10 +70,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(5, exception.RowNumber);
             Assert.AreEqual("Name_First", exception.ColumnName);
         }
-
-        #endregion
-
-        #region MissingSheetException Tests
 
         [TestMethod]
         public void MissingSheetException_DefaultConstructor_CreatesException()
@@ -120,7 +117,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var exception = new MissingSheetException("Sheet not found")
             {
-                AvailableSheets = new List<string> { "Sheet1", "Sheet2", "Sheet3" }
+                AvailableSheets = new List<string> { "Sheet1", "Sheet2", "Sheet3" },
             };
 
             // Assert
@@ -139,10 +136,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsInstanceOfType<ExcelParsingException>(exception);
         }
-
-        #endregion
-
-        #region MissingColumnException Tests
 
         [TestMethod]
         public void MissingColumnException_DefaultConstructor_CreatesException()
@@ -176,7 +169,7 @@ namespace WinterAdventurer.Test
             var exception = new MissingColumnException("Column not found")
             {
                 ExpectedPattern = "Name_First",
-                AvailableColumns = new List<string> { "Column1", "Column2", "Column3" }
+                AvailableColumns = new List<string> { "Column1", "Column2", "Column3" },
             };
 
             // Assert
@@ -194,10 +187,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsInstanceOfType<ExcelParsingException>(exception);
         }
-
-        #endregion
-
-        #region InvalidWorkshopFormatException Tests
 
         [TestMethod]
         public void InvalidWorkshopFormatException_DefaultConstructor_CreatesException()
@@ -231,7 +220,7 @@ namespace WinterAdventurer.Test
             var exception = new InvalidWorkshopFormatException("Invalid format")
             {
                 CellValue = "Invalid Workshop Name",
-                ExpectedFormat = "WorkshopName (Leader)"
+                ExpectedFormat = "WorkshopName (Leader)",
             };
 
             // Assert
@@ -248,10 +237,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsInstanceOfType<ExcelParsingException>(exception);
         }
-
-        #endregion
-
-        #region SchemaValidationException Tests
 
         [TestMethod]
         public void SchemaValidationException_DefaultConstructor_CreatesException()
@@ -288,7 +273,7 @@ namespace WinterAdventurer.Test
             {
                 SchemaName = "WinterAdventureSchema",
                 MissingSheet = "ClassSelection",
-                AvailableSheets = new List<string> { "Sheet1", "Sheet2" }
+                AvailableSheets = new List<string> { "Sheet1", "Sheet2" },
             };
 
             // Assert
@@ -308,10 +293,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsInstanceOfType<ExcelParsingException>(exception);
         }
-
-        #endregion
-
-        #region PdfGenerationException Tests
 
         [TestMethod]
         public void PdfGenerationException_DefaultConstructor_CreatesException()
@@ -358,7 +339,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var exception = new PdfGenerationException("Generation failed")
             {
-                Section = "Roster"
+                Section = "Roster",
             };
 
             // Assert
@@ -374,10 +355,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsInstanceOfType<Exception>(exception);
         }
-
-        #endregion
-
-        #region MissingResourceException Tests
 
         [TestMethod]
         public void MissingResourceException_DefaultConstructor_CreatesException()
@@ -424,7 +401,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var exception = new MissingResourceException("Resource not found")
             {
-                ResourceName = "NotoSans-Regular.ttf"
+                ResourceName = "NotoSans-Regular.ttf",
             };
 
             // Assert
@@ -440,7 +417,5 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.IsInstanceOfType<PdfGenerationException>(exception);
         }
-
-        #endregion
     }
 }

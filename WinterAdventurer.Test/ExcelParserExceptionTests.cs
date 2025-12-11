@@ -1,5 +1,8 @@
+// <copyright file="ExcelParserExceptionTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using WinterAdventurer.Library.Exceptions;
 using WinterAdventurer.Library.Services;
@@ -22,8 +25,6 @@ namespace WinterAdventurer.Test
             _parser = new ExcelParser(NullLogger<ExcelParser>.Instance);
         }
 
-        #region MissingSheetException Tests
-
         [TestMethod]
         public void ParseFromStream_WithMissingClassSelectionSheet_ThrowsMissingSheetException()
         {
@@ -44,11 +45,14 @@ namespace WinterAdventurer.Test
             }
             catch (MissingSheetException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("ClassSelection"),
+                Assert.IsTrue(
+                    ex.Message.Contains("ClassSelection"),
                     "Exception message should mention ClassSelection");
-                Assert.IsNotNull(ex.AvailableSheets,
+                Assert.IsNotNull(
+                    ex.AvailableSheets,
                     "AvailableSheets should be populated");
-                Assert.IsTrue(ex.AvailableSheets.Count > 0,
+                Assert.IsTrue(
+                    ex.AvailableSheets.Count > 0,
                     "AvailableSheets should contain at least one sheet");
             }
         }
@@ -77,14 +81,9 @@ namespace WinterAdventurer.Test
                 "Should return empty list when period sheets are missing");
         }
 
-        #endregion
-
         // Note: ExcelParser is robust and handles many edge cases gracefully,
         // so many scenarios that might throw exceptions actually succeed.
         // The tests below verify the robust behavior.
-
-        #region Edge Case Tests
-
         [TestMethod]
         public void ParseFromStream_WithEmptyWorkshopCell_SkipsGracefully()
         {
@@ -99,7 +98,7 @@ namespace WinterAdventurer.Test
             var periodSheet = package.Workbook.Worksheets.Add("MorningFirstPeriod");
             AddPeriodSheetHeaders(periodSheet);
             periodSheet.Cells[2, 1].Value = "SEL001";
-            periodSheet.Cells[2, 6].Value = "";  // Empty workshop
+            periodSheet.Cells[2, 6].Value = string.Empty;  // Empty workshop
             periodSheet.Cells[2, 7].Value = "1";
 
             using var stream = new MemoryStream();
@@ -208,10 +207,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("John O'Brien-Smith", workshops[0].Leader);
         }
 
-        #endregion
-
-        #region Helper Methods
-
         private void AddClassSelectionHeaders(ExcelWorksheet sheet)
         {
             sheet.Cells[1, 1].Value = "ClassSelection_Id";
@@ -233,7 +228,5 @@ namespace WinterAdventurer.Test
             sheet.Cells[1, 8].Value = "_2dayClassesFirst2Days";
             sheet.Cells[1, 9].Value = "_2dayClassesSecond2Days";
         }
-
-        #endregion
     }
 }

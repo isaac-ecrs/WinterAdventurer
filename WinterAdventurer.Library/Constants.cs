@@ -1,3 +1,7 @@
+// <copyright file="Constants.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 namespace WinterAdventurer.Library
 {
     /// <summary>

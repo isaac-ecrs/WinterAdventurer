@@ -1,7 +1,8 @@
-using System;
-using System.Diagnostics;
+// <copyright file="CustomFontResolver.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using PdfSharp.Fonts;
 
@@ -53,7 +54,10 @@ namespace WinterAdventurer.Library
                     // Note: PDFsharp 6.2+ no longer allows calling PlatformFontResolver.ResolveTypeface()
                     // directly from custom font resolvers, so we use NotoSans as the fallback
                     if (isBold)
+                    {
                         return new FontResolverInfo("NotoSans-Bold");
+                    }
+
                     return new FontResolverInfo("NotoSans-Regular");
             }
         }
@@ -113,7 +117,8 @@ namespace WinterAdventurer.Library
         private byte[] LoadFontFromResource(string resourceName)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resources = assembly.GetManifestResourceNames();
+
+            _ = assembly.GetManifestResourceNames();
 
             using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
             {

@@ -1,4 +1,6 @@
-using System;
+// <copyright file="SchemaValidationException.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.Library.Exceptions
 {
@@ -9,41 +11,44 @@ namespace WinterAdventurer.Library.Exceptions
     public class SchemaValidationException : ExcelParsingException
     {
         /// <summary>
-        /// Name of the schema that failed validation.
+        /// Gets or sets name of the schema that failed validation.
         /// </summary>
         public string? SchemaName { get; set; }
 
         /// <summary>
-        /// Name of the missing sheet, if applicable.
+        /// Gets or sets name of the missing sheet, if applicable.
         /// </summary>
         public string? MissingSheet { get; set; }
 
         /// <summary>
-        /// List of sheet names that are available in the Excel file.
+        /// Gets or sets list of sheet names that are available in the Excel file.
         /// </summary>
         public List<string> AvailableSheets { get; set; } = new List<string>();
 
         /// <summary>
-        /// Initializes a new instance of the SchemaValidationException class.
+        /// Initializes a new instance of the <see cref="SchemaValidationException"/> class.
         /// </summary>
-        public SchemaValidationException() : base()
+        public SchemaValidationException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the SchemaValidationException class with a specified error message.
+        /// Initializes a new instance of the <see cref="SchemaValidationException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public SchemaValidationException(string message) : base(message)
+        public SchemaValidationException(string message)
+            : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the SchemaValidationException class with a specified error message and inner exception.
+        /// Initializes a new instance of the <see cref="SchemaValidationException"/> class with a specified error message and inner exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public SchemaValidationException(string message, Exception innerException) : base(message, innerException)
+        public SchemaValidationException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

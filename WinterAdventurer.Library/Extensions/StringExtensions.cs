@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
+// <copyright file="StringExtensions.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WinterAdventurer.Library.Extensions
 {
@@ -15,12 +14,14 @@ namespace WinterAdventurer.Library.Extensions
         /// </summary>
         /// <param name="input">String to convert to proper case.</param>
         /// <returns>String with each word capitalized (first letter uppercase, remaining lowercase).</returns>
-        [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase",
-                     Justification = "This method is for proper-casing display text, not for culture-invariant comparisons or lookups. Lowercase is required for the output format.")]
+        [SuppressMessage(
+            "Globalization",
+            "CA1308:Normalize strings to uppercase",
+            Justification = "This method is for proper-casing display text, not for culture-invariant comparisons or lookups. Lowercase is required for the output format.")]
         public static string ToProper(this string input)
         {
             var splitInput = input.Split(' ');
-            var combinedInput = "";
+            var combinedInput = string.Empty;
 
             foreach (var word in splitInput)
             {
@@ -88,5 +89,4 @@ namespace WinterAdventurer.Library.Extensions
             }
         }
     }
-
 }

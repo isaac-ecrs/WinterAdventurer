@@ -1,3 +1,7 @@
+// <copyright file="Period.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Text.RegularExpressions;
 
 namespace WinterAdventurer.Library.Models
@@ -22,6 +26,7 @@ namespace WinterAdventurer.Library.Models
         public string DisplayName { get; set; } = string.Empty;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Period"/> class.
         /// Creates a period from an Excel sheet name, generating a user-friendly display name.
         /// Display name conversion enables showing "Morning First Period" instead of "MorningFirstPeriod" in schedules and reports.
         /// </summary>

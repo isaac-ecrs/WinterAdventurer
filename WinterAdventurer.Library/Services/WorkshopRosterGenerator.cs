@@ -2,8 +2,6 @@
 // Copyright (c) ECRS.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
@@ -18,10 +16,11 @@ namespace WinterAdventurer.Library.Services
     public class WorkshopRosterGenerator : PdfFormatterBase
     {
         /// <summary>
-        /// Initializes a new instance of the WorkshopRosterGenerator class.
+        /// Initializes a new instance of the <see cref="WorkshopRosterGenerator"/> class.
         /// </summary>
         /// <param name="logger">Logger for diagnostic output.</param>
-        public WorkshopRosterGenerator(ILogger<WorkshopRosterGenerator> logger) : base(logger)
+        public WorkshopRosterGenerator(ILogger<WorkshopRosterGenerator> logger)
+            : base(logger)
         {
         }
 
@@ -33,7 +32,7 @@ namespace WinterAdventurer.Library.Services
         /// <param name="eventName">Name of the event displayed in section footers.</param>
         /// <param name="timeslots">Timeslots to find period time ranges. If null, time ranges are omitted from rosters.</param>
         /// <returns>List of MigraDoc Section objects, one per workshop.</returns>
-        public List<Section> GenerateRosterSections(List<Workshop> workshops, string eventName, List<Models.TimeSlot>? timeslots = null)
+        public List<Section> GenerateRosterSections(List<Workshop> workshops, string eventName, List<TimeSlot>? timeslots = null)
         {
             var sections = new List<Section>();
 
@@ -278,15 +277,25 @@ namespace WinterAdventurer.Library.Services
             {
                 text += $" (Choice #{choiceNumber})";
             }
+
             text += " [\u2003]";  // Using em space for wider checkbox
 
             // Use progressively smaller fonts for longer names to prevent wrapping
             if (text.Length > PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.VeryLong)
+            {
                 return PdfLayoutConstants.AdaptiveFontSizing.ParticipantFontSizes.VeryLong;
+            }
+
             if (text.Length > PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Long)
+            {
                 return PdfLayoutConstants.AdaptiveFontSizing.ParticipantFontSizes.Long;
+            }
+
             if (text.Length > PdfLayoutConstants.AdaptiveFontSizing.TextLengthThresholds.Medium)
+            {
                 return PdfLayoutConstants.AdaptiveFontSizing.ParticipantFontSizes.Medium;
+            }
+
             return PdfLayoutConstants.AdaptiveFontSizing.ParticipantFontSizes.Default;
         }
     }

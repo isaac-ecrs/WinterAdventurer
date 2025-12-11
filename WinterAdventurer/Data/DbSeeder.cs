@@ -1,3 +1,7 @@
+// <copyright file="DbSeeder.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 
 namespace WinterAdventurer.Data;
@@ -28,7 +32,7 @@ public partial class DbSeeder
         ("Craft Room", "Downstairs"),
         ("Elm Room", null),
         ("Rec Hall", "Downstairs"),
-        ("Library", null)
+        ("Library", null),
     };
 
     /// <summary>
@@ -40,7 +44,7 @@ public partial class DbSeeder
     /// </remarks>
     private static readonly (string Name, string Color)[] DefaultTags = new[]
     {
-        ("Downstairs", "#FF5722")  // Orange color for downstairs tag
+        ("Downstairs", "#FF5722"),  // Orange color for downstairs tag
     };
 
     public DbSeeder(ILogger<DbSeeder> logger)
@@ -97,14 +101,14 @@ public partial class DbSeeder
         {
             Name = tag.Name,
             Color = tag.Color,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         }).ToList();
 
         // Add and save
         context.Tags.AddRange(newTags);
         await context.SaveChangesAsync();
 
-        string seededTags = String.Empty;
+        string seededTags = string.Empty;
 
         if (_logger.IsEnabled(LogLevel.Information))
         {
@@ -147,14 +151,14 @@ public partial class DbSeeder
             var newLocations = locationsToAdd.Select(loc => new Location
             {
                 Name = loc.Name,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             }).ToList();
 
             // Add and save locations first
             context.Locations.AddRange(newLocations);
             await context.SaveChangesAsync();
 
-            string seededLocations = String.Empty;
+            string seededLocations = string.Empty;
 
             if (_logger.IsEnabled(LogLevel.Information))
             {
@@ -220,42 +224,36 @@ public partial class DbSeeder
     [LoggerMessage(
             EventId = 9001,
             Level = LogLevel.Information,
-            Message = "All default tags already exist in database"
-    )]
+            Message = "All default tags already exist in database")]
     private partial void LogInformationAllDefaultTagsExist();
 
     [LoggerMessage(
             EventId = 9002,
             Level = LogLevel.Information,
-            Message = "Seeded {count} default tags: {tags}"
-    )]
+            Message = "Seeded {count} default tags: {tags}")]
     private partial void LogInformationSeededTagsCount(int count, string tags);
 
     [LoggerMessage(
             EventId = 9003,
             Level = LogLevel.Information,
-            Message = "All default locations already exist in database"
-    )]
+            Message = "All default locations already exist in database")]
     private partial void LogInformationAllDefaultLocationsExist();
 
     [LoggerMessage(
             EventId = 9004,
             Level = LogLevel.Information,
-            Message = "Seeded {Count} default locations: {Locations}"
-    )]
+            Message = "Seeded {Count} default locations: {Locations}")]
     private partial void LogInformationSeededLocationsCount(int count, string locations);
 
     [LoggerMessage(
             EventId = 9005,
             Level = LogLevel.Information,
-            Message = "Assigned {Count} default tags to locations"
-    )]
+            Message = "Assigned {Count} default tags to locations")]
     private partial void LogInformationAssignedDefaultTagsToLocations(int count);
 
     [LoggerMessage(
             EventId = 9006,
             Level = LogLevel.Information,
-            Message = "All default tag assignments already exist in database"
-    )]
+            Message = "All default tag assignments already exist in database")]
     private partial void LogInformationAllDefaultTagAssignmentsExist();
 }

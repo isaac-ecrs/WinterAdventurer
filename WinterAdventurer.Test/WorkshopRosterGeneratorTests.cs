@@ -1,5 +1,8 @@
+// <copyright file="WorkshopRosterGeneratorTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WinterAdventurer.Library.Models;
 using WinterAdventurer.Library.Services;
 
@@ -18,8 +21,6 @@ namespace WinterAdventurer.Test
         {
             _generator = new WorkshopRosterGenerator(NullLogger<WorkshopRosterGenerator>.Instance);
         }
-
-        #region GenerateRosterSections Tests
 
         [TestMethod]
         public void GenerateRosterSections_WithEmptyWorkshopList_ReturnsEmptyList()
@@ -57,7 +58,7 @@ namespace WinterAdventurer.Test
             {
                 CreateSampleWorkshop("Pottery", "John Smith"),
                 CreateSampleWorkshop("Woodworking", "Jane Doe"),
-                CreateSampleWorkshop("Painting", "Mary Johnson")
+                CreateSampleWorkshop("Painting", "Mary Johnson"),
             };
 
             // Act
@@ -80,6 +81,7 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.AreEqual(1, sections.Count);
             var section = sections[0];
+
             // Workshop name should be in one of the paragraphs (as the first content paragraph after logo)
             var paragraphs = section.Elements.OfType<MigraDoc.DocumentObjectModel.Paragraph>().ToList();
             Assert.IsTrue(paragraphs.Count > 0, "Section should contain paragraphs");
@@ -207,7 +209,7 @@ namespace WinterAdventurer.Test
                     Label = "Morning First Period",
                     StartTime = new TimeSpan(8, 0, 0),
                     EndTime = new TimeSpan(9, 30, 0)
-                }
+                },
             };
 
             // Act
@@ -241,14 +243,14 @@ namespace WinterAdventurer.Test
                     FirstName = "Charlie",
                     LastName = "Wilson",
                     ChoiceNumber = 1,
-                    ClassSelectionId = "SEL003"
+                    ClassSelectionId = "SEL003",
                 },
                 new WorkshopSelection
                 {
                     FirstName = "Alice",
                     LastName = "Adams",
                     ChoiceNumber = 1,
-                    ClassSelectionId = "SEL001"
+                    ClassSelectionId = "SEL001",
                 },
                 new WorkshopSelection
                 {
@@ -256,7 +258,7 @@ namespace WinterAdventurer.Test
                     LastName = "Smith",
                     ChoiceNumber = 1,
                     ClassSelectionId = "SEL002"
-                }
+                },
             };
 
             var workshops = new List<Workshop> { workshop };
@@ -266,6 +268,7 @@ namespace WinterAdventurer.Test
 
             // Assert
             Assert.AreEqual(1, sections.Count);
+
             // Verify the section was created successfully
             // The sorting logic is internal, but we can verify the section contains all participants
             var section = sections[0];
@@ -286,14 +289,14 @@ namespace WinterAdventurer.Test
                     FirstName = "Alice",
                     LastName = "Adams",
                     ChoiceNumber = 1,
-                    ClassSelectionId = "SEL001"
+                    ClassSelectionId = "SEL001",
                 },
                 new WorkshopSelection
                 {
                     FirstName = "Bob",
                     LastName = "Baker",
                     ChoiceNumber = 2,
-                    ClassSelectionId = "SEL002"
+                    ClassSelectionId = "SEL002",
                 },
                 new WorkshopSelection
                 {
@@ -301,7 +304,7 @@ namespace WinterAdventurer.Test
                     LastName = "Carter",
                     ChoiceNumber = 1,
                     ClassSelectionId = "SEL003"
-                }
+                },
             };
 
             var workshops = new List<Workshop> { workshop };
@@ -343,14 +346,14 @@ namespace WinterAdventurer.Test
                     FirstName = "Alice",
                     LastName = "Adams",
                     ChoiceNumber = 1,
-                    ClassSelectionId = "SEL001"
+                    ClassSelectionId = "SEL001",
                 },
                 new WorkshopSelection
                 {
                     FirstName = "Bob",
                     LastName = "Baker",
                     ChoiceNumber = 1,
-                    ClassSelectionId = "SEL002"
+                    ClassSelectionId = "SEL002",
                 },
                 new WorkshopSelection
                 {
@@ -358,7 +361,7 @@ namespace WinterAdventurer.Test
                     LastName = "Carter",
                     ChoiceNumber = 1,
                     ClassSelectionId = "SEL003"
-                }
+                },
             };
 
             var workshops = new List<Workshop> { workshop };
@@ -395,7 +398,7 @@ namespace WinterAdventurer.Test
                     LastName = "Adams",
                     ChoiceNumber = 1,
                     ClassSelectionId = "SEL001"
-                }
+                },
             };
 
             var workshops = new List<Workshop> { workshop };
@@ -461,12 +464,8 @@ namespace WinterAdventurer.Test
             Assert.IsTrue(hasEventName, "Footer should contain the event name");
         }
 
-        #endregion
-
-        #region Helper Methods
-
         /// <summary>
-        /// Creates a sample workshop for testing purposes
+        /// Creates a sample workshop for testing purposes.
         /// </summary>
         private Workshop CreateSampleWorkshop(string name, string leader)
         {
@@ -485,10 +484,8 @@ namespace WinterAdventurer.Test
                         ChoiceNumber = 1,
                         ClassSelectionId = "SEL001"
                     }
-                }
+                },
             };
         }
-
-        #endregion
     }
 }

@@ -1,4 +1,6 @@
-using Microsoft.Playwright;
+// <copyright file="WorkflowTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.E2ETests;
 
@@ -9,8 +11,6 @@ namespace WinterAdventurer.E2ETests;
 [TestClass]
 public class WorkflowTests : E2ETestBase
 {
-    #region Upload and Edit Workflows
-
     [TestMethod]
     public async Task UploadExcel_EditWorkshop_GeneratePdf_Success()
     {
@@ -114,10 +114,6 @@ public class WorkflowTests : E2ETestBase
         Assert.IsNotNull(download, "PDF should be generated with timeslots configured");
     }
 
-    #endregion
-
-    #region Error Handling
-
     [TestMethod]
     public async Task UploadInvalidExcel_ShowsErrorMessage()
     {
@@ -175,10 +171,6 @@ public class WorkflowTests : E2ETestBase
         Assert.IsNotNull(pdfButton, "Create PDF button should exist");
     }
 
-    #endregion
-
-    #region PDF Download
-
     [TestMethod]
     public async Task GeneratePdf_DownloadsFile_WithCorrectFilename()
     {
@@ -197,9 +189,11 @@ public class WorkflowTests : E2ETestBase
 
         // Assert - Verify filename
         Assert.IsNotNull(download);
-        Assert.IsTrue(download.SuggestedFilename.Contains("Rosters") || download.SuggestedFilename.Contains("rosters"),
+        Assert.IsTrue(
+            download.SuggestedFilename.Contains("Rosters") || download.SuggestedFilename.Contains("rosters"),
             $"Filename should contain 'Rosters', got: {download.SuggestedFilename}");
-        Assert.IsTrue(download.SuggestedFilename.EndsWith(".pdf"),
+        Assert.IsTrue(
+            download.SuggestedFilename.EndsWith(".pdf"),
             $"Filename should end with .pdf, got: {download.SuggestedFilename}");
     }
 
@@ -231,10 +225,6 @@ public class WorkflowTests : E2ETestBase
         }
     }
 
-    #endregion
-
-    #region Multi-Step Workflow
-
     [TestMethod]
     public async Task UploadExcel_AddBlankSchedules_GeneratePdf_Success()
     {
@@ -260,6 +250,4 @@ public class WorkflowTests : E2ETestBase
         var download = await downloadTask;
         Assert.IsNotNull(download, "PDF with blank schedules should be generated");
     }
-
-    #endregion
 }

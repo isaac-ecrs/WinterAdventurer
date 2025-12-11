@@ -1,3 +1,7 @@
+// <copyright file="PdfTestHelper.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
 using UglyToad.PdfPig;
@@ -26,7 +30,7 @@ namespace WinterAdventurer.Test.Helpers
             using var stream = new MemoryStream();
             var renderer = new PdfDocumentRenderer
             {
-                Document = document
+                Document = document,
             };
             renderer.RenderDocument();
             renderer.PdfDocument.Save(stream, false);
@@ -73,7 +77,8 @@ namespace WinterAdventurer.Test.Helpers
 
             if (pageNumber < 1 || pageNumber > document.NumberOfPages)
             {
-                throw new ArgumentOutOfRangeException(nameof(pageNumber),
+                throw new ArgumentOutOfRangeException(
+                    nameof(pageNumber),
                     $"Page number {pageNumber} is out of range. PDF has {document.NumberOfPages} pages.");
             }
 
@@ -93,8 +98,8 @@ namespace WinterAdventurer.Test.Helpers
 
             // PDF text extraction may not preserve spaces consistently
             // So we normalize both strings by removing whitespace for comparison
-            string normalizedExpected = expectedText.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "");
-            string normalizedActual = allText.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "");
+            string normalizedExpected = expectedText.Replace(" ", string.Empty).Replace("\t", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
+            string normalizedActual = allText.Replace(" ", string.Empty).Replace("\t", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
 
             if (!normalizedActual.Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase))
             {
@@ -122,7 +127,8 @@ namespace WinterAdventurer.Test.Helpers
 
             if (pageNumber < 1 || pageNumber > document.NumberOfPages)
             {
-                throw new ArgumentOutOfRangeException(nameof(pageNumber),
+                throw new ArgumentOutOfRangeException(
+                    nameof(pageNumber),
                     $"Page number {pageNumber} is out of range. PDF has {document.NumberOfPages} pages.");
             }
 
@@ -165,7 +171,8 @@ namespace WinterAdventurer.Test.Helpers
 
             if (pageNumber < 1 || pageNumber > document.NumberOfPages)
             {
-                throw new ArgumentOutOfRangeException(nameof(pageNumber),
+                throw new ArgumentOutOfRangeException(
+                    nameof(pageNumber),
                     $"Page number {pageNumber} is out of range. PDF has {document.NumberOfPages} pages.");
             }
 

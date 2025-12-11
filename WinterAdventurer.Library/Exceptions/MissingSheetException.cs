@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// <copyright file="MissingSheetException.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.Library.Exceptions
 {
@@ -10,31 +11,34 @@ namespace WinterAdventurer.Library.Exceptions
     public class MissingSheetException : ExcelParsingException
     {
         /// <summary>
-        /// List of sheet names that are available in the Excel file.
+        /// Gets or sets list of sheet names that are available in the Excel file.
         /// </summary>
         public List<string> AvailableSheets { get; set; } = new List<string>();
 
         /// <summary>
-        /// Initializes a new instance of the MissingSheetException class.
+        /// Initializes a new instance of the <see cref="MissingSheetException"/> class.
         /// </summary>
-        public MissingSheetException() : base()
+        public MissingSheetException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the MissingSheetException class with a specified error message.
+        /// Initializes a new instance of the <see cref="MissingSheetException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public MissingSheetException(string message) : base(message)
+        public MissingSheetException(string message)
+            : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the MissingSheetException class with a specified error message and inner exception.
+        /// Initializes a new instance of the <see cref="MissingSheetException"/> class with a specified error message and inner exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public MissingSheetException(string message, Exception innerException) : base(message, innerException)
+        public MissingSheetException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

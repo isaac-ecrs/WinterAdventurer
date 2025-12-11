@@ -1,3 +1,7 @@
+// <copyright file="ModelTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Test
@@ -5,8 +9,6 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class ModelTests
     {
-        #region WorkshopDuration Tests
-
         [TestMethod]
         public void WorkshopDuration_SingleDay_CalculatesCorrectly()
         {
@@ -79,10 +81,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Days 2-3", duration.Description);
         }
 
-        #endregion
-
-        #region Period Tests
-
         [TestMethod]
         public void Period_SimpleSheetName_SetsDisplayNameCorrectly()
         {
@@ -149,10 +147,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Morning A M Session", period.DisplayName);
         }
 
-        #endregion
-
-        #region Workshop Tests
-
         [TestMethod]
         public void Workshop_Key_GeneratesUniqueIdentifier()
         {
@@ -164,7 +158,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = period,
-                Duration = duration
+                Duration = duration,
             };
 
             // Act
@@ -186,7 +180,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = period,
-                Duration = duration
+                Duration = duration,
             };
 
             var workshop2 = new Workshop
@@ -194,7 +188,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "Jane Doe",
                 Period = period,
-                Duration = duration
+                Duration = duration,
             };
 
             // Act
@@ -220,7 +214,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = period,
-                Duration = duration1
+                Duration = duration1,
             };
 
             var workshop2 = new Workshop
@@ -228,7 +222,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = period,
-                Duration = duration2
+                Duration = duration2,
             };
 
             // Act
@@ -254,7 +248,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = period1,
-                Duration = duration
+                Duration = duration,
             };
 
             var workshop2 = new Workshop
@@ -262,7 +256,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = period2,
-                Duration = duration
+                Duration = duration,
             };
 
             // Act
@@ -302,7 +296,7 @@ namespace WinterAdventurer.Test
                 Name = "Pottery",
                 Leader = "John Smith",
                 Period = new Period("Morning"),
-                Duration = new WorkshopDuration(1, 4)
+                Duration = new WorkshopDuration(1, 4),
             };
 
             var selection1 = new WorkshopSelection { ChoiceNumber = 1 };
@@ -317,10 +311,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(1, workshop.Selections[0].ChoiceNumber);
             Assert.AreEqual(2, workshop.Selections[1].ChoiceNumber);
         }
-
-        #endregion
-
-        #region Integration Tests
 
         [TestMethod]
         public void Workshop_CompleteScenario_AllPropertiesWork()
@@ -337,13 +327,13 @@ namespace WinterAdventurer.Test
                 Duration = duration,
                 IsMini = false,
                 MaxParticipants = 15,
-                MinAge = 12
+                MinAge = 12,
             };
 
             var selection = new WorkshopSelection
             {
                 ChoiceNumber = 1,
-                ClassSelectionId = "12345"
+                ClassSelectionId = "12345",
             };
             workshop.Selections.Add(selection);
 
@@ -370,7 +360,7 @@ namespace WinterAdventurer.Test
                 new { SheetName = "AfternoonSecondPeriod", Expected = "Afternoon Second Period" },
                 new { SheetName = "EveningSession", Expected = "Evening Session" },
                 new { SheetName = "AllDay", Expected = "All Day" },
-                new { SheetName = "LunchBreak", Expected = "Lunch Break" }
+                new { SheetName = "LunchBreak", Expected = "Lunch Break" },
             };
 
             foreach (var testCase in testCases)
@@ -391,7 +381,7 @@ namespace WinterAdventurer.Test
                 new { Start = 1, End = 2, Days = 2, Desc = "Days 1-2" },
                 new { Start = 1, End = 4, Days = 4, Desc = "Days 1-4" },
                 new { Start = 3, End = 4, Days = 2, Desc = "Days 3-4" },
-                new { Start = 2, End = 2, Days = 1, Desc = "Day 2" }
+                new { Start = 2, End = 2, Days = 1, Desc = "Day 2" },
             };
 
             foreach (var testCase in testCases)
@@ -403,10 +393,6 @@ namespace WinterAdventurer.Test
                     $"Failed Description for {testCase.Start}-{testCase.End}");
             }
         }
-
-        #endregion
-
-        #region TimeSlot Tests
 
         [TestMethod]
         public void TimeSlot_DefaultValues_InitializedCorrectly()
@@ -433,7 +419,7 @@ namespace WinterAdventurer.Test
                 Label = "Morning Session",
                 StartTime = new TimeSpan(8, 0, 0),
                 EndTime = new TimeSpan(9, 30, 0),
-                IsPeriod = true
+                IsPeriod = true,
             };
 
             // Act
@@ -451,7 +437,7 @@ namespace WinterAdventurer.Test
             {
                 Label = "Free Time",
                 StartTime = new TimeSpan(14, 0, 0),
-                EndTime = null
+                EndTime = null,
             };
 
             // Act
@@ -469,7 +455,7 @@ namespace WinterAdventurer.Test
             {
                 Label = "TBD",
                 StartTime = null,
-                EndTime = null
+                EndTime = null,
             };
 
             // Act
@@ -498,7 +484,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(13, 30, 0),
-                EndTime = new TimeSpan(15, 0, 0)
+                EndTime = new TimeSpan(15, 0, 0),
             };
 
             // Act
@@ -515,7 +501,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(0, 0, 0),
-                EndTime = new TimeSpan(1, 0, 0)
+                EndTime = new TimeSpan(1, 0, 0),
             };
 
             // Act
@@ -524,10 +510,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.AreEqual("12:00 AM - 1:00 AM", timeRange);
         }
-
-        #endregion
-
-        #region WorkshopSelection Tests
 
         [TestMethod]
         public void WorkshopSelection_DefaultValues_InitializedCorrectly()
@@ -560,7 +542,7 @@ namespace WinterAdventurer.Test
                 LastName = "Smith",
                 ChoiceNumber = 1,
                 RegistrationId = 100,
-                Duration = duration
+                Duration = duration,
             };
 
             // Assert
@@ -580,7 +562,7 @@ namespace WinterAdventurer.Test
             // Arrange & Act
             var selection = new WorkshopSelection
             {
-                ChoiceNumber = 1
+                ChoiceNumber = 1,
             };
 
             // Assert
@@ -593,7 +575,7 @@ namespace WinterAdventurer.Test
             // Arrange & Act
             var selection = new WorkshopSelection
             {
-                ChoiceNumber = 2
+                ChoiceNumber = 2,
             };
 
             // Assert
@@ -611,7 +593,7 @@ namespace WinterAdventurer.Test
                 WorkshopName = "Pottery",
                 FirstName = "John",
                 LastName = "Smith",
-                ChoiceNumber = 1
+                ChoiceNumber = 1,
             };
 
             // Act
@@ -642,10 +624,6 @@ namespace WinterAdventurer.Test
             Assert.AreEqual("Days 3-4", selection2.Duration.Description);
         }
 
-        #endregion
-
-        #region Attendee Tests
-
         [TestMethod]
         public void Attendee_DefaultValues_InitializedCorrectly()
         {
@@ -671,7 +649,7 @@ namespace WinterAdventurer.Test
                 FirstName = "John",
                 LastName = "Smith",
                 Email = "john.smith@example.com",
-                Age = "14"
+                Age = "14",
             };
 
             // Assert
@@ -689,7 +667,7 @@ namespace WinterAdventurer.Test
             var attendee = new Attendee
             {
                 FirstName = "Jane",
-                LastName = "Doe"
+                LastName = "Doe",
             };
 
             // Act
@@ -706,7 +684,7 @@ namespace WinterAdventurer.Test
             var attendee = new Attendee
             {
                 FirstName = "Alice",
-                LastName = ""
+                LastName = string.Empty,
             };
 
             // Act
@@ -722,7 +700,7 @@ namespace WinterAdventurer.Test
             // Arrange
             var attendee = new Attendee
             {
-                Age = "12-14"
+                Age = "12-14",
             };
 
             // Assert
@@ -739,7 +717,7 @@ namespace WinterAdventurer.Test
                 FirstName = "John",
                 LastName = "Smith",
                 Email = "john@example.com",
-                Age = "14"
+                Age = "14",
             };
 
             // Act
@@ -761,7 +739,7 @@ namespace WinterAdventurer.Test
             var attendee = new Attendee
             {
                 FirstName = "O'Brien",
-                LastName = "De La Cruz"
+                LastName = "De La Cruz",
             };
 
             // Act
@@ -770,7 +748,5 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.AreEqual("O'Brien De La Cruz", fullName);
         }
-
-        #endregion
     }
 }

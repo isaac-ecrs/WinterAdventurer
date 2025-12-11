@@ -1,4 +1,5 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+// <copyright file="AssemblyInfo.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
-// Configure test parallelization at class level to avoid resource conflicts
 [assembly: Parallelize(Workers = 0, Scope = ExecutionScope.ClassLevel)]

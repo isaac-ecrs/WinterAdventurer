@@ -1,9 +1,13 @@
+// <copyright file="Tag.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
 
 namespace WinterAdventurer.Data;
 
 /// <summary>
-/// Represents a tag that can be applied to locations (e.g., "Downstairs", "Accessible")
+/// Represents a tag that can be applied to locations (e.g., "Downstairs", "Accessible").
 /// </summary>
 public class Tag
 {
@@ -15,7 +19,7 @@ public class Tag
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Optional color for UI display (e.g., "#FF5722" for orange)
+    /// Gets or sets optional color for UI display (e.g., "#FF5722" for orange).
     /// </summary>
     [MaxLength(20)]
     public string? Color { get; set; }

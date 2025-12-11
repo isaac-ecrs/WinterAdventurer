@@ -1,3 +1,7 @@
+// <copyright file="WorkshopDuration.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 namespace WinterAdventurer.Library.Models
 {
     /// <summary>
@@ -31,6 +35,7 @@ namespace WinterAdventurer.Library.Models
             : $"Days {StartDay}-{EndDay}";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="WorkshopDuration"/> class.
         /// Creates a workshop duration representing which days the workshop runs during the event.
         /// Enables tracking workshops that run full-event (days 1-4) versus half-event (days 1-2 or 3-4).
         /// </summary>

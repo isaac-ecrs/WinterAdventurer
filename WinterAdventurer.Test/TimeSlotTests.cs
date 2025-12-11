@@ -1,3 +1,7 @@
+// <copyright file="TimeSlotTests.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Test
@@ -5,8 +9,6 @@ namespace WinterAdventurer.Test
     [TestClass]
     public class TimeSlotTests
     {
-        #region TimeRange Tests
-
         [TestMethod]
         public void TimeRange_WithBothStartAndEndTime_ReturnsFormattedRange()
         {
@@ -14,7 +16,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(9, 0, 0),   // 9:00 AM
-                EndTime = new TimeSpan(10, 30, 0)    // 10:30 AM
+                EndTime = new TimeSpan(10, 30, 0),    // 10:30 AM
             };
 
             // Act
@@ -31,7 +33,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(14, 15, 0),  // 2:15 PM
-                EndTime = new TimeSpan(16, 45, 0)     // 4:45 PM
+                EndTime = new TimeSpan(16, 45, 0),     // 4:45 PM
             };
 
             // Act
@@ -48,7 +50,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(0, 0, 0),   // Midnight
-                EndTime = new TimeSpan(1, 0, 0)      // 1:00 AM
+                EndTime = new TimeSpan(1, 0, 0),      // 1:00 AM
             };
 
             // Act
@@ -65,7 +67,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(12, 0, 0),   // Noon
-                EndTime = new TimeSpan(13, 30, 0)     // 1:30 PM
+                EndTime = new TimeSpan(13, 30, 0),     // 1:30 PM
             };
 
             // Act
@@ -82,7 +84,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(11, 30, 0),  // 11:30 AM
-                EndTime = new TimeSpan(13, 0, 0)      // 1:00 PM
+                EndTime = new TimeSpan(13, 0, 0),      // 1:00 PM
             };
 
             // Act
@@ -99,7 +101,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(21, 0, 0),  // 9:00 PM
-                EndTime = null
+                EndTime = null,
             };
 
             // Act
@@ -116,14 +118,14 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = null,
-                EndTime = null
+                EndTime = null,
             };
 
             // Act
             var result = timeSlot.TimeRange;
 
             // Assert
-            Assert.AreEqual("", result);
+            Assert.AreEqual(string.Empty, result);
         }
 
         [TestMethod]
@@ -133,14 +135,14 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = null,
-                EndTime = new TimeSpan(10, 0, 0)
+                EndTime = new TimeSpan(10, 0, 0),
             };
 
             // Act
             var result = timeSlot.TimeRange;
 
             // Assert
-            Assert.AreEqual("", result);
+            Assert.AreEqual(string.Empty, result);
         }
 
         [TestMethod]
@@ -150,7 +152,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(6, 30, 0),   // 6:30 AM
-                EndTime = new TimeSpan(8, 0, 0)       // 8:00 AM
+                EndTime = new TimeSpan(8, 0, 0),       // 8:00 AM
             };
 
             // Act
@@ -167,7 +169,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(20, 0, 0),   // 8:00 PM
-                EndTime = new TimeSpan(22, 30, 0)     // 10:30 PM
+                EndTime = new TimeSpan(22, 30, 0),     // 10:30 PM
             };
 
             // Act
@@ -184,7 +186,7 @@ namespace WinterAdventurer.Test
             var timeSlot = new TimeSlot
             {
                 StartTime = new TimeSpan(10, 0, 0),   // 10:00 AM
-                EndTime = new TimeSpan(11, 0, 0)      // 11:00 AM
+                EndTime = new TimeSpan(11, 0, 0),      // 11:00 AM
             };
 
             // Act
@@ -193,10 +195,6 @@ namespace WinterAdventurer.Test
             // Assert
             Assert.AreEqual("10:00 AM - 11:00 AM", result);
         }
-
-        #endregion
-
-        #region Property Tests
 
         [TestMethod]
         public void TimeSlot_DefaultConstructor_SetsDefaultValues()
@@ -241,7 +239,7 @@ namespace WinterAdventurer.Test
                 Label = expectedLabel,
                 StartTime = expectedStartTime,
                 EndTime = expectedEndTime,
-                IsPeriod = expectedIsPeriod
+                IsPeriod = expectedIsPeriod,
             };
 
             // Assert
@@ -251,7 +249,5 @@ namespace WinterAdventurer.Test
             Assert.AreEqual(expectedEndTime, timeSlot.EndTime);
             Assert.AreEqual(expectedIsPeriod, timeSlot.IsPeriod);
         }
-
-        #endregion
     }
 }

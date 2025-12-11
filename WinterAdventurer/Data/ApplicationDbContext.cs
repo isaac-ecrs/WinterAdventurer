@@ -1,3 +1,7 @@
+// <copyright file="ApplicationDbContext.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 
 namespace WinterAdventurer.Data;
@@ -82,8 +86,7 @@ public class ApplicationDbContext : DbContext
                 .UsingEntity<Dictionary<string, object>>(
                     "LocationTag",  // Join table name
                     j => j.HasOne<Tag>().WithMany().HasForeignKey("TagId"),
-                    j => j.HasOne<Location>().WithMany().HasForeignKey("LocationId")
-                );
+                    j => j.HasOne<Location>().WithMany().HasForeignKey("LocationId"));
         });
 
         // Configure Tag entity

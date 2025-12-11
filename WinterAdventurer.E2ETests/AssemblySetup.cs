@@ -1,4 +1,6 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+// <copyright file="AssemblySetup.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
 
 namespace WinterAdventurer.E2ETests;
 
@@ -13,6 +15,7 @@ public class AssemblySetup
     /// Runs once before any tests in the assembly.
     /// Starts the web server and waits for it to be ready.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     [AssemblyInitialize]
     public static async Task AssemblyInit(TestContext context)
     {
