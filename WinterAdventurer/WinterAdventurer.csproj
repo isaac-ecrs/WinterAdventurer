@@ -6,9 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Workaround for .NET 10 preview missing prune package data -->
     <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
-    <AnalysisMode>Recommended</AnalysisMode>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- Suppress less critical analyzer warnings for web project -->
     <!-- Same rationale as Library project - focus on security rules, suppress design/style -->

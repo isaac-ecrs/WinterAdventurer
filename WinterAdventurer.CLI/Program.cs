@@ -1,7 +1,5 @@
 ﻿using MigraDoc.Rendering;
 using PdfSharp.Fonts;
-using PdfSharp.Pdf;
-using System.Diagnostics;
 using System.Text.Json;
 using WinterAdventurer.Library;
 using WinterAdventurer.Library.Models;
@@ -177,10 +175,10 @@ catch (Exception ex)
 /// <summary>
 /// Loads and validates timeslot configuration from a JSON file.
 /// Ensures all period timeslots have configured times and no overlaps exist.
+/// Exits with code 1 if file doesn't exist, JSON is invalid, or validation fails.
 /// </summary>
 /// <param name="timeslotsPath">Path to the JSON file containing timeslot definitions.</param>
 /// <returns>A validated list of TimeSlot objects ready for PDF generation.</returns>
-/// <exception cref="System.Environment.Exit">Exits with code 1 if file doesn't exist, JSON is invalid, or validation fails.</exception>
 static List<TimeSlot> LoadTimeslots(string timeslotsPath)
 {
     Console.WriteLine($"\nLoading timeslots from: {timeslotsPath}");

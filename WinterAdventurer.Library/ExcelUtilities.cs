@@ -64,11 +64,6 @@ namespace WinterAdventurer.Library
         /// </summary>
         private readonly PdfDocumentOrchestrator _pdfOrchestrator;
 
-        /// <summary>
-        /// Standard black color used throughout PDF document generation.
-        /// </summary>
-        readonly Color COLOR_BLACK = Color.FromRgb(0, 0, 0);
-
         public ExcelUtilities(ILogger<ExcelUtilities> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

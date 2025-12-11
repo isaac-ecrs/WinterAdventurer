@@ -4,10 +4,9 @@
 <MudPaper Class="pa-4 mb-4">
     <MudText Typo="Typo.h5" Class="mb-3">Configure Schedule Times</MudText>
 
-    <div class="timeslot-container" data-version="@timeslotVersion">
     @foreach (var timeslot in Timeslots)
     {
-        <MudGrid Class="@GetTimeslotClass(timeslot)" @key="@timeslot.Id">
+        <MudGrid @key="@timeslot.Id">
             <MudItem xs="4">
                 <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
             </MudItem>
