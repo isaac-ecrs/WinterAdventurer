@@ -1,6 +1,10 @@
+// <copyright file="PdfDocumentOrchestrator.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Collections.Generic;
-using MigraDoc.DocumentObjectModel;
 using Microsoft.Extensions.Logging;
+using MigraDoc.DocumentObjectModel;
 using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Library.Services

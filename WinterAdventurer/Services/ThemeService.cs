@@ -71,7 +71,8 @@ public class ThemeService
     public async Task ToggleThemeAsync()
     {
         // Prevent rapid toggling during transition
-        if (_isTransitioning) return;
+        if (_isTransitioning)
+            return;
 
         _isTransitioning = true;
         OnThemeChanged?.Invoke(); // Trigger overlay fade-in

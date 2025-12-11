@@ -1,9 +1,9 @@
-﻿using PdfSharp.Fonts;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Globalization;
+using PdfSharp.Fonts;
 
 namespace WinterAdventurer.Library
 {
@@ -31,18 +31,21 @@ namespace WinterAdventurer.Library
                     {
                         return new FontResolverInfo("NotoSans-Bold");
                     }
+
                     return new FontResolverInfo("NotoSans-Regular");
                 case "OSWALD":
                     if (isBold)
                     {
                         return new FontResolverInfo("Oswald-Bold");
                     }
+
                     return new FontResolverInfo("Oswald-Regular");
                 case "ROBOTO":
                     if (isBold)
                     {
                         return new FontResolverInfo("Roboto-Bold");
                     }
+
                     return new FontResolverInfo("Roboto-Regular");
 
                 default:
@@ -91,7 +94,7 @@ namespace WinterAdventurer.Library
                     return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Regular.ttf";
                 case "OSWALD-BOLD":
                     return "WinterAdventurer.Library.Resources.Fonts.Oswald.static.Oswald-Bold.ttf";
-                case "ROBOTO-REGUAR":
+                case "ROBOTO-REGULAR":
                     return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Regular.ttf";
                 case "ROBOTO-BOLD":
                     return "WinterAdventurer.Library.Resources.Fonts.Roboto.Roboto-Bold.ttf";

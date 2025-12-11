@@ -1,8 +1,12 @@
+// <copyright file="WorkshopRosterGenerator.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
-using Microsoft.Extensions.Logging;
 using WinterAdventurer.Library.Models;
 
 namespace WinterAdventurer.Library.Services
@@ -33,7 +37,7 @@ namespace WinterAdventurer.Library.Services
         {
             var sections = new List<Section>();
 
-            foreach(var workshopListing in workshops)
+            foreach (var workshopListing in workshops)
             {
                 var section = new Section();
 
@@ -83,6 +87,7 @@ namespace WinterAdventurer.Library.Services
                 {
                     periodText += $" ({periodTimeslot.TimeRange})";
                 }
+
                 periodText += $" - {workshopListing.Duration.Description}";
 
                 periodInfo.AddFormattedText(periodText);

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using WinterAdventurer.Data;
 using Microsoft.Extensions.Logging;
+using WinterAdventurer.Data;
 
 namespace WinterAdventurer.Services;
 

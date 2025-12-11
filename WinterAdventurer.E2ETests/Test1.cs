@@ -1,4 +1,4 @@
-﻿namespace WinterAdventurer.E2ETests;
+namespace WinterAdventurer.E2ETests;
 
 [TestClass]
 public sealed class Test1

@@ -1,10 +1,10 @@
-﻿using MigraDoc.Rendering;
-using PdfSharp.Fonts;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using MigraDoc.Rendering;
+using PdfSharp.Fonts;
 using WinterAdventurer.Library;
 using WinterAdventurer.Library.Models;
 using WinterAdventurer.Library.Services;
-using Microsoft.Extensions.Logging;
 
 // Create logger factory for console logging
 using var loggerFactory = LoggerFactory.Create(builder =>

@@ -1,14 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
 
 namespace WinterAdventurer.Library.Extensions
 {
-    using System;
-
     public static class StringExtensions
     {
         /// <summary>
@@ -17,7 +15,7 @@ namespace WinterAdventurer.Library.Extensions
         /// </summary>
         /// <param name="input">String to convert to proper case.</param>
         /// <returns>String with each word capitalized (first letter uppercase, remaining lowercase).</returns>
-        [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", 
+        [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase",
                      Justification = "This method is for proper-casing display text, not for culture-invariant comparisons or lookups. Lowercase is required for the output format.")]
         public static string ToProper(this string input)
         {

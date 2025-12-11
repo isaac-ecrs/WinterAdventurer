@@ -47,7 +47,7 @@ namespace WinterAdventurer.Library.Services
                     throw new MissingResourceException($"Could not find embedded resource: {resourceName}")
                     {
                         ResourceName = resourceName,
-                        Section = "SchemaLoading"
+                        Section = "SchemaLoading",
                     };
                 }
 
@@ -59,7 +59,7 @@ namespace WinterAdventurer.Library.Services
                     {
                         throw new SchemaValidationException("Failed to deserialize event schema")
                         {
-                            SchemaName = resourceName
+                            SchemaName = resourceName,
                         };
                     }
                     return schema;
@@ -132,14 +132,14 @@ namespace WinterAdventurer.Library.Services
                     {
                         var headers = ws.Dimension != null
                             ? Enumerable.Range(1, ws.Dimension.Columns)
-                                .Select(i => new { Column = i, Value = ws.Cells[1, i].Value?.ToString() })
+                                .Select(i => new { Column = i, Value = ws.Cells[1, i].Value?.ToString(), })
                                 .Cast<object>()
                                 .ToList()
                             : new List<object>();
 
                         var sampleRow = ws.Dimension != null
                             ? Enumerable.Range(1, ws.Dimension.Columns)
-                                .Select(i => new { Column = i, Value = ws.Cells[2, i].Value?.ToString() })
+                                .Select(i => new { Column = i, Value = ws.Cells[2, i].Value?.ToString(), })
                                 .Cast<object>()
                                 .ToList()
                             : new List<object>();
@@ -151,9 +151,9 @@ namespace WinterAdventurer.Library.Services
                             RowCount = ws.Dimension?.Rows,
                             ColumnCount = ws.Dimension?.Columns,
                             Headers = headers,
-                            SampleRow = sampleRow
+                            SampleRow = sampleRow,
                         };
-                    }).ToList()
+                    }).ToList(),
                 };
 
                 var json = JsonConvert.SerializeObject(schema, Newtonsoft.Json.Formatting.Indented);
@@ -238,9 +238,9 @@ namespace WinterAdventurer.Library.Services
 
                     string sheetNames = string.Empty;
 
-                    if(_logger.IsEnabled(LogLevel.Warning))
+                    if (_logger.IsEnabled(LogLevel.Warning))
                     {
-                        sheetNames = string.Join(", ", availableSheets); 
+                        sheetNames = string.Join(", ", availableSheets);
                     }
 
                     LogWarningClassSelectionSheetNotFound(sheetConfig.SheetName, sheetNames);
@@ -248,7 +248,7 @@ namespace WinterAdventurer.Library.Services
                     throw new MissingSheetException($"Required sheet '{sheetConfig.SheetName}' not found in Excel file.")
                     {
                         SheetName = sheetConfig.SheetName,
-                        AvailableSheets = availableSheets
+                        AvailableSheets = availableSheets,
                     };
                 }
 
@@ -280,17 +280,17 @@ namespace WinterAdventurer.Library.Services
                         // Generate fallback ID if missing
                         if (string.IsNullOrWhiteSpace(selectionId))
                         {
-                            selectionId = $"{firstName}{lastName}".Replace(" ", String.Empty);
+                            selectionId = $"{firstName}{lastName}".Replace(" ", string.Empty);
                             LogDebugGeneratedFallbackAttendeeId(firstName ?? "FirstNameNull", lastName ?? "LastNameNull", selectionId);
                         }
 
                         attendees[selectionId] = new Attendee
                         {
                             ClassSelectionId = selectionId,
-                            FirstName = firstName ?? String.Empty,
-                            LastName = lastName ?? String.Empty,
-                            Email = email ?? String.Empty,
-                            Age = age ?? String.Empty
+                            FirstName = firstName ?? string.Empty,
+                            LastName = lastName ?? string.Empty,
+                            Email = email ?? string.Empty,
+                            Age = age ?? string.Empty,
                         };
                     }
                     catch (Exception ex)
@@ -312,7 +312,7 @@ namespace WinterAdventurer.Library.Services
                 LogErrorFailedToLoadAttendees(ex);
                 throw new ExcelParsingException("Failed to load attendees. Please verify the ClassSelection sheet structure.", ex)
                 {
-                    SheetName = schema.ClassSelectionSheet.SheetName
+                    SheetName = schema.ClassSelectionSheet.SheetName,
                 };
             }
         }
@@ -388,13 +388,13 @@ namespace WinterAdventurer.Library.Services
                                 else
                                 {
                                     // Fallback: try to get name from the row
-                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? String.Empty;
-                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? String.Empty;
+                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? string.Empty;
+                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? string.Empty;
                                     attendee = new Attendee
                                     {
                                         ClassSelectionId = selectionId ?? $"{firstName}{lastName}",
                                         FirstName = firstName,
-                                        LastName = lastName
+                                        LastName = lastName,
                                     };
                                 }
 
@@ -409,7 +409,7 @@ namespace WinterAdventurer.Library.Services
                                     FullName = attendee.FullName,
                                     ChoiceNumber = choiceNumber,
                                     Duration = duration,
-                                    RegistrationId = registrationId
+                                    RegistrationId = registrationId,
                                 };
 
                                 // Create unique key for this workshop offering
@@ -428,7 +428,7 @@ namespace WinterAdventurer.Library.Services
                                         Leader = leaderName,
                                         Period = period,
                                         Duration = duration,
-                                        Selections = new List<WorkshopSelection> { selection }
+                                        Selections = new List<WorkshopSelection> { selection },
                                     };
                                 }
                             }
@@ -453,7 +453,7 @@ namespace WinterAdventurer.Library.Services
                 LogErrorFailedToCollectWorkshops(ex, sheet.Name);
                 throw new ExcelParsingException($"Failed to collect workshops from sheet '{sheet.Name}'. Please verify the sheet structure.", ex)
                 {
-                    SheetName = sheet.Name
+                    SheetName = sheet.Name,
                 };
             }
         }

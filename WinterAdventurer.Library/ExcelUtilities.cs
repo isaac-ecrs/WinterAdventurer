@@ -1,25 +1,25 @@
-﻿using System.Collections;
+using System.Collections;
+using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using OfficeOpenXml;
-using WinterAdventurer.Library.Extensions;
-using WinterAdventurer.Library.Models;
-using WinterAdventurer.Library.EventSchemas;
-using WinterAdventurer.Library.Services;
-using WinterAdventurer.Library.Exceptions;
+using System.Xml;
+using Microsoft.Extensions.Logging;
 using MigraDoc;
 using MigraDoc.DocumentObjectModel;
-using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Shapes;
-using System.Data.Common;
-using System.Xml;
-using PdfSharp.Fonts;
-using System.Diagnostics;
+using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Visitors;
-using PdfSharp.Pdf;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
+using PdfSharp.Fonts;
+using PdfSharp.Pdf;
+using WinterAdventurer.Library.EventSchemas;
+using WinterAdventurer.Library.Exceptions;
+using WinterAdventurer.Library.Extensions;
+using WinterAdventurer.Library.Models;
+using WinterAdventurer.Library.Services;
 
 namespace WinterAdventurer.Library
 {
@@ -267,10 +267,10 @@ namespace WinterAdventurer.Library
                         attendees[selectionId] = new Attendee
                         {
                             ClassSelectionId = selectionId,
-                            FirstName = firstName ?? "",
-                            LastName = lastName ?? "",
-                            Email = email ?? "",
-                            Age = age ?? ""
+                            FirstName = firstName ?? string.Empty,
+                            LastName = lastName ?? string.Empty,
+                            Email = email ?? string.Empty,
+                            Age = age ?? string.Empty,
                         };
                     }
                     catch (Exception ex)
@@ -360,13 +360,13 @@ namespace WinterAdventurer.Library
                                 else
                                 {
                                     // Fallback: try to get name from the row
-                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? "";
-                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? "";
+                                    var firstName = helper.GetCellValue(row, periodConfig.GetColumnName("firstName")) ?? string.Empty;
+                                    var lastName = helper.GetCellValue(row, periodConfig.GetColumnName("lastName")) ?? string.Empty;
                                     attendee = new Attendee
                                     {
                                         ClassSelectionId = selectionId ?? $"{firstName}{lastName}",
                                         FirstName = firstName,
-                                        LastName = lastName
+                                        LastName = lastName,
                                     };
                                 }
 
@@ -381,7 +381,7 @@ namespace WinterAdventurer.Library
                                     FullName = attendee.FullName,
                                     ChoiceNumber = choiceNumber,
                                     Duration = duration,
-                                    RegistrationId = registrationId
+                                    RegistrationId = registrationId,
                                 };
 
                                 // Create unique key for this workshop offering
@@ -400,7 +400,7 @@ namespace WinterAdventurer.Library
                                         Leader = leaderName,
                                         Period = period,
                                         Duration = duration,
-                                        Selections = new List<WorkshopSelection> { selection }
+                                        Selections = new List<WorkshopSelection> { selection },
                                     };
                                 }
                             }

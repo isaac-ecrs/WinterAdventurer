@@ -1,5 +1,5 @@
-using WinterAdventurer.Library.EventSchemas;
 using Newtonsoft.Json.Linq;
+using WinterAdventurer.Library.EventSchemas;
 
 namespace WinterAdventurer.Test
 {

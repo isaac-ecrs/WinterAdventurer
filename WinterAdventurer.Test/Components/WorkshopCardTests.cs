@@ -652,7 +652,8 @@ namespace WinterAdventurer.Test.Components
         public Task<Location> AddOrGetLocationAsync(string locationName)
         {
             var existing = _locations.FirstOrDefault(l => l.Name == locationName);
-            if (existing != null) return Task.FromResult(existing);
+            if (existing != null)
+                return Task.FromResult(existing);
 
             var newLocation = new Location { Id = _locations.Count + 1, Name = locationName };
             _locations.Add(newLocation);
@@ -662,7 +663,8 @@ namespace WinterAdventurer.Test.Components
         public Task<bool> DeleteLocationAsync(string locationName)
         {
             var location = _locations.FirstOrDefault(l => l.Name == locationName);
-            if (location == null) return Task.FromResult(false);
+            if (location == null)
+                return Task.FromResult(false);
 
             _locations.Remove(location);
             return Task.FromResult(true);

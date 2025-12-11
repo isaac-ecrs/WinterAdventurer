@@ -1,5 +1,5 @@
-using WinterAdventurer.Library.Services;
 using WinterAdventurer.Library.Models;
+using WinterAdventurer.Library.Services;
 
 namespace WinterAdventurer.Test
 {

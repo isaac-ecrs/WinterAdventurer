@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
-using Microsoft.Extensions.Logging;
 using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Models;
 

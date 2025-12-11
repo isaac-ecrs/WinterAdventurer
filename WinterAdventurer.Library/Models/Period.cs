@@ -12,14 +12,14 @@ namespace WinterAdventurer.Library.Models
         /// Gets or sets the technical Excel sheet name for this period (e.g., "MorningFirstPeriod").
         /// Used for matching Excel sheets during import.
         /// </summary>
-        public string SheetName {get;set;} = string.Empty;
+        public string SheetName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the user-friendly display name for this period (e.g., "Morning First Period").
         /// Generated automatically from SheetName by inserting spaces before capital letters.
         /// Used in schedules and reports.
         /// </summary>
-        public string DisplayName {get;set;} = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
 
         /// <summary>
         /// Creates a period from an Excel sheet name, generating a user-friendly display name.

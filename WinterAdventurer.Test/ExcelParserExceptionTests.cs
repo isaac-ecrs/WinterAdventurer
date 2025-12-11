@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using WinterAdventurer.Library.Services;
 using WinterAdventurer.Library.Exceptions;
+using WinterAdventurer.Library.Services;
 
 namespace WinterAdventurer.Test
 {

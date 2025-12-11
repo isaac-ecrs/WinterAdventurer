@@ -1,7 +1,11 @@
+// <copyright file="PdfFormatterBase.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
-using Microsoft.Extensions.Logging;
 
 namespace WinterAdventurer.Library.Services
 {
@@ -98,8 +102,9 @@ namespace WinterAdventurer.Library.Services
                                 logo.Left = PdfLayoutConstants.Logo.WorkshopRosterPortrait.Left;
                             }
                         }
-                        else // roster (default)
+                        else
                         {
+                            // roster (default)
                             // Class rosters - portrait, bottom right to avoid overlapping long workshop names
                             // Page is 11" tall with 0.5" margins = 10" content area
                             // Position at 10" - 1.0" logo - 0.2" margin = 8.8" from top

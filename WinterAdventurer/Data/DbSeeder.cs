@@ -106,7 +106,7 @@ public partial class DbSeeder
 
         string seededTags = String.Empty;
 
-        if(_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Information))
         {
             seededTags = string.Join(", ", tagsToAdd.Select(t => t.Name));
         }
@@ -156,7 +156,7 @@ public partial class DbSeeder
 
             string seededLocations = String.Empty;
 
-            if(_logger.IsEnabled(LogLevel.Information))
+            if (_logger.IsEnabled(LogLevel.Information))
             {
                 seededLocations = string.Join(", ", locationsToAdd.Select(l => l.Name));
             }

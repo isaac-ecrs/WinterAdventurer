@@ -1,3 +1,7 @@
+// <copyright file="TimeslotValidationService.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 namespace WinterAdventurer.Library.Services;
 
 public interface ITimeslotValidationService

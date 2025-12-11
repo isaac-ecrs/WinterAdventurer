@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
-using Microsoft.Extensions.Logging;
 using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Models;
 
@@ -95,7 +95,7 @@ namespace WinterAdventurer.Library.Services
             var timeColumnWidth = PdfLayoutConstants.ColumnWidths.MasterSchedule.Time;
             var daysColumnWidth = PdfLayoutConstants.ColumnWidths.MasterSchedule.Days;
             var pageUsableWidth = section.PageSetup.Orientation == Orientation.Landscape
-                ? 10.2  // 11" - 0.4" - 0.4"
+                ? 10.2 // 11" - 0.4" - 0.4"
                 : PdfLayoutConstants.PageDimensions.PortraitUsableWidth;
             // Make table 9.5" wide to leave room for centering
             var tableWidth = section.PageSetup.Orientation == Orientation.Landscape ? 9.5 : pageUsableWidth;
@@ -104,7 +104,7 @@ namespace WinterAdventurer.Library.Services
             // Add left indent to center the table horizontally (slightly more to the right)
             if (section.PageSetup.Orientation == Orientation.Landscape)
             {
-                var leftIndent = (pageUsableWidth - tableWidth) / 2 + 0.15;  // Center + extra shift right
+                var leftIndent = ((pageUsableWidth - tableWidth) / 2) + 0.15;  // Center + extra shift right
                 table.Rows.LeftIndent = Unit.FromInch(leftIndent);
             }
 
@@ -406,7 +406,7 @@ namespace WinterAdventurer.Library.Services
                 timeslots.Add(new Models.TimeSlot
                 {
                     Label = period.DisplayName,
-                    IsPeriod = true
+                    IsPeriod = true,
                 });
             }
 
@@ -414,19 +414,19 @@ namespace WinterAdventurer.Library.Services
             timeslots.Insert(0, new Models.TimeSlot
             {
                 Label = "Breakfast",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             timeslots.Add(new Models.TimeSlot
             {
                 Label = "Lunch",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             timeslots.Add(new Models.TimeSlot
             {
                 Label = "Evening Program",
-                IsPeriod = false
+                IsPeriod = false,
             });
 
             return timeslots;
