@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   sodipodi:docname="watson_layout.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="2.1707776"
+     inkscape:cx="302.42619"
+     inkscape:cy="79.003948"
+     inkscape:window-width="1671"
+     inkscape:window-height="1050"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer4">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="0"
+       originy="0"
+       spacingx="0.99999998"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern49"
+       patternTransform="matrix(0.03050959,0,0,0.03050959,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern48"
+       patternTransform="matrix(0.03050959,0,0,0.03050959,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern47"
+       patternTransform="matrix(0.03050959,0,0,0.03050959,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern46"
+       patternTransform="matrix(0.03050959,0,0,0.03050959,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <linearGradient
+       id="swatch45"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop45" />
+    </linearGradient>
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern45"
+       patternTransform="matrix(0.03050959,0,0,0.03050959,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern44"
+       patternTransform="matrix(0.03050959,0,0,0.03050959,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#WireFence"
+       preserveAspectRatio="xMidYMid"
+       id="pattern43"
+       patternTransform="matrix(0.09152877,0,0,0.09152877,-19.825556,-6.0097653)"
+       x="0"
+       y="0" />
+    <pattern
+       patternUnits="userSpaceOnUse"
+       width="52"
+       height="61.14"
+       id="WireFence"
+       patternTransform="scale(0.3,0.3)"
+       preserveAspectRatio="xMidYMid"
+       style="fill:#000000"
+       inkscape:label="Wire Fence"
+       inkscape:collect="always"
+       inkscape:isstock="true">
+      <path
+         id="path42"
+         style="stroke:none"
+         d="m 31.437499,0 7.257813,7.2578126 c -0.879538,1.3312883 -0.879117,3.0161644 10e-7,4.3476564 L 26.072266,24.228516 14,36.300782 0,22.302735 v 2.828124 l 12.640625,12.640625 c -0.89873,1.34129 -0.898729,3.115742 0,4.457031 L 0,54.86914 v 2.828126 l 14,-14 17.443359,17.443359 2.828125,10e-7 -18.912109,-18.91211 c 0.898055,-1.340861 0.898042,-3.116186 0,-4.457031 L 27.488281,25.642578 40,13.128906 l 12.000001,12 L 52,22.300781 41.302734,11.605469 c 0.879644,-1.331587 0.879713,-3.0161029 0,-4.3476564 L 48.560547,0 H 45.732422 L 40,5.732422 34.267578,0 Z M 52,54.869141 l -6.271484,6.271484 2.828124,0 L 52,57.697265 Z" />
+    </pattern>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath39">
+      <path
+         id="path39"
+         style="stroke-width:0.1;stroke-linecap:square;paint-order:markers fill stroke;stop-color:#000000"
+         d="m -880.82767,-187.29769 h 1640.84 v 73.28155 h -1640.84 z" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath25">
+      <rect
+         style="fill:#ff0000;stroke:none;stroke-width:3;stroke-linecap:square;stroke-linejoin:miter;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect25-8"
+         width="78"
+         height="45.033199"
+         x="763.61322"
+         y="452.82422" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath27">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.999999;stroke-linecap:butt;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect28-6"
+         width="46.160622"
+         height="39.922417"
+         x="86.574379"
+         y="420.06253" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath52">
+      <path
+         id="path52"
+         style="stroke-width:0.1;stroke-linecap:square;paint-order:markers fill stroke;stop-color:#000000"
+         d="m -880.82767,-187.29769 h 1640.84 v 73.28155 h -1640.84 z" />
+    </clipPath>
+    <rect
+       x="86.929136"
+       y="26.456692"
+       width="49.134412"
+       height="9.5085013"
+       id="rect5" />
+    <rect
+       x="86.929138"
+       y="26.456692"
+       width="9.6871787"
+       height="6.5209127"
+       id="rect5-9" />
+    <rect
+       x="86.929138"
+       y="26.456692"
+       width="9.6871786"
+       height="6.5209126"
+       id="rect5-9-8" />
+    <rect
+       x="86.929138"
+       y="26.456692"
+       width="25.12577"
+       height="6.6753111"
+       id="rect5-9-0" />
+    <rect
+       x="86.929138"
+       y="26.456692"
+       width="10.807508"
+       height="4.0188968"
+       id="rect5-9-5" />
+    <rect
+       x="86.929138"
+       y="26.456692"
+       width="10.807508"
+       height="4.0188966"
+       id="rect5-9-5-4" />
+    <rect
+       x="86.929138"
+       y="26.456692"
+       width="10.807508"
+       height="4.0188966"
+       id="rect5-9-5-43" />
+  </defs>
+  <g
+     inkscape:label="Rooms"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect1"
+       width="45.764385"
+       height="30.509592"
+       x="41.193626"
+       y="9.2450294"
+       inkscape:label="dining-room" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.4682;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect2"
+       width="30.237116"
+       height="5.5569749"
+       x="10.684034"
+       y="21.72134"
+       inkscape:label="west-hallway" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.4682;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect2-3"
+       width="30.237116"
+       height="5.5569749"
+       x="87.230484"
+       y="21.72134"
+       inkscape:label="west-hallway" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect3"
+       width="15.254796"
+       height="12.203835"
+       x="10.684034"
+       y="9.2450294"
+       inkscape:label="elm-room" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect3-1"
+       width="15.254796"
+       height="12.203835"
+       x="71.703217"
+       y="39.754623"
+       inkscape:label="martin-room" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect3-3"
+       width="13.740863"
+       height="21.651052"
+       x="117.79464"
+       y="13.833882"
+       inkscape:label="east-foyer" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect4"
+       width="15.469445"
+       height="10.67382"
+       x="131.54337"
+       y="13.826006"
+       inkscape:label="chapel-a" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect4-4"
+       width="29.201445"
+       height="9.8969059"
+       x="117.80303"
+       y="3.9286056"
+       inkscape:label="chapel" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect4-2"
+       width="15.443798"
+       height="10.908628"
+       x="131.55621"
+       y="24.512648"
+       inkscape:label="library" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.42756;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       d="m 106.82246,28.665242 v 17.049231 h 24.68741 V 35.484935 h -13.71522 v -6.819693 z"
+       id="path4"
+       inkscape:label="stairs-to-craft-and-rec-rooms" />
+  </g>
+  <g
+     inkscape:label="RoomHighlights"
+     inkscape:groupmode="layer"
+     id="g15">
+    <rect
+       style="display:inline;fill:url(#pattern43);fill-opacity:1;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect7"
+       width="45.764385"
+       height="30.509592"
+       x="41.193626"
+       y="9.2450294"
+       inkscape:label="dining-room" />
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:2.4682;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect8"
+       width="30.237116"
+       height="5.5569749"
+       x="10.684034"
+       y="21.72134"
+       inkscape:label="west-hallway" />
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:2.4682;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect9"
+       width="30.237116"
+       height="5.5569749"
+       x="87.230484"
+       y="21.72134"
+       inkscape:label="west-hallway" />
+    <rect
+       style="display:inline;fill:url(#pattern44);fill-opacity:1;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect10"
+       width="15.254796"
+       height="12.203835"
+       x="10.684034"
+       y="9.2450294"
+       inkscape:label="elm-room" />
+    <rect
+       style="display:inline;fill:url(#pattern49);fill-opacity:1;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect11"
+       width="15.254796"
+       height="12.203835"
+       x="71.703217"
+       y="39.754623"
+       inkscape:label="martin-room" />
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect12"
+       width="13.740863"
+       height="21.651052"
+       x="117.79464"
+       y="13.833882"
+       inkscape:label="east-foyer" />
+    <rect
+       style="display:inline;fill:url(#pattern46);fill-opacity:1;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect13"
+       width="15.469445"
+       height="10.67382"
+       x="131.54337"
+       y="13.826006"
+       inkscape:label="chapel-a" />
+    <rect
+       style="display:inline;fill:url(#pattern45);fill-opacity:1;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect14"
+       width="29.201445"
+       height="9.8969059"
+       x="117.80303"
+       y="3.9286056"
+       inkscape:label="chapel" />
+    <rect
+       style="display:inline;fill:url(#pattern47);fill-opacity:1;stroke:#000000;stroke-width:2.42171;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       id="rect15"
+       width="15.443798"
+       height="10.908628"
+       x="131.55621"
+       y="24.512648"
+       inkscape:label="library" />
+    <path
+       style="display:inline;fill:url(#pattern48);fill-opacity:1;stroke:#000000;stroke-width:2.42756;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       d="m 106.82246,28.665242 v 17.049231 h 24.68741 V 35.484935 h -13.71522 v -6.819693 z"
+       id="path15"
+       inkscape:label="stairs-to-craft-and-rec-rooms" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="LabelBackgrounds"
+     style="display:inline">
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.403617;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6"
+       width="31.494431"
+       height="7.7963176"
+       x="48.525059"
+       y="19.754467" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.217587;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6-3"
+       width="9.1528788"
+       height="7.7963176"
+       x="13.734992"
+       y="11.44879" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.217587;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6-1"
+       width="9.1528797"
+       height="7.7963176"
+       x="74.754173"
+       y="41.958382" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.254225;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6-36"
+       width="19.029016"
+       height="5.1191816"
+       x="109.50347"
+       y="37.686398" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.254225;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6-36-2"
+       width="19.029016"
+       height="5.1191816"
+       x="123.20789"
+       y="6.1940713" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.17884;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6-36-22"
+       width="9.4169073"
+       height="5.1191816"
+       x="134.51945"
+       y="16.601034" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.737798;stroke:none;stroke-width:0.17884;stroke-dasharray:none;stroke-dashoffset:917.099"
+       id="rect6-36-22-6"
+       width="9.4169073"
+       height="5.1191816"
+       x="134.61615"
+       y="27.494196" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Labels">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,-17.98547,0.28431368)"
+       id="text5"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.33333px;font-family:roboto;-inkscape-font-specification:roboto;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"><tspan
+         x="86.929688"
+         y="31.123695"
+         id="tspan4">Dining Room</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,-55.767601,-8.6159438)"
+       id="text5-9"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.66667px;font-family:roboto;-inkscape-font-specification:roboto;text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5-9);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       x="3.311202"
+       y="0"><tspan
+         x="89.522133"
+         y="28.790368"
+         id="tspan5">Elm
+</tspan><tspan
+         x="88.261714"
+         y="32.123705"
+         id="tspan6">Room</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,5.1305277,22.077923)"
+       id="text5-9-0"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.66667px;font-family:roboto;-inkscape-font-specification:roboto;text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5-9-8);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       x="3.311202"
+       y="0"><tspan
+         x="87.90299"
+         y="28.790368"
+         id="tspan7">Martin
+</tspan><tspan
+         x="88.261714"
+         y="32.123705"
+         id="tspan8">Room</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,38.874531,16.657788)"
+       id="text5-9-2"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.66667px;font-family:roboto;-inkscape-font-specification:roboto;text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5-9-0);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       x="3.311202"
+       y="0"><tspan
+         x="92.003246"
+         y="28.790368"
+         id="tspan9">Stairs to Rec
+</tspan><tspan
+         x="89.498685"
+         y="32.123705"
+         id="tspan10">and Craft Rooms</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,64.584055,-3.2958492)"
+       id="text5-9-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.66667px;font-family:roboto;-inkscape-font-specification:roboto;text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5-9-5);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       x="3.311202"
+       y="0"><tspan
+         x="87.025058"
+         y="28.790368"
+         id="tspan11">Chapel A</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,58.232609,-13.655004)"
+       id="text5-9-6-8"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.66667px;font-family:roboto;-inkscape-font-specification:roboto;text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5-9-5-43);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       x="3.311202"
+       y="0"><tspan
+         x="88.225581"
+         y="28.790368"
+         id="tspan12">Chapel</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.80723292,0,0,0.80723292,64.661523,7.4217865)"
+       id="text5-9-6-5"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.66667px;font-family:roboto;-inkscape-font-specification:roboto;text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect5-9-5-4);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-dashoffset:917.099;stroke-opacity:1"
+       x="3.311202"
+       y="0"><tspan
+         x="88.296544"
+         y="28.790368"
+         id="tspan13">Library</tspan></text>
+  </g>
+</svg>

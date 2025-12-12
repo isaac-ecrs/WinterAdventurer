@@ -181,6 +181,12 @@ namespace WinterAdventurer.Library
             /// Map width when embedded in individual schedules (6.0 inches).
             /// </summary>
             public static readonly Unit Width = Unit.FromInch(6.0);
+
+            /// <summary>
+            /// Map height when embedded in individual schedules (4.5 inches).
+            /// Locked to prevent wrapping and ensure consistent layout.
+            /// </summary>
+            public static readonly Unit Height = Unit.FromInch(4.5);
         }
 
         /// <summary>

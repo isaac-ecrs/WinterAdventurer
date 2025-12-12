@@ -32,12 +32,12 @@ public class MockExcelUtilities : ExcelUtilities
     public string LastEventName { get; private set; } = string.Empty;
 
     public MockExcelUtilities()
-        : base(NullLogger<ExcelUtilities>.Instance)
+        : base(NullLogger<ExcelUtilities>.Instance, new NullLoggerFactory())
     {
     }
 
     public MockExcelUtilities(ILogger<ExcelUtilities> logger)
-        : base(logger)
+        : base(logger, new NullLoggerFactory())
     {
     }
 
