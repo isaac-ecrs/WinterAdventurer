@@ -21,7 +21,7 @@ namespace WinterAdventurer.Test
         [TestInitialize]
         public void Setup()
         {
-            _excelUtilities = new ExcelUtilities(NullLogger<ExcelUtilities>.Instance);
+            _excelUtilities = new ExcelUtilities(NullLogger<ExcelUtilities>.Instance, new NullLoggerFactory());
             ExcelPackage.License.SetNonCommercialOrganization("WinterAdventurer");
         }
 

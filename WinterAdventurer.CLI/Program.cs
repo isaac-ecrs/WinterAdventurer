@@ -85,7 +85,7 @@ try
 {
     using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
     {
-        var excelUtilities = new ExcelUtilities(logger);
+        var excelUtilities = new ExcelUtilities(logger, loggerFactory);
 
         // Import and parse Excel
         Console.WriteLine($"Importing Excel file: {Path.GetFileName(filePath)}");

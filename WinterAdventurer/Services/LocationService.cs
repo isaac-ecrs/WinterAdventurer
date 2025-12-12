@@ -343,13 +343,43 @@ public partial class LocationService : ILocationService
     {
         LogSavingAllTimeSlots(timeSlots.Count);
 
-        // Clear existing and add all new ones
-        await ClearAllTimeSlotsAsync();
+        var incomingIds = new HashSet<string>(timeSlots.Select(t => t.Id));
+        var existingTimeSlots = await _context.TimeSlots.ToListAsync();
 
-        foreach (var timeSlot in timeSlots)
+        // Update existing timeslots (by ID)
+        foreach (var incoming in timeSlots)
         {
-            timeSlot.LastUpdated = DateTime.UtcNow;
-            _context.TimeSlots.Add(timeSlot);
+            var existing = existingTimeSlots.FirstOrDefault(t => t.Id == incoming.Id);
+            if (existing != null)
+            {
+                // Update existing timeslot
+                existing.Label = incoming.Label;
+                existing.StartTime = incoming.StartTime;
+                existing.EndTime = incoming.EndTime;
+                existing.IsPeriod = incoming.IsPeriod;
+                existing.LastUpdated = DateTime.UtcNow;
+                LogUpdatedExistingTimeSlot(incoming.Label);
+            }
+            else
+            {
+                // Add new timeslot
+                incoming.LastUpdated = DateTime.UtcNow;
+                incoming.CreatedAt = DateTime.UtcNow;
+                _context.TimeSlots.Add(incoming);
+                LogAddedNewTimeSlot(incoming.Label);
+            }
+        }
+
+        // Delete custom timeslots (IsPeriod=false) that are no longer in the list
+        // Preserve period timeslots (IsPeriod=true) to prevent accidental deletion
+        var toDelete = existingTimeSlots
+            .Where(t => !incomingIds.Contains(t.Id) && !t.IsPeriod)
+            .ToList();
+
+        if (toDelete.Count > 0)
+        {
+            _context.TimeSlots.RemoveRange(toDelete);
+            LogDeletingCustomTimeslots(toDelete.Count);
         }
 
         await _context.SaveChangesAsync();
@@ -468,6 +498,9 @@ public partial class LocationService : ILocationService
 
     [LoggerMessage(EventId = 7214, Level = LogLevel.Information, Message = "SAVED {Count} timeslots to database")]
     partial void LogSavedAllTimeSlots(int count);
+
+    [LoggerMessage(EventId = 7215, Level = LogLevel.Information, Message = "Deleting {Count} custom timeslots (preserving period timeslots)")]
+    partial void LogDeletingCustomTimeslots(int count);
 
     #endregion
 }

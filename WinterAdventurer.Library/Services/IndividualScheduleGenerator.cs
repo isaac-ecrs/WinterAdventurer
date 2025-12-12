@@ -7,6 +7,8 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 using WinterAdventurer.Library.EventSchemas;
 using WinterAdventurer.Library.Models;
+#pragma warning disable SA1401 // Fields should be private
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line
 
 namespace WinterAdventurer.Library.Services
 {
@@ -16,8 +18,9 @@ namespace WinterAdventurer.Library.Services
     /// </summary>
     public partial class IndividualScheduleGenerator : PdfFormatterBase
     {
-        private readonly EventSchema _schema;
-        private readonly MasterScheduleGenerator _masterScheduleGenerator;
+        internal readonly EventSchema _schema;
+        internal readonly MasterScheduleGenerator _masterScheduleGenerator;
+        private readonly MapCompositor? _mapCompositor;
         private static readonly string[] LeaderDelimiter = new[] { " and " };
 
         /// <summary>
@@ -26,14 +29,17 @@ namespace WinterAdventurer.Library.Services
         /// <param name="schema">Event schema configuration defining period structure.</param>
         /// <param name="masterScheduleGenerator">Master schedule generator for blank schedule templates.</param>
         /// <param name="logger">Logger for diagnostic output.</param>
+        /// <param name="mapCompositor">Optional map compositor for generating personalized facility maps.</param>
         public IndividualScheduleGenerator(
             EventSchema schema,
             MasterScheduleGenerator masterScheduleGenerator,
-            ILogger<IndividualScheduleGenerator> logger)
+            ILogger<IndividualScheduleGenerator> logger,
+            MapCompositor? mapCompositor = null)
             : base(logger)
         {
             _schema = schema ?? throw new ArgumentNullException(nameof(schema));
             _masterScheduleGenerator = masterScheduleGenerator ?? throw new ArgumentNullException(nameof(masterScheduleGenerator));
+            _mapCompositor = mapCompositor;
         }
 
         /// <summary>
@@ -345,8 +351,9 @@ namespace WinterAdventurer.Library.Services
                     }
                 }
 
-                // Add facility map to the footer
-                AddFacilityMapToSection(section);
+                // Add personalized facility map based on attendee's locations
+                var attendeeLocations = GetUniqueLocationsForAttendee(attendeeSelections, workshops);
+                AddPersonalizedFacilityMapToSection(section, attendeeLocations);
 
                 // Add event name footer
                 AddEventNameFooter(section, eventName);
@@ -365,6 +372,90 @@ namespace WinterAdventurer.Library.Services
                                         .Select(t => t.Name.ToLowerInvariant()));
 
             return tagString;
+        }
+
+        /// <summary>
+        /// Extracts unique location names from an attendee's workshop selections.
+        /// Matches selections against all workshops to find their assigned locations.
+        /// </summary>
+        /// <param name="attendeeSelections">Workshop selections for the attendee (first-choice only).</param>
+        /// <param name="allWorkshops">List of all workshops to match selections against.</param>
+        /// <returns>Sorted list of unique location names, or empty list if no locations assigned.</returns>
+        private List<string> GetUniqueLocationsForAttendee(
+            List<WorkshopSelection> attendeeSelections,
+            List<Workshop> allWorkshops)
+        {
+            var locations = new HashSet<string>();
+
+            // For each attendee selection, find the matching workshop and get its location
+            foreach (var selection in attendeeSelections)
+            {
+                // Find all workshops that match this selection
+                var matchingWorkshops = allWorkshops.Where(w =>
+                    w.Name == selection.WorkshopName &&
+                    w.Duration.StartDay == selection.Duration.StartDay &&
+                    w.Duration.EndDay == selection.Duration.EndDay &&
+                    w.Selections.Any(s => s.ClassSelectionId == selection.ClassSelectionId)).ToList();
+
+                // Add locations from all matching workshops
+                foreach (var workshop in matchingWorkshops)
+                {
+                    if (!string.IsNullOrWhiteSpace(workshop.Location))
+                    {
+                        locations.Add(workshop.Location);
+                    }
+                }
+            }
+
+            return locations.OrderBy(l => l).ToList();
+        }
+
+        /// <summary>
+        /// Adds personalized facility map to PDF section, showing only locations attendee will visit.
+        /// Falls back to static map if locations unavailable or compositing fails.
+        /// </summary>
+        /// <param name="section">MigraDoc section to add the map to.</param>
+        /// <param name="locations">List of location names to highlight on the map.</param>
+        private void AddPersonalizedFacilityMapToSection(Section section, List<string> locations)
+        {
+            // Fallback to static map if compositor not available
+            if (_mapCompositor == null)
+            {
+                LogWarningMapCompositorNull();
+                AddFacilityMapToSection(section);
+                return;
+            }
+
+            if (locations.Count == 0)
+            {
+                LogWarningNoLocationsFound();
+                AddFacilityMapToSection(section);
+                return;
+            }
+
+            try
+            {
+                LogInformationComposingPersonalizedMap(locations.Count);
+                // Generate personalized map
+                var mapPath = _mapCompositor.CompositeMap(locations);
+
+                // Add facility map centered with minimal spacing
+                var mapParagraph = section.AddParagraph();
+                mapParagraph.Format.Alignment = ParagraphAlignment.Center;
+                mapParagraph.Format.SpaceBefore = Unit.FromPoint(4);
+                mapParagraph.Format.SpaceAfter = Unit.FromPoint(4);
+                var map = mapParagraph.AddImage(mapPath);
+                map.LockAspectRatio = true;
+                map.Width = PdfLayoutConstants.FacilityMap.Width;
+
+                LogInformationAddedPersonalizedMap(locations.Count);
+            }
+            catch (Exception ex)
+            {
+                LogWarningPersonalizedMapFailed(ex, locations.Count);
+                // Fallback to static map
+                AddFacilityMapToSection(section);
+            }
         }
 
         /// <summary>
@@ -431,6 +522,36 @@ namespace WinterAdventurer.Library.Services
             Level = LogLevel.Information,
             Message = "Generated {sectionCount} blank schedule sections")]
         private partial void LogInformationGeneratedBlankScheduleSections(int sectionCount);
+
+        [LoggerMessage(
+            EventId = 5003,
+            Level = LogLevel.Warning,
+            Message = "MapCompositor is null - falling back to static map")]
+        private partial void LogWarningMapCompositorNull();
+
+        [LoggerMessage(
+            EventId = 5004,
+            Level = LogLevel.Warning,
+            Message = "No locations found for attendee - falling back to static map")]
+        private partial void LogWarningNoLocationsFound();
+
+        [LoggerMessage(
+            EventId = 5005,
+            Level = LogLevel.Information,
+            Message = "Composing personalized facility map for {locationCount} locations")]
+        private partial void LogInformationComposingPersonalizedMap(int locationCount);
+
+        [LoggerMessage(
+            EventId = 5006,
+            Level = LogLevel.Information,
+            Message = "Added personalized facility map for {locationCount} locations")]
+        private partial void LogInformationAddedPersonalizedMap(int locationCount);
+
+        [LoggerMessage(
+            EventId = 5007,
+            Level = LogLevel.Warning,
+            Message = "Failed to generate personalized map for {locationCount} locations, falling back to static map")]
+        private partial void LogWarningPersonalizedMapFailed(Exception ex, int locationCount);
 
         #endregion
 

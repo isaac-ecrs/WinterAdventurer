@@ -159,15 +159,14 @@ namespace WinterAdventurer.Library.Services
                             stream.CopyTo(fileStream);
                         }
 
-                        // Add spacing before map
-                        section.AddParagraph().Format.SpaceAfter = Unit.FromPoint(8);
-
-                        // Add facility map centered
+                        // Add facility map centered with minimal spacing
                         var mapParagraph = section.AddParagraph();
                         mapParagraph.Format.Alignment = ParagraphAlignment.Center;
+                        mapParagraph.Format.SpaceBefore = Unit.FromPoint(4);
+                        mapParagraph.Format.SpaceAfter = Unit.FromPoint(4);
                         var map = mapParagraph.AddImage(tempPath);
                         map.LockAspectRatio = true;
-                        map.Width = PdfLayoutConstants.FacilityMap.Width; // Smaller map to fit on one page
+                        map.Width = PdfLayoutConstants.FacilityMap.Width;
                     }
                 }
             }

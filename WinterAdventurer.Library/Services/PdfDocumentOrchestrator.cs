@@ -41,6 +41,7 @@ namespace WinterAdventurer.Library.Services
         /// <summary>
         /// Creates a complete PDF document containing workshop rosters and individual schedules.
         /// Combines class rosters for leaders with personalized schedule pages for each participant.
+        /// Individual schedules include personalized facility maps showing only attendee's workshop locations.
         /// </summary>
         /// <param name="workshops">List of workshops to include in the document.</param>
         /// <param name="eventName">Name of the event displayed in PDF headers and footers.</param>
@@ -64,6 +65,15 @@ namespace WinterAdventurer.Library.Services
 
             var document = new Document();
 
+            // Create map compositor for personalized facility maps
+            // NOTE: Do NOT dispose mapCompositor here! MigraDoc adds image file paths to the document
+            // but doesn't load the actual image data until rendering time (which happens after this method returns).
+            // If we dispose here, the temp files get deleted before rendering. Instead, let it be garbage collected.
+            var locationMapResolverLogger = new LoggerAdapter<LocationMapResolver>(_logger);
+            var locationMapResolver = new LocationMapResolver(locationMapResolverLogger);
+            var mapCompositorLogger = new LoggerAdapter<MapCompositor>(_logger);
+            var mapCompositor = new MapCompositor(mapCompositorLogger, locationMapResolver);
+
             // Add workshop rosters (only if workshops exist)
             if (workshops != null && workshops.Count > 0)
             {
@@ -73,8 +83,16 @@ namespace WinterAdventurer.Library.Services
                     document.Sections.Add(section);
                 }
 
-                // Add individual schedules
-                var scheduleSections = _scheduleGenerator.GenerateIndividualSchedules(
+                // Add individual schedules with personalized facility maps
+                // Create a new schedule generator with map compositor for personalized maps
+                var scheduleGeneratorLogger = new LoggerAdapter<IndividualScheduleGenerator>(_logger);
+                var scheduleGeneratorWithMaps = new IndividualScheduleGenerator(
+                    _scheduleGenerator._schema,
+                    _scheduleGenerator._masterScheduleGenerator,
+                    scheduleGeneratorLogger,
+                    mapCompositor);
+
+                var scheduleSections = scheduleGeneratorWithMaps.GenerateIndividualSchedules(
                     workshops,
                     eventName,
                     mergeWorkshopCells,

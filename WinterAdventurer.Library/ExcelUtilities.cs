@@ -57,27 +57,28 @@ namespace WinterAdventurer.Library
         /// </summary>
         private readonly PdfDocumentOrchestrator _pdfOrchestrator;
 
-        public ExcelUtilities(ILogger<ExcelUtilities> logger)
+        public ExcelUtilities(ILogger<ExcelUtilities> logger, ILoggerFactory loggerFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             GlobalFontSettings.FontResolver = new CustomFontResolver();
 
             // Load schema for service dependencies
             _schema = LoadEventSchema();
 
-            // Create service dependencies
-            var excelParserLogger = new LoggerFactory().CreateLogger<ExcelParser>();
+            // Create service dependencies using the configured logger factory
+            var excelParserLogger = factory.CreateLogger<ExcelParser>();
             _excelParser = new ExcelParser(excelParserLogger);
 
-            var rosterLogger = new LoggerFactory().CreateLogger<WorkshopRosterGenerator>();
+            var rosterLogger = factory.CreateLogger<WorkshopRosterGenerator>();
             var rosterGenerator = new WorkshopRosterGenerator(rosterLogger);
 
-            var scheduleLogger = new LoggerFactory().CreateLogger<IndividualScheduleGenerator>();
-            var masterScheduleLogger = new LoggerFactory().CreateLogger<MasterScheduleGenerator>();
+            var scheduleLogger = factory.CreateLogger<IndividualScheduleGenerator>();
+            var masterScheduleLogger = factory.CreateLogger<MasterScheduleGenerator>();
             var masterScheduleGenerator = new MasterScheduleGenerator(_schema, masterScheduleLogger);
             var scheduleGenerator = new IndividualScheduleGenerator(_schema, masterScheduleGenerator, scheduleLogger);
 
-            var orchestratorLogger = new LoggerFactory().CreateLogger<PdfDocumentOrchestrator>();
+            var orchestratorLogger = factory.CreateLogger<PdfDocumentOrchestrator>();
             _pdfOrchestrator = new PdfDocumentOrchestrator(
                 rosterGenerator,
                 scheduleGenerator,

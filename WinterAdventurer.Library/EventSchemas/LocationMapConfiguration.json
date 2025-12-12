@@ -1,0 +1,13 @@
+{
+  "baseLayoutResourceName": "WinterAdventurer.Library.Resources.Images.WatsonMaps.watson_layout.png",
+  "locationMappings": {
+    "Chapel A": "watson_layout_chapel_a.png",
+    "Chapel": "watson_layout_chapel.png",
+    "Dining Room": "watson_layout_dining_room.png",
+    "Elm Room": "watson_layout_elm_room.png",
+    "Library": "watson_layout_library.png",
+    "Martin Room": "watson_layout_martin_room.png",
+    "Stairs": "watson_layout_stairs.png"
+  },
+  "fallbackBehavior": "useBaseLayoutOnly"
+}
