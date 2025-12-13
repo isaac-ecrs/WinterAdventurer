@@ -40,9 +40,14 @@
 
 <MudDrawer @bind-Open="@settingsDrawerOpen" Anchor="Anchor.Right" Width="400px" Elevation="1">
     <MudDrawerHeader>
-        <MudText Typo="Typo.h6">Settings</MudText>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <MudText Typo="Typo.h6">Settings</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                          Size="Size.Small"
+                          OnClick="@(() => settingsDrawerOpen = false)" />
+        </div>
     </MudDrawerHeader>
-    <div style="padding: 1rem;">
+    <div style="padding: 1rem; overflow-y: auto;">
         <AnimationSettingsPanel />
     </div>
 </MudDrawer>

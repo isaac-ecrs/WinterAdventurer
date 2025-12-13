@@ -108,24 +108,26 @@
     align-items: center;
     justify-content: center;
     border-radius: 4px;
-    background: rgba(var(--mud-palette-primary-rgb), 0.1);
-    color: var(--mud-palette-primary);
-    font-size: 0.85rem;
-    font-weight: 500;
+    background: var(--mud-palette-primary);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 50px;
 }
 
 .preview-item.fadeIn {
-    animation: fadeIn var(--anim-duration-base) ease-out forwards;
+    animation: previewFadeIn var(--anim-duration-base) ease-out forwards;
 }
 
 .preview-item.pulse {
-    animation: pulse var(--anim-duration-2xl) ease-in-out infinite;
+    animation: previewPulse var(--anim-duration-2xl) ease-in-out infinite;
 }
 
-@keyframes fadeIn {
+@keyframes previewFadeIn {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: scale(0.8);
     }
     to {
         opacity: 1;
@@ -133,12 +135,14 @@
     }
 }
 
-@keyframes pulse {
+@keyframes previewPulse {
     0%, 100% {
         opacity: 1;
+        transform: scale(1);
     }
     50% {
-        opacity: 0.6;
+        opacity: 0.5;
+        transform: scale(1.05);
     }
 }
 

@@ -13,10 +13,10 @@
         <div class="preview-section">
             <p class="preview-label">Preview:</p>
             <div class="animation-preview">
-                <div class="preview-item fadeIn">
+                <div class="preview-item fadeIn" key="@previewVersion">
                     <span>Fade In</span>
                 </div>
-                <div class="preview-item pulse">
+                <div class="preview-item pulse" key="@previewVersion">
                     <span>Pulse</span>
                 </div>
             </div>
@@ -51,6 +51,7 @@
 
 @code {
     private double currentIntensity = 1.0;
+    private int previewVersion = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -61,6 +62,9 @@
     {
         AnimationSettingsService.AnimationIntensity = newIntensity;
         currentIntensity = newIntensity;
+
+        // Restart preview animations by changing key
+        previewVersion++;
 
         // Update CSS variables via JavaScript
         _ = JS.InvokeVoidAsync("setAnimationIntensity", newIntensity);
