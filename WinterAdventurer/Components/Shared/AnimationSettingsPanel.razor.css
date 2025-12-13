@@ -84,21 +84,22 @@
 }
 
 .preview-section {
-    border-top: 1px solid var(--mud-palette-divider);
-    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--mud-palette-divider);
+    margin-bottom: 1rem;
 }
 
 .preview-label {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--mud-palette-text-primary);
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 0.5rem 0;
 }
 
 .animation-preview {
     display: flex;
-    gap: 1rem;
-    height: 60px;
+    gap: 0.75rem;
+    height: 50px;
 }
 
 .preview-item {
