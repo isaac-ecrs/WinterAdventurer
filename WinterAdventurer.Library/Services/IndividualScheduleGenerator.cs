@@ -507,9 +507,6 @@ namespace WinterAdventurer.Library.Services
                     // Insert at the beginning of the section
                     section.Elements.InsertObject(0, nameField);
 
-                    // Add facility map with compact width to prevent page overflow
-                    AddFacilityMapToSection(section, PdfLayoutConstants.FacilityMap.CompactWidth);
-
                     // Add event name footer
                     AddEventNameFooter(section, eventName);
 
