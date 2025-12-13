@@ -20,6 +20,24 @@ window.updateTourTheme = function(isDarkMode) {
     console.log('Tour theme updated to:', isDarkMode ? 'dark' : 'light');
 };
 
+// Set animation intensity from slider
+window.setAnimationIntensity = function(intensity) {
+    const clampedIntensity = Math.max(0.5, Math.min(2.0, intensity));
+    document.documentElement.style.setProperty('--animation-intensity', clampedIntensity);
+    localStorage.setItem('animation-intensity', clampedIntensity.toString());
+    console.log('Animation intensity set to:', clampedIntensity);
+};
+
+// Initialize animation intensity from localStorage on page load
+(function() {
+    const savedIntensity = localStorage.getItem('animation-intensity');
+    if (savedIntensity) {
+        const intensity = parseFloat(savedIntensity);
+        document.documentElement.style.setProperty('--animation-intensity', intensity);
+        console.log('Animation intensity restored from localStorage:', intensity);
+    }
+})();
+
 // Set theme from welcome screen buttons
 window.setTourTheme = function(theme) {
     const isDarkMode = theme === 'dark';

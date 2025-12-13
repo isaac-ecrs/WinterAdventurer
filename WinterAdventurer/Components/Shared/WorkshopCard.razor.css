@@ -1,6 +1,6 @@
 /* Workshop card animations */
 .workshop-card-wrapper {
-    animation: fadeSlideIn 300ms ease-out backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out backwards;
     will-change: transform, opacity;
 }
 
@@ -22,7 +22,7 @@
 
 /* Location field highlight on change */
 .location-field-changed {
-    animation: highlightPulse 600ms ease-out;
+    animation: highlightPulse var(--anim-duration-xl) ease-out;
 }
 
 @keyframes highlightPulse {
@@ -37,19 +37,19 @@
 /* Card hover effect */
 .workshop-card-wrapper:hover {
     transform: translateY(-2px);
-    transition: transform 150ms ease-out;
+    transition: transform var(--anim-duration-fast) ease-out;
 }
 
 /* Smooth transitions for all interactive elements */
 .mud-input,
 .mud-autocomplete,
 .mud-text-field {
-    transition: all 200ms ease-in-out;
+    transition: all var(--anim-duration-normal) ease-in-out;
 }
 
 /* Delete animation */
 .workshop-card-deleting {
-    animation: fadeSlideOut 300ms ease-in forwards;
+    animation: fadeSlideOut var(--anim-duration-base) ease-in forwards;
 }
 
 @keyframes fadeSlideOut {

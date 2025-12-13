@@ -433,11 +433,23 @@ namespace WinterAdventurer.Library.Services
                 return;
             }
 
+            // Add "Stairs" overlay if attendee is visiting Rec Hall or Craft Room
+            var locationsWithStairs = new List<string>(locations);
+            if (locations.Any(l => l.Equals("Rec Hall", StringComparison.OrdinalIgnoreCase) ||
+                                   l.Equals("Craft Room", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (!locationsWithStairs.Any(l => l.Equals("Stairs", StringComparison.OrdinalIgnoreCase)))
+                {
+                    locationsWithStairs.Add("Stairs");
+                    locationsWithStairs = locationsWithStairs.OrderBy(l => l).ToList();
+                }
+            }
+
             try
             {
-                LogInformationComposingPersonalizedMap(locations.Count);
+                LogInformationComposingPersonalizedMap(locationsWithStairs.Count);
                 // Generate personalized map
-                var mapPath = _mapCompositor.CompositeMap(locations);
+                var mapPath = _mapCompositor.CompositeMap(locationsWithStairs);
 
                 // Add facility map centered with minimal spacing
                 var mapParagraph = section.AddParagraph();
@@ -448,11 +460,11 @@ namespace WinterAdventurer.Library.Services
                 map.LockAspectRatio = true;
                 map.Width = PdfLayoutConstants.FacilityMap.Width;
 
-                LogInformationAddedPersonalizedMap(locations.Count);
+                LogInformationAddedPersonalizedMap(locationsWithStairs.Count);
             }
             catch (Exception ex)
             {
-                LogWarningPersonalizedMapFailed(ex, locations.Count);
+                LogWarningPersonalizedMapFailed(ex, locationsWithStairs.Count);
                 // Fallback to static map
                 AddFacilityMapToSection(section);
             }

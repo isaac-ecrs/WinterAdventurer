@@ -1,3 +1,16 @@
+/* Animation intensity multiplier - controlled via JavaScript */
+:root {
+    --animation-intensity: 1;
+    --anim-duration-fast: calc(150ms / var(--animation-intensity));
+    --anim-duration-normal: calc(200ms / var(--animation-intensity));
+    --anim-duration-base: calc(300ms / var(--animation-intensity));
+    --anim-duration-lg: calc(400ms / var(--animation-intensity));
+    --anim-duration-xl: calc(600ms / var(--animation-intensity));
+    --anim-duration-2xl: calc(1500ms / var(--animation-intensity));
+    --anim-duration-3xl: calc(2000ms / var(--animation-intensity));
+    --anim-stagger-delay: calc(50ms / var(--animation-intensity));
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -58,7 +71,7 @@ h1:focus {
 
 /* Theme transition animations */
 body, .mud-main-content, .mud-card, .mud-paper {
-    transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+    transition: background-color var(--anim-duration-base) ease-in-out, color var(--anim-duration-base) ease-in-out;
 }
 
 .theme-transition-overlay {
@@ -71,7 +84,7 @@ body, .mud-main-content, .mud-card, .mud-paper {
     opacity: 0;
     pointer-events: none;
     z-index: 9999;
-    transition: opacity 300ms ease-in-out;
+    transition: opacity var(--anim-duration-base) ease-in-out;
 }
 
 .theme-transition-overlay.active {

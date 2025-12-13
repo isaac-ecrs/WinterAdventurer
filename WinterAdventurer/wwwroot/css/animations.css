@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    animation: fadeIn 300ms ease-out;
+    animation: fadeIn var(--anim-duration-base) ease-out;
 }
 
 @keyframes fadeIn {
@@ -12,7 +12,7 @@
 }
 
 .loading-text {
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: pulse var(--anim-duration-2xl) ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -25,7 +25,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    animation: successFadeIn 400ms ease-out;
+    animation: successFadeIn var(--anim-duration-lg) ease-out;
 }
 
 @keyframes successFadeIn {
@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: checkmarkPop 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: checkmarkPop var(--anim-duration-lg) cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 @keyframes checkmarkPop {
@@ -69,7 +69,7 @@
     color: white;
     font-size: 16px;
     font-weight: bold;
-    animation: checkmarkDraw 300ms ease-out 100ms backwards;
+    animation: checkmarkDraw var(--anim-duration-base) ease-out 100ms backwards;
 }
 
 @keyframes checkmarkDraw {
@@ -85,7 +85,7 @@
 
 /* Button state transitions */
 .mud-button {
-    transition: all 200ms ease-in-out !important;
+    transition: all var(--anim-duration-normal) ease-in-out !important;
 }
 
 .mud-button:active:not(:disabled) {
@@ -94,7 +94,7 @@
 
 /* File upload button animation */
 .file-upload-button {
-    transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+    transition: transform var(--anim-duration-normal) ease-out, box-shadow var(--anim-duration-normal) ease-out;
 }
 
 .file-upload-button:hover:not(:disabled) {
@@ -104,7 +104,7 @@
 
 /* Progress indicator smooth appearance */
 .mud-progress-circular {
-    animation: fadeIn 200ms ease-out;
+    animation: fadeIn var(--anim-duration-normal) ease-out;
 }
 
 /* Spinner rotation enhancement */

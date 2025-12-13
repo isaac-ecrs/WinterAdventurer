@@ -2,39 +2,39 @@
 .timeslot-row {
     opacity: 1;
     transform: translateY(0);
-    transition: all 300ms ease-out;
+    transition: all var(--anim-duration-base) ease-out;
 }
 
 /* Initial load animation using a version attribute */
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(1) {
-    animation: fadeSlideIn 300ms ease-out 0ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(0 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(2) {
-    animation: fadeSlideIn 300ms ease-out 50ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(1 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(3) {
-    animation: fadeSlideIn 300ms ease-out 100ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(2 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(4) {
-    animation: fadeSlideIn 300ms ease-out 150ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(3 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(5) {
-    animation: fadeSlideIn 300ms ease-out 200ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(4 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(6) {
-    animation: fadeSlideIn 300ms ease-out 250ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(5 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(7) {
-    animation: fadeSlideIn 300ms ease-out 300ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(6 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(8) {
-    animation: fadeSlideIn 300ms ease-out 350ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(7 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(9) {
-    animation: fadeSlideIn 300ms ease-out 400ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(8 * var(--anim-stagger-delay)) backwards;
 }
 .timeslot-container[data-version="1"] .timeslot-row:nth-child(10) {
-    animation: fadeSlideIn 300ms ease-out 450ms backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(9 * var(--anim-stagger-delay)) backwards;
 }
 
 @keyframes fadeSlideIn {
@@ -50,7 +50,7 @@
 
 /* Re-sort animation - briefly highlight when position changes */
 .timeslot-row.reordering {
-    animation: highlightFlash 400ms ease-out;
+    animation: highlightFlash var(--anim-duration-lg) ease-out;
 }
 
 @keyframes highlightFlash {
@@ -68,7 +68,7 @@
 /* Smooth transitions for all interactive elements */
 .mud-input-root,
 .mud-button {
-    transition: all 200ms ease-in-out;
+    transition: all var(--anim-duration-normal) ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
