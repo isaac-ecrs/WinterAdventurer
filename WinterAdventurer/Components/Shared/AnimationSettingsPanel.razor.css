@@ -117,21 +117,25 @@
 }
 
 .preview-item.fadeIn {
-    animation: previewFadeIn var(--anim-duration-base) ease-out forwards;
+    animation: previewFadeIn 2s ease-out forwards;
 }
 
 .preview-item.pulse {
-    animation: previewPulse var(--anim-duration-2xl) ease-in-out infinite;
+    animation: previewPulse 2s ease-in-out infinite;
 }
 
 @keyframes previewFadeIn {
-    from {
+    0% {
         opacity: 0;
-        transform: scale(0.8);
+        transform: scale(0.3) rotate(-10deg);
     }
-    to {
+    50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+    }
+    100% {
         opacity: 1;
-        transform: scale(1);
+        transform: scale(1) rotate(0deg);
     }
 }
 
@@ -139,10 +143,12 @@
     0%, 100% {
         opacity: 1;
         transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     50% {
-        opacity: 0.5;
-        transform: scale(1.05);
+        opacity: 0.3;
+        transform: scale(1.3);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
 }
 

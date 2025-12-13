@@ -7,44 +7,55 @@
 
 /* Animation trigger on any version change - apply to all rows with staggered delays */
 .timeslot-container[data-version] .timeslot-row:nth-child(1) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(0 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(0 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(0 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(2) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(1 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(1 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(1 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(3) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(2 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(2 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(2 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(4) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(3 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(3 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(3 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(5) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(4 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(4 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(4 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(6) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(5 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(5 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(5 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(7) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(6 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(6 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(6 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(8) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(7 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(7 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(7 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(9) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(8 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(8 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(8 * var(--anim-stagger-delay));
 }
 .timeslot-container[data-version] .timeslot-row:nth-child(10) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(9 * var(--anim-stagger-delay)) backwards;
+    animation: fadeSlideIn var(--anim-duration-base) ease-out calc(9 * var(--anim-stagger-delay)), rowGlow 0.8s ease-out calc(9 * var(--anim-stagger-delay));
 }
 
 @keyframes fadeSlideIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(30px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes rowGlow {
+    0% {
+        box-shadow: 0 0 0 2px var(--mud-palette-primary);
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.15);
+    }
+    100% {
+        box-shadow: 0 0 0 0px var(--mud-palette-primary);
+        background-color: transparent;
     }
 }
 
