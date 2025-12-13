@@ -491,7 +491,7 @@ namespace WinterAdventurer.Library.Services
                 // Pass workshops so master schedule can extract locations for the grid
                 var masterSections = _masterScheduleGenerator.GenerateMasterSchedule(
                     workshops: workshops,
-                    eventName: "Workshop Schedule",
+                    eventName: eventName,
                     timeslots: timeslots);
 
                 foreach (var section in masterSections)
@@ -506,9 +506,6 @@ namespace WinterAdventurer.Library.Services
 
                     // Insert at the beginning of the section
                     section.Elements.InsertObject(0, nameField);
-
-                    // Add event name footer
-                    AddEventNameFooter(section, eventName);
 
                     sections.Add(section);
                 }
