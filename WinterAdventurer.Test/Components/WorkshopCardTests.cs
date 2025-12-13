@@ -33,6 +33,7 @@ namespace WinterAdventurer.Test.Components
                 config.PopoverOptions.ThrowOnDuplicateProvider = false;
             });
             Services.AddSingleton<ILocationService, MockLocationService>();
+            Services.AddScoped<AnimationSettingsService>();
             Services.AddSingleton(NullLogger<WorkshopCard>.Instance);
 
             // Configure JSInterop for MudBlazor components

@@ -16,6 +16,13 @@
         </MudTooltip>
     }
 
+    <MudTooltip Text="Animation settings">
+        <MudIconButton Icon="@Icons.Material.Filled.Settings"
+                       Color="Color.Primary"
+                       OnClick="@OpenSettingsDrawer"
+                       Style="background-color: var(--mud-palette-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+    </MudTooltip>
+
     <MudTooltip Text="@(ThemeService.IsDarkMode ? "Switch to light mode" : "Switch to dark mode")">
         <MudIconButton Icon="@(ThemeService.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Color="Color.Primary"
@@ -31,6 +38,20 @@
     </MudTooltip>
 </div>
 
+<MudDrawer @bind-Open="@settingsDrawerOpen" Anchor="Anchor.Right" Width="400px" Elevation="1">
+    <MudDrawerHeader>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <MudText Typo="Typo.h6">Settings</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                          Size="Size.Small"
+                          OnClick="@(() => settingsDrawerOpen = false)" />
+        </div>
+    </MudDrawerHeader>
+    <div style="padding: 1rem; overflow-y: auto;">
+        <AnimationSettingsPanel />
+    </div>
+</MudDrawer>
+
 @code {
     /// <summary>
     /// Whether to show the reload button (only shown after file upload)
@@ -38,9 +59,16 @@
     [Parameter]
     public bool ShowReloadButton { get; set; }
 
+    private bool settingsDrawerOpen = false;
+
     private void ReloadPage()
     {
         Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private void OpenSettingsDrawer()
+    {
+        settingsDrawerOpen = true;
     }
 
     private async Task ToggleTheme()

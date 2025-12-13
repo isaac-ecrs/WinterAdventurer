@@ -19,7 +19,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", null);
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act
         await service.InitializeAsync();
@@ -34,7 +34,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "dark");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act
         await service.InitializeAsync();
@@ -49,7 +49,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "light");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act
         await service.InitializeAsync();
@@ -64,7 +64,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "invalid");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act
         await service.InitializeAsync();
@@ -79,7 +79,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.ThrowOnLocalStorageAccess = true;
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act
         await service.InitializeAsync();
@@ -94,7 +94,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "dark");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act
         await service.InitializeAsync();
@@ -110,7 +110,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "dark");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
 
         // Act
@@ -126,7 +126,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "light");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
 
         // Act
@@ -141,7 +141,7 @@ public class ThemeServiceTests
     {
         // Arrange
         var jsRuntime = new MockJSRuntime();
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
 
         // Act - toggle to light mode
@@ -157,7 +157,7 @@ public class ThemeServiceTests
     {
         // Arrange
         var jsRuntime = new MockJSRuntime();
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
         var initialMode = service.IsDarkMode;
 
@@ -177,7 +177,7 @@ public class ThemeServiceTests
     {
         // Arrange
         var jsRuntime = new MockJSRuntime();
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
         jsRuntime.UpdateTourThemeCalled = false;
 
@@ -194,7 +194,7 @@ public class ThemeServiceTests
     {
         // Arrange
         var jsRuntime = new MockJSRuntime();
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
 
         bool eventRaised = false;
@@ -212,7 +212,7 @@ public class ThemeServiceTests
     {
         // Arrange
         var jsRuntime = new MockJSRuntime();
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
 
         // Make JSInterop fail
@@ -231,7 +231,7 @@ public class ThemeServiceTests
     {
         // Arrange
         var jsRuntime = new MockJSRuntime();
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
         await service.InitializeAsync();
         jsRuntime.ThrowOnUpdateTourTheme = true;
 
@@ -246,7 +246,7 @@ public class ThemeServiceTests
         // Arrange
         var jsRuntime = new MockJSRuntime();
         jsRuntime.SetLocalStorageValue("theme", "dark");
-        var service = new ThemeService(jsRuntime);
+        var service = new ThemeService(jsRuntime, new AnimationSettingsService());
 
         // Act - initialize
         await service.InitializeAsync();

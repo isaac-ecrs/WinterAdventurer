@@ -91,6 +91,9 @@ try
     // Add theme service
     builder.Services.AddScoped<ThemeService>();
 
+    // Add animation settings service
+    builder.Services.AddScoped<AnimationSettingsService>();
+
     // Add tour service
     builder.Services.AddScoped<TourService>();
 

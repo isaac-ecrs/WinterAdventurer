@@ -14,6 +14,7 @@ namespace WinterAdventurer.Services;
 public class ThemeService
 {
     private readonly IJSRuntime _jsRuntime;
+    private readonly AnimationSettingsService _animationSettings;
     private bool _isDarkMode = true; // Default to dark mode
     private bool _isTransitioning = false;
 
@@ -26,9 +27,11 @@ public class ThemeService
     /// Initializes a new instance of the <see cref="ThemeService"/> class.
     /// </summary>
     /// <param name="jsRuntime">The JavaScript interop runtime for browser interactions.</param>
-    public ThemeService(IJSRuntime jsRuntime)
+    /// <param name="animationSettings">The animation settings service for duration adjustments.</param>
+    public ThemeService(IJSRuntime jsRuntime, AnimationSettingsService animationSettings)
     {
         _jsRuntime = jsRuntime;
+        _animationSettings = animationSettings;
     }
 
     /// <summary>
@@ -70,6 +73,7 @@ public class ThemeService
     /// Toggles the current theme between light and dark mode with a smooth transition animation.
     /// Persists the new theme preference to localStorage, updates the tour theme via JavaScript interop,
     /// and raises the <see cref="OnThemeChanged"/> event to notify subscribers.
+    /// Animation timing is adjusted based on the current animation intensity setting.
     /// </summary>
     /// <returns>A task representing the asynchronous toggle operation.</returns>
     public async Task ToggleThemeAsync()
@@ -83,7 +87,9 @@ public class ThemeService
         _isTransitioning = true;
         OnThemeChanged?.Invoke(); // Trigger overlay fade-in
 
-        await Task.Delay(150); // Half of 300ms transition
+        // Half of 300ms base transition (150ms) adjusted by animation intensity
+        int halfTransition = _animationSettings.GetAdjustedDelay(150);
+        await Task.Delay(halfTransition);
 
         _isDarkMode = !_isDarkMode;
         await SaveThemeAsync();
@@ -100,7 +106,7 @@ public class ThemeService
 
         OnThemeChanged?.Invoke(); // Trigger theme change
 
-        await Task.Delay(150); // Complete the transition
+        await Task.Delay(halfTransition); // Complete the transition
         _isTransitioning = false;
         OnThemeChanged?.Invoke(); // Final update to remove overlay
     }

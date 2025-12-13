@@ -1,3 +1,16 @@
+/* Animation intensity multiplier - controlled via JavaScript */
+:root {
+    --animation-intensity: 1;
+    --anim-duration-fast: calc(150ms / var(--animation-intensity));
+    --anim-duration-normal: calc(200ms / var(--animation-intensity));
+    --anim-duration-base: calc(300ms / var(--animation-intensity));
+    --anim-duration-lg: calc(400ms / var(--animation-intensity));
+    --anim-duration-xl: calc(600ms / var(--animation-intensity));
+    --anim-duration-2xl: calc(1500ms / var(--animation-intensity));
+    --anim-duration-3xl: calc(2000ms / var(--animation-intensity));
+    --anim-stagger-delay: calc(50ms / var(--animation-intensity));
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -58,7 +71,7 @@ h1:focus {
 
 /* Theme transition animations */
 body, .mud-main-content, .mud-card, .mud-paper {
-    transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+    transition: background-color var(--anim-duration-base) ease-in-out, color var(--anim-duration-base) ease-in-out;
 }
 
 .theme-transition-overlay {
@@ -71,11 +84,43 @@ body, .mud-main-content, .mud-card, .mud-paper {
     opacity: 0;
     pointer-events: none;
     z-index: 9999;
-    transition: opacity 300ms ease-in-out;
+    transition: opacity var(--anim-duration-base) ease-in-out;
 }
 
 .theme-transition-overlay.active {
     opacity: 0.5;
+}
+
+/* Timeslot animations */
+.timeslot-row {
+    animation: timeslotFadeSlideIn 0.5s ease-out forwards !important;
+    animation-delay: 0 !important;
+}
+
+.timeslot-row.removing {
+    animation: timeslotFadeSlideOut 0.3s ease-out forwards !important;
+}
+
+@keyframes timeslotFadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes timeslotFadeSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

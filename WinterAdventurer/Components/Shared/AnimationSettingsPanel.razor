@@ -1,0 +1,72 @@
+@using MudBlazor
+@using WinterAdventurer.Services
+@inject AnimationSettingsService AnimationSettingsService
+@inject IJSRuntime JS
+
+<div class="animation-settings-panel">
+    <div class="settings-header">
+        <MudIcon Icon="@Icons.Material.Filled.Settings" class="settings-icon" />
+        <h3>Animation Settings</h3>
+    </div>
+
+    <div class="settings-content">
+        <div class="preview-section">
+            <p class="preview-label">Preview:</p>
+            <div class="animation-preview">
+                <div class="preview-item fadeIn" key="@previewVersion">
+                    <span>Fade In</span>
+                </div>
+                <div class="preview-item pulse" key="@previewVersion">
+                    <span>Pulse</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="intensity-slider-container">
+            <label for="intensity-slider" class="slider-label">
+                Animation Intensity
+            </label>
+            <div class="slider-value-display">
+                <span class="intensity-value">@AnimationSettingsService.AnimationIntensity.ToString("F1")x</span>
+            </div>
+
+            <MudSlider Value="@currentIntensity"
+                       ValueChanged="@((double value) => OnIntensityChanged(value))"
+                       Min="0.5"
+                       Max="2.0"
+                       Step="0.1"
+                       id="intensity-slider"
+                       Color="Color.Primary"
+                       Class="animation-slider">
+            </MudSlider>
+
+            <div class="slider-labels">
+                <span class="label-slower">Slower</span>
+                <span class="label-normal">Normal (1.0x)</span>
+                <span class="label-faster">Faster</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private double currentIntensity = 1.0;
+    private int previewVersion = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentIntensity = AnimationSettingsService.AnimationIntensity;
+    }
+
+    private void OnIntensityChanged(double newIntensity)
+    {
+        AnimationSettingsService.AnimationIntensity = newIntensity;
+        currentIntensity = newIntensity;
+
+        // Restart preview animations by changing key
+        previewVersion++;
+
+        // Update CSS variables via JavaScript
+        _ = JS.InvokeVoidAsync("setAnimationIntensity", newIntensity);
+    }
+}

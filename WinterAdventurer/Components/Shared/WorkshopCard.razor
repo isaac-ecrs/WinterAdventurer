@@ -5,6 +5,7 @@
 @using Microsoft.Extensions.Logging
 @inject ILocationService LocationService
 @inject ILogger<WorkshopCard> Logger
+@inject AnimationSettingsService AnimationSettings
 
 <div class="workshop-card-wrapper" style="animation-delay: @(CardIndex * 50)ms">
     <MudCard>
@@ -224,10 +225,10 @@
         // Notify parent that location changed (parent will increment version and add to cache)
         await OnLocationChanged.InvokeAsync(Workshop);
 
-        // Show pulse animation
+        // Show pulse animation (600ms animation adjusted by intensity)
         locationJustChanged = true;
         StateHasChanged();
-        await Task.Delay(600);
+        await Task.Delay(AnimationSettings.GetAdjustedDelay(600));
         locationJustChanged = false;
         StateHasChanged();
     }
