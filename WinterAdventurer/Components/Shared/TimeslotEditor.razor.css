@@ -2,9 +2,11 @@
 .timeslot-row {
     opacity: 1;
     transform: translateY(0);
-    transition: all var(--anim-duration-base) ease-out;
-    /* Apply animation based on animation-delay being set */
-    animation: fadeSlideIn var(--anim-duration-base) ease-out forwards, rowGlow 0.8s ease-out;
+    transition: all 0.3s ease-out;
+    /* Apply animation with hardcoded duration to test */
+    animation: fadeSlideIn 0.5s ease-out forwards, rowGlow 0.8s ease-out;
+    /* Debug: add visible border to verify CSS is being applied */
+    border-top: 3px solid orange !important;
 }
 
 @keyframes fadeSlideIn {
