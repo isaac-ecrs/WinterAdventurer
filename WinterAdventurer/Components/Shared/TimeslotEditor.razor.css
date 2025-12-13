@@ -3,10 +3,6 @@
     opacity: 1;
     transform: translateY(0);
     transition: all 0.3s ease-out;
-    /* Apply animation with hardcoded duration to test */
-    animation: fadeSlideIn 0.5s ease-out forwards, rowGlow 0.8s ease-out;
-    /* Debug: add visible border to verify CSS is being applied */
-    border-top: 3px solid orange !important;
 }
 
 @keyframes fadeSlideIn {
