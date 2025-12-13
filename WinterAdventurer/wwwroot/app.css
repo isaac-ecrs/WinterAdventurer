@@ -93,7 +93,7 @@ body, .mud-main-content, .mud-card, .mud-paper {
 
 /* Timeslot animations */
 .timeslot-row {
-    animation: timeslotFadeSlideIn 0.5s ease-out forwards, timeslotRowGlow 0.8s ease-out;
+    animation: timeslotFadeSlideIn 0.5s ease-out forwards;
 }
 
 @keyframes timeslotFadeSlideIn {
@@ -107,25 +107,11 @@ body, .mud-main-content, .mud-card, .mud-paper {
     }
 }
 
-@keyframes timeslotRowGlow {
-    0% {
-        box-shadow: 0 0 0 2px var(--mud-palette-primary);
-        background-color: rgba(var(--mud-palette-primary-rgb), 0.15);
-    }
-    100% {
-        box-shadow: 0 0 0 0px var(--mud-palette-primary);
-        background-color: transparent;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
     body, .mud-main-content, .mud-card, .mud-paper {
         transition: none !important;
     }
     .theme-transition-overlay {
         display: none;
-    }
-    .timeslot-row {
-        animation: none !important;
     }
 }
