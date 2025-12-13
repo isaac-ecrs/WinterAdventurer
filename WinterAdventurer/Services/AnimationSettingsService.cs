@@ -1,3 +1,7 @@
+// <copyright file="AnimationSettingsService.cs" company="ECRS">
+// Copyright (c) ECRS.
+// </copyright>
+
 using System;
 
 namespace WinterAdventurer.Services
