@@ -93,7 +93,8 @@ body, .mud-main-content, .mud-card, .mud-paper {
 
 /* Timeslot animations */
 .timeslot-row {
-    animation: timeslotFadeSlideIn 0.5s ease-out forwards;
+    animation: timeslotFadeSlideIn 0.5s ease-out forwards !important;
+    animation-delay: 0 !important;
 }
 
 @keyframes timeslotFadeSlideIn {
