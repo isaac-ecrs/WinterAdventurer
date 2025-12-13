@@ -1,5 +1,7 @@
 @using MudBlazor
 @using WinterAdventurer.Models
+@using WinterAdventurer.Services
+@inject AnimationSettingsService AnimationSettings
 
 <MudPaper Class="pa-4 mb-4">
     <MudText Typo="Typo.h5" Class="mb-3">Configure Schedule Times</MudText>
@@ -9,7 +11,9 @@
         {
             var timeslot = Timeslots[i];
             var delayMs = $"{i * 50}ms";
-            <MudGrid class="timeslot-row" @key="@timeslot.Id" style="@($"animation-delay: {delayMs}")">
+            var isRemoving = removingTimeslots.Contains(timeslot.Id);
+            var rowClass = isRemoving ? "timeslot-row removing" : "timeslot-row";
+            <MudGrid class="@rowClass" @key="@timeslot.Id" style="@($"animation-delay: {delayMs}")">
             <MudItem xs="4">
                 <MudTextField @bind-Value="timeslot.Label" Label="Period/Activity Name" Disabled="@timeslot.IsPeriod" />
             </MudItem>
@@ -88,6 +92,11 @@
     private int containerVersion = 1;
 
     /// <summary>
+    /// Tracks timeslots that are currently animating out
+    /// </summary>
+    private HashSet<string> removingTimeslots = new HashSet<string>();
+
+    /// <summary>
     /// Syncs external version changes from parent component
     /// </summary>
     protected override void OnParametersSet()
@@ -116,7 +125,17 @@
     {
         if (!timeslot.IsPeriod)
         {
+            // Add to removing set to trigger CSS animation
+            removingTimeslots.Add(timeslot.Id);
+            StateHasChanged();
+
+            // Wait for animation to complete (300ms removal animation)
+            int animationDuration = AnimationSettings.GetAdjustedDelay(300);
+            await Task.Delay(animationDuration);
+
+            // Now actually remove the timeslot
             Timeslots.Remove(timeslot);
+            removingTimeslots.Remove(timeslot.Id);
             containerVersion++; // Trigger animation
             await OnTimeslotsChanged.InvokeAsync();
         }
