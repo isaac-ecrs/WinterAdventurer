@@ -187,6 +187,12 @@ namespace WinterAdventurer.Library
             /// Locked to prevent wrapping and ensure consistent layout.
             /// </summary>
             public static readonly Unit Height = Unit.FromInch(4.5);
+
+            /// <summary>
+            /// Compact map width for blank schedules to prevent page overflow (4.5 inches).
+            /// Results in ~3.4" height with locked aspect ratio.
+            /// </summary>
+            public static readonly Unit CompactWidth = Unit.FromInch(4.5);
         }
 
         /// <summary>

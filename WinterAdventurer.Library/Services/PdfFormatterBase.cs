@@ -140,7 +140,7 @@ namespace WinterAdventurer.Library.Services
         /// Map is centered and sized appropriately for the page layout.
         /// </summary>
         /// <param name="section">MigraDoc section to add the map to.</param>
-        protected void AddFacilityMapToSection(Section section)
+        protected void AddFacilityMapToSection(Section section, Unit? width = null)
         {
             try
             {
@@ -166,7 +166,9 @@ namespace WinterAdventurer.Library.Services
                         mapParagraph.Format.SpaceAfter = Unit.FromPoint(4);
                         var map = mapParagraph.AddImage(tempPath);
                         map.LockAspectRatio = true;
-                        map.Width = PdfLayoutConstants.FacilityMap.Width;
+
+                        // Use provided width or default to standard width
+                        map.Width = width ?? PdfLayoutConstants.FacilityMap.Width;
                     }
                 }
             }
