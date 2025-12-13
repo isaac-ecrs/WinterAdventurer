@@ -3,38 +3,8 @@
     opacity: 1;
     transform: translateY(0);
     transition: all var(--anim-duration-base) ease-out;
-}
-
-/* Animation trigger on any version change - apply to all rows with staggered delays */
-.timeslot-container[data-version] .timeslot-row:nth-child(1) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 0ms, rowGlow 0.8s ease-out 0ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(2) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 50ms, rowGlow 0.8s ease-out 50ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(3) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 100ms, rowGlow 0.8s ease-out 100ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(4) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 150ms, rowGlow 0.8s ease-out 150ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(5) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 200ms, rowGlow 0.8s ease-out 200ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(6) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 250ms, rowGlow 0.8s ease-out 250ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(7) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 300ms, rowGlow 0.8s ease-out 300ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(8) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 350ms, rowGlow 0.8s ease-out 350ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(9) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 400ms, rowGlow 0.8s ease-out 400ms;
-}
-.timeslot-container[data-version] .timeslot-row:nth-child(10) {
-    animation: fadeSlideIn var(--anim-duration-base) ease-out 450ms, rowGlow 0.8s ease-out 450ms;
+    /* Apply animation based on animation-delay being set */
+    animation: fadeSlideIn var(--anim-duration-base) ease-out forwards, rowGlow 0.8s ease-out;
 }
 
 @keyframes fadeSlideIn {
