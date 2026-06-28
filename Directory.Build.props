@@ -18,4 +18,14 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="all" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
   </ItemGroup>
+
+  <!-- Pin System.Security.Cryptography.Xml to patched version (transitive via PDFsharp) -->
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.9" />
+  </ItemGroup>
+
+  <!-- SQLitePCLRaw.lib.e_sqlite3 GHSA-2m69-gcr7-jv3q: no patched version exists yet (2.1.11 is latest) -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>
