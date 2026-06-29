@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.56.0" />
+    <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.61.0" />
     <PackageReference Include="MSTest" Version="3.11.1" />
     <PackageReference Include="EPPlus" Version="8.6.1" />
   </ItemGroup>
